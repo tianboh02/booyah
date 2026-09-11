@@ -13,8 +13,14 @@ const projectTech = mongoose.model('ProjectTech', ProjectTechSchema, 'project_te
 
 // get tech by project id
 exports.findTechByProjectid = function (projectid) {//marcus
-    return projectTech.find({ projectid: projectid })
+    return projectTech.find({ projectid: projectid });
 }
+
+//check tech if exist in project
+exports.findTechExist = function (projectid, technology) {
+    return projectTech.find({ projectid: projectid, technology: technology });
+};
+
 
 // create tech
 exports.createProjectTech = function (newProjectTech) {
