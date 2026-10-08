@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const UserSchema = new mongoose.Schema({
     userID: { type: String, required: true, unique: true },
     displayname: { type: String, required: true, unique: false },
-    experience: { type: String, required: true, unique: false },
+    experience: { type: String, required: false, unique: false },
 });
 
 const user = mongoose.model('User', UserSchema, 'user');
@@ -14,8 +14,14 @@ exports.createUser = function (newUser) {
 };
 
 
-
 // get account by username
-exports.findByUserId= function (userID) {
+exports.findByUserId = function (userID) {
     return user.find({ userID: userID })
 }
+
+exports.updateUserExperience = function (userID, newExperience) {
+    return user.updateOne(
+        { userID: userID },                  // Filter by userID
+        { $set: { experience: newExperience } } // Update only the experience field
+    );
+};
