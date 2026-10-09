@@ -1,138 +1,10 @@
 const userModel = require("../models/user-model")
+const axios = require('axios');
+
 
 exports.test = async (req, res, next) => {
 
 };
-
-// exports.createUser = async (req, res, next) => {
-//     let message = "";
-//     const originalPassword = req.body.password;
-//     const hashedPassword = await bcrypt.hash(originalPassword, 10)
-
-//     try {
-//         const user = {
-//             username: req.body.username,
-//             firstname: req.body.firstname,
-//             lastname: req.body.lastname,
-//             email: req.body.email,
-//             password: hashedPassword,
-//         };
-
-//         const checkUsername = await User.findByUsername(req.body.username);
-//         if (checkUsername) {
-//             message = "Username already exist. Please try again!";
-//             console.log(message);
-//             return res.status(400).json({ error: message });
-//         }
-
-//         const checkEmail = await User.findUserByEmail(req.body.email);
-//         if (checkEmail) {
-//             message = "Email already registered. Please try again!";
-//             console.log(message);
-//             return res.status(400).json({ error: message });
-//         }
-
-//         if (!checkUsername && !checkEmail) {
-//             try {
-//                 const create = await User.createUser(user);
-//                 const userId = create._id;
-//                 message = "User Created";
-//                 console.log("User Created");
-//                 return res.status(200).json({ message: message });
-
-//             } catch (err) {
-//                 console.error(err);
-//                 message = err;
-//                 return res.status(400).json({ error: message });
-//             }
-//         }
-
-//     } catch (err) {
-//         next(err)
-//         // console.error(err);
-//         // message = err;
-//         // return res.status(400).json({ error: message });
-//     }
-// };
-
-// exports.login = async (req, res, next) => {
-//     let message = "";
-
-//     try {
-//         const enteredPassword = req.body.password;
-
-//         //find if username exist first
-//         const user = await User.findByUsername(req.body.username);
-
-//         //if username does not exist, show this
-//         if (!user) {
-//             message = "User not found. Please try again!";
-//             console.log(message);
-//             return res.status(400).json({ error: message });
-//         }
-
-//         //check if entered password match user's password in database
-//         const match = await bcrypt.compare(enteredPassword, user.password);
-
-//         //if dont match show this
-//         if (!match) {
-//             message = "Wrong password. Please try again!"
-//             console.log(message);
-//             return res.status(400).json({ error: message });
-//         }
-
-//         //if all pass, save session user details
-//         req.session.user = {
-//             id: user._id,
-//             username: user.username,
-//         }
-
-//         //finish login process, go to home
-//         console.log("Log In Successful");
-//         return res.status(200).json({ data: req.session.user });
-
-//     } catch (err) {
-//         next(err)
-//         // console.error(err);
-//         // message = err;
-//         // return res.status(400).json({ error: message });
-//     }
-// };
-
-// exports.updatePassword = async (req, res, next) => {
-//     let message = "";
-//     try {
-//         const newPassword = req.body.newPassword;
-//         const confirmPassword = req.body.confirmPassword;
-
-//         //if password does not match, throw error message to user
-//         if (newPassword !== confirmPassword) {
-//             message = "Password mismatched. Please try again!"
-//             console.log(message);
-//             return res.status(400).json({ error: message });
-//         }
-
-//         //password same, hash the confirmed password
-//         if (newPassword === confirmPassword) {
-//             const hashedPassword = await bcrypt.hash(confirmPassword, 10)
-
-//             //using user id stored in session, update acccount password
-//             const user_id = req.session.user.id
-//             const update = await User.updateUserPassword(user_id, hashedPassword);
-//             console.log("Password Updated", update);
-//             message = "updated"
-
-//             return res.status(200).json({ message: message });
-//         }
-
-//     } catch (err) {
-//         next(err)
-//         // console.error(err);
-//         // message = err
-//         // return res.status(400).json({ error: message });
-//     }
-// };
-
 
 exports.createUser = async (req, res, next) => {
     let message = "";
@@ -150,6 +22,90 @@ exports.createUser = async (req, res, next) => {
         console.log("User Created");
         return res.status(200).json({ message: message });
 
+
+    } catch (err) {
+        next(err)
+        // console.error(err);
+        // message = err;
+        // return res.status(400).json({ error: message });
+    }
+};
+
+exports.githubOAuth = async (req, res, next) => {
+
+    const GITHUB_CLIENT_ID = process.env.GITHUB_CLIENT_ID;
+    const GITHUB_CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET;
+
+    console.log("--------------------------")
+    console.log("Start Authenticating...")
+    try {
+        const payload = {
+            client_id: GITHUB_CLIENT_ID,
+            client_secret: GITHUB_CLIENT_SECRET,
+            code: req.body.code
+        }
+
+        const header = {
+            headers: {
+                Accept: 'application/json',
+                'User-Agent': 'booyah'
+            }
+        };
+
+        const token_res = await axios.post("https://github.com/login/oauth/access_token", payload, header)
+
+        const accessToken = token_res.data.access_token
+
+        if (!accessToken) {
+            return res.status(400).json({ message: 'Failed to obtain access token' })
+        }
+        console.log("Authenticated")
+
+
+        console.log("Getting user info...")
+        // 2. Fetch user details from GitHub API using the access token
+        const userResponse = await axios.get('https://api.github.com/user', {
+            headers: {
+                Authorization: `Bearer ${accessToken}`
+            }
+        })
+        const githubUser = userResponse.data
+        console.log("User identified:", githubUser.login, "(", githubUser.id, ")")
+
+        console.log("Checking if user is registered with booyah...")
+        let isNewUser = false
+
+        const check = await userModel.findByUserId(githubUser.id);
+        console.log(check);
+
+
+        if (check.length == 0) {
+            console.log("Not a user, creating...")
+            isNewUser = true
+
+            const user = {
+                userID: githubUser.id,
+                displayname: githubUser.name ? githubUser.name : githubUser.login,
+                experience: null,
+            };
+
+            const create = await userModel.createUser(user);
+            console.log("User Created");
+        }
+        console.log("--------------------------")
+
+
+        res.json({
+            token: accessToken,
+            user: {
+                id: githubUser.id,
+                username: githubUser.login,
+                name: githubUser.name,
+                avatar: githubUser.avatar_url,
+                experience: check[0] ? check[0].experience : null
+            },
+            newUser: isNewUser
+        })
 
     } catch (err) {
         next(err)
