@@ -25,3 +25,10 @@ exports.updateUserExperience = function (userID, newExperience) {
         { $set: { experience: newExperience } } // Update only the experience field
     );
 };
+
+exports.updateUserDisplayName = function (userID, newDisplayName) {
+    return user.updateOne(
+        { userID: userID },                  // Filter by userID
+        { $set: { displayname: newDisplayName } } // Update only the displayName field
+    );
+};

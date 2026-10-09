@@ -11,6 +11,7 @@ const router = express.Router();
 router.post("/auth/create", userController.createUser);
 router.post("/auth/findUser", userController.checkUserIdExist);
 router.put("/auth/updateExperience", userController.updateUserExperience);
+router.put("/auth/updateDisplayName", userController.updateUserDisplayName);
 
 
 //saved project

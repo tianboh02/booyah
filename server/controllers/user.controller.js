@@ -194,3 +194,22 @@ exports.updateUserExperience = async (req, res, next) => {
         // return res.status(400).json({ error: message });
     }
 };
+
+exports.updateUserDisplayName = async (req, res, next) => {
+    let message = "";
+
+    try {
+        const userId = req.body.userID
+        const newDisplayName = req.body.displayname
+
+        const updateDisp = await userModel.updateUserExperience(userId, newDisplayName);
+        message = { modified: updateDisp.modifiedCount }
+        console.log(updateDisp.modifiedCount, "Display Name Updated");
+        return res.status(200).json(message);
+    } catch (err) {
+        next(err)
+        // console.error(err);
+        // message = err;
+        // return res.status(400).json({ error: message });
+    }
+};

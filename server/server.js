@@ -15,15 +15,7 @@ server.use(express.json());
 
 server.use("/", routes);
 
-//user
-
-
-
-
-
-
 // this is a test server 
-
 server.get("/test", (req, res) => {
     let message = "testing booyah backend APIs"
     return res.status(400).json({ error: message });
