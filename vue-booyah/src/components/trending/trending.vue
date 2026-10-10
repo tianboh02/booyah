@@ -2,5 +2,5 @@
 </script>
 
 <template>
-    <h1>im dashboard</h1>
+    <h1>Trending Page</h1>
 </template>
