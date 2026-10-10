@@ -1,15 +1,14 @@
+const dotenv = require('dotenv');
+dotenv.config({ path: './config.env' });
+
 const express = require("express");
 const cors = require("cors");
 const mongoose = require('mongoose');
-const dotenv = require('dotenv');
 const routes = require("./routes/routes")
 
-dotenv.config({ path: './config.env' });
-console.log("die env")
 
 const server = express();
 server.use(cors({ origin: /^http:\/\/localhost:\d+$/ }));
-console.log("1")
 
 server.use(express.json());
 

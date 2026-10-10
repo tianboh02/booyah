@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 968 1024" width="968" height="1024" role="img" aria-label="Booyah logo">
+  
+
+  <!-- Four rounded corner brackets -->
+  <g fill="none" stroke="#8340f0" stroke-width="63" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M445 256 V337 H364" data-index="0"></path>
+    <path d="M543 256 V337 H624" data-index="1"></path>
+    <path d="M445 517 V433 H364" data-index="2"></path>
+    <path d="M543 517 V433 H624" data-index="3"></path>
+  </g>
+
+  <!-- Center four-point star -->
+  <path d="M494 328 Q499 380 550 385 Q499 390 494 444 Q489 390 438 385 Q489 380 494 328 Z" fill="#8340f0" data-index="4"></path>
+
+  <!-- Wordmark -->
+  <text x="494" y="718" text-anchor="middle" fill="#ffffff" font-family="Poppins, Montserrat, 'Segoe UI', Arial, sans-serif" font-size="168" font-weight="700" textLength="568" lengthAdjust="spacingAndGlyphs">Booyah</text>
+</svg>
