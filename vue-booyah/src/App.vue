@@ -27,7 +27,7 @@ const checkAuth = () => {
 }
 
 const userAvatar = computed(() => currentUser.value.avatar || defaultAvatar)
-const userHandle = computed(() => currentUser.value.username || 'User')
+const userHandle = computed(() => currentUser.value.name || 'User')
 const userExperience = computed(() => currentUser.value.experience || 'New')
 
 // Shows navigation only when logged in AND not on the setup page
