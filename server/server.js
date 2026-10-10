@@ -10,6 +10,10 @@ const routes = require("./routes/routes")
 const server = express();
 server.use(cors({ origin: /^http:\/\/localhost:\d+$/ }));
 
+const dns = require('dns');
+// Force Node.js to use Google and Cloudflare DNS for SRV resolution
+dns.setServers(['8.8.8.8', '1.1.1.1']);
+
 server.use(express.json());
 
 server.use("/", routes);
