@@ -7,7 +7,7 @@ const redirectToGitHub = () => {
     const rootUrl = 'https://github.com/login/oauth/authorize';
     const options = {
         client_id: VITE_GITHUB_CLIENT_ID,
-        scope: 'read:user user:email', // Request access permissions
+        scope: 'read:user user:email repo', // Request access permissions
     };
 
     const q = new URLSearchParams(options).toString();
