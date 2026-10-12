@@ -18,3 +18,24 @@ body,
     margin: 0;
     padding: 0;
 }
+
+/* src/assets/main.css */
+
+/* Global Bootstrap Card Overrides */
+.card {
+    --bs-card-bg: #0e1014;
+    --bs-card-border-color: #202428;
+    background-color: #0e1014 !important;
+    border: 1px solid #202428 !important;
+}
+
+/* Global Reusable Theme Utilities */
+.text-muted-github {
+    color: #8b949e !important;
+}
+
+.badge-github {
+    background-color: #0e0f0f !important;
+    color: #adb3ba !important;
+    border: 1px solid #454c53 !important;
+}
