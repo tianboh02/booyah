@@ -33,7 +33,14 @@ onMounted(async () => {
         console.log("New User:", newUser)
 
         // Redirect to dashboard or home page
-        router.push('/discovery')
+        console.log(user?.experience)
+        if (user?.experience === "Practitioner") {
+            router.push('/my-projects')
+        }
+        else {
+            router.push('/discovery')
+        }
+
     } catch (error) {
         console.error('GitHub authentication failed:', error)
         errorMessage.value = error.response?.data?.message || 'Authentication failed. Please try again.'
