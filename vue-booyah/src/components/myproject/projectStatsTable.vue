@@ -29,7 +29,6 @@ const stats = computed(() => {
     const publics = total - privates
     const stars = props.repoList.reduce((acc, r) => acc + (r.stargazers_count || 0), 0)
 
-    // Count languages, assigning 'No language' if empty/null
     const langCounts = {}
     props.repoList.forEach(r => {
         const lang = r.language || 'No language'
@@ -38,7 +37,7 @@ const stats = computed(() => {
 
     const sortedLangs = Object.entries(langCounts).sort((a, b) => b[1] - a[1])
 
-    // Pick top actual language for the headline stat (fallback to 'No language' if all are empty)
+    // Pick top actual language from our sorted language array for the stats box, else show no language if empty 
     const topActual = sortedLangs.find(([name]) => name !== 'No language') || sortedLangs[0]
     const topLang = topActual ? topActual[0] : 'None'
     const topLangCount = topActual ? topActual[1] : 0
@@ -55,7 +54,7 @@ const stats = computed(() => {
     }
 })
 
-// Language share breakdown for legend and pie chart (100% total)
+// Language share breakdown for legend and pie chart (100% total) AI
 const langShareList = computed(() => {
     if (!hasData.value) return []
 
@@ -67,7 +66,7 @@ const langShareList = computed(() => {
     }))
 })
 
-// Exact CSS Conic Gradient string for Donut Chart (fills 100%)
+// Exact CSS Conic Gradient string for Donut Chart (fills 100%) AI
 const donutGradient = computed(() => {
     if (!hasData.value || langShareList.value.length === 0) return 'none'
 
@@ -99,11 +98,11 @@ const reposByLangList = computed(() => {
 <template>
     <div class="graph-body container my-4">
 
-        <!-- Top Stats Row (3 Columns) -->
+        <!-- top stat row (3 Cols each box) -->
         <div class="card p-4 mb-4 rounded-3 shadow-sm">
             <div v-if="hasData" class="row g-0 align-items-center">
 
-                <!-- Repositories Stat -->
+                <!-- No of repositories -->
                 <div class="col-md-4 pe-md-4 stat-divider">
                     <h2 class="text-white fw-bold mb-1">{{ stats.totalRepos }}</h2>
                     <div class="text-white fw-semibold small">Repositories</div>
@@ -111,14 +110,14 @@ const reposByLangList = computed(() => {
                         private</div>
                 </div>
 
-                <!-- Most-used Language Stat -->
+                <!-- most used lang -->
                 <div class="col-md-4 px-md-4 stat-divider my-3 my-md-0">
                     <h2 class="text-white fw-bold mb-1 text-truncate">{{ stats.mostUsedLang }}</h2>
                     <div class="text-white fw-semibold small">Most-used language</div>
                     <div class="text-muted-github small">{{ stats.mostUsedPct }}% of your code</div>
                 </div>
 
-                <!-- Total Stars Stat -->
+                <!-- star count of all repos -->
                 <div class="col-md-4 ps-md-4">
                     <h2 class="text-white fw-bold mb-1">{{ stats.totalStars }}</h2>
                     <div class="text-white fw-semibold small">Total stars</div>
@@ -132,10 +131,10 @@ const reposByLangList = computed(() => {
             </div>
         </div>
 
-        <!-- Bottom Row (Language Share & Repos by Primary Language) -->
+        <!-- bottom stat row -->
         <div class="row g-4">
 
-            <!-- Left Card: Language Share -->
+            <!-- language share chart -->
             <div class="col-lg-6">
                 <div class="card p-4 h-100 rounded-3 shadow-sm">
                     <h6 class="fw-bold text-white mb-4">Language share </h6>
