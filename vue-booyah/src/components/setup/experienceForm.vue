@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import axios from 'axios'
+import API from '@/api'
 
 const route = useRoute()
 const router = useRouter()
@@ -22,7 +22,7 @@ const handleSubmit = async () => {
         const currentUser = userStr ? JSON.parse(userStr) : {}
 
         // 2. Axios POST request sending currentUser.id to match backend req.body.userID
-        const response = await axios.put('http://localhost:8000/auth/updateExperience', {
+        const response = await API.put('/auth/updateExperience', {
             userID: currentUser.id,
             experience: selectedExperience.value
         })
