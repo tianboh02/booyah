@@ -3,7 +3,7 @@
 
 <template>
     <div class="header-body container my-4">
-        <h2>My Projects</h2>
-        <p class="text-muted-github">Your GitHub repositories, loaded when you sign in. </p>
+        <h3 class="fw-bold text-white mb-1">My Projects</h3>
+        <p class="text-muted-github small mb-0">Your GitHub repositories, loaded when you sign in. </p>
     </div>
 </template>

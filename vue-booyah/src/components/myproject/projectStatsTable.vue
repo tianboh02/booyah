@@ -37,7 +37,7 @@ const stats = computed(() => {
 
     const sortedLangs = Object.entries(langCounts).sort((a, b) => b[1] - a[1])
 
-    // Pick top actual language from our sorted language array for the stats box, else show no language if empty 
+    // Pick top actual language for the headline stat (fallback to 'No language' if all are empty)
     const topActual = sortedLangs.find(([name]) => name !== 'No language') || sortedLangs[0]
     const topLang = topActual ? topActual[0] : 'None'
     const topLangCount = topActual ? topActual[1] : 0
@@ -54,7 +54,7 @@ const stats = computed(() => {
     }
 })
 
-// Language share breakdown for legend and pie chart (100% total) AI
+// Language share breakdown for legend and pie chart (100% total)
 const langShareList = computed(() => {
     if (!hasData.value) return []
 
@@ -66,7 +66,7 @@ const langShareList = computed(() => {
     }))
 })
 
-// Exact CSS Conic Gradient string for Donut Chart (fills 100%) AI
+// Exact CSS Conic Gradient string for Donut Chart (fills 100%)
 const donutGradient = computed(() => {
     if (!hasData.value || langShareList.value.length === 0) return 'none'
 
@@ -98,61 +98,68 @@ const reposByLangList = computed(() => {
 <template>
     <div class="graph-body container my-4">
 
-        <!-- top stat row (3 Cols each box) -->
-        <div class="card p-4 mb-4 rounded-3 shadow-sm">
-            <div v-if="hasData" class="row g-0 align-items-center">
+        <!-- Top Stats Cards Grid -->
+        <div v-if="hasData" class="row row-cols-1 row-cols-md-3 g-3 mb-4">
 
-                <!-- No of repositories -->
-                <div class="col-md-4 pe-md-4 stat-divider">
-                    <h2 class="text-white fw-bold mb-1">{{ stats.totalRepos }}</h2>
-                    <div class="text-white fw-semibold small">Repositories</div>
-                    <div class="text-muted-github small">{{ stats.publicRepos }} public · {{ stats.privateRepos }}
-                        private</div>
+            <!-- Number of Repositories Card -->
+            <div class="col">
+                <div class="card p-3 h-100 rounded-3 shadow-sm text-white">
+                    <span class="h3 fw-bold text-white mb-1 font-monospace">{{ stats.totalRepos }}</span>
+                    <span class="text-white fw-semibold small">Repositories</span>
+                    <span class="text-muted-github small">{{ stats.publicRepos }} public · {{ stats.privateRepos }}
+                        private</span>
                 </div>
-
-                <!-- most used lang -->
-                <div class="col-md-4 px-md-4 stat-divider my-3 my-md-0">
-                    <h2 class="text-white fw-bold mb-1 text-truncate">{{ stats.mostUsedLang }}</h2>
-                    <div class="text-white fw-semibold small">Most-used language</div>
-                    <div class="text-muted-github small">{{ stats.mostUsedPct }}% of your code</div>
-                </div>
-
-                <!-- star count of all repos -->
-                <div class="col-md-4 ps-md-4">
-                    <h2 class="text-white fw-bold mb-1">{{ stats.totalStars }}</h2>
-                    <div class="text-white fw-semibold small">Total stars</div>
-                    <div class="text-muted-github small">Across all repositories</div>
-                </div>
-
             </div>
 
-            <div v-else class="text-muted-github text-center py-2">
-                No repository data detected.
+            <!-- Most-used Language Card -->
+            <div class="col">
+                <div class="card p-3 h-100 rounded-3 shadow-sm text-white">
+                    <span class="h3 fw-bold text-white mb-1 font-monospace text-truncate d-block">{{ stats.mostUsedLang
+                    }}</span>
+                    <span class="text-white fw-semibold small">Most-used language</span>
+                    <span class="text-muted-github small"><span class="font-monospace">{{ stats.mostUsedPct }}%</span>
+                        of your code</span>
+                </div>
             </div>
+
+            <!-- Total Stars Card -->
+            <div class="col">
+                <div class="card p-3 h-100 rounded-3 shadow-sm text-white">
+                    <span class="h3 fw-bold text-white mb-1 font-monospace">{{ stats.totalStars }}</span>
+                    <span class="text-white fw-semibold small">Total stars</span>
+                    <span class="text-muted-github small">Across all repositories</span>
+                </div>
+            </div>
+
         </div>
 
-        <!-- bottom stat row -->
+        <!-- Empty State Fallback Card -->
+        <div v-else class="card p-4 mb-4 rounded-3 shadow-sm text-muted-github text-center py-3">
+            No repository data detected.
+        </div>
+
+        <!-- Bottom Stat Row -->
         <div class="row g-4">
 
-            <!-- language share chart -->
+            <!-- Language Share Chart Card -->
             <div class="col-lg-6">
                 <div class="card p-4 h-100 rounded-3 shadow-sm">
-                    <h6 class="fw-bold text-white mb-4">Language share </h6>
-                    <span class="text-muted-github" style="font-size: 12px;">*This feature is currently AI-ed and under
-                        development for further implementation with Echarts. </span>
-                    <br>
+                    <h2 class="h5 fw-bold text-white mb-1">Language share</h2>
+                    <p class="text-muted-github small mb-4">
+                        *This feature is currently under development for further implementation with ECharts.
+                    </p>
 
                     <div v-if="langShareList.length > 0"
-                        class="d-flex align-items-center gap-4 flex-wrap flex-sm-nowrap">
+                        class="d-flex align-items-center gap-4 flex-wrap flex-sm-nowrap my-auto">
                         <!-- Donut Chart -->
                         <div class="position-relative d-flex align-items-center justify-content-center flex-shrink-0 mx-auto mx-sm-0"
                             style="width: 140px; height: 140px;">
                             <div class="rounded-circle w-100 h-100" :style="{ background: donutGradient }"></div>
                             <div class="rounded-circle d-flex flex-column align-items-center justify-content-center text-center"
                                 style="width: 86px; height: 86px; background-color: #161b22; position: absolute;">
-                                <span class="fw-bold text-white h5 mb-0">{{ stats.mostUsedPct }}%</span>
-                                <span class="text-muted-github" style="font-size: 0.7rem;">{{ stats.mostUsedLang
-                                }}</span>
+                                <span class="h4 fw-bold text-white mb-0 font-monospace">{{ stats.mostUsedPct }}%</span>
+                                <span class="text-muted-github small text-truncate px-1" style="max-width: 80px;">{{
+                                    stats.mostUsedLang }}</span>
                             </div>
                         </div>
 
@@ -165,7 +172,7 @@ const reposByLangList = computed(() => {
                                         :style="{ backgroundColor: item.color, width: '10px', height: '10px' }"></span>
                                     <span class="text-white small text-truncate">{{ item.name }}</span>
                                 </div>
-                                <span class="text-muted-github small ms-1">{{ item.percentage }}%</span>
+                                <span class="text-muted-github small ms-1 font-monospace">{{ item.percentage }}%</span>
                             </div>
                         </div>
                     </div>
@@ -177,21 +184,22 @@ const reposByLangList = computed(() => {
                 </div>
             </div>
 
-            <!-- Right Card: Repos by Primary Language -->
+            <!-- Repos by Primary Language Card -->
             <div class="col-lg-6">
                 <div class="card p-4 h-100 rounded-3 shadow-sm">
-                    <h6 class="fw-bold text-white mb-4">Repos by primary language</h6>
+                    <h2 class="h5 fw-bold text-white mb-4">Repos by primary language</h2>
 
                     <div v-if="reposByLangList.length > 0" class="d-flex flex-column gap-3">
                         <div v-for="lang in reposByLangList" :key="lang.name" class="d-flex align-items-center gap-3">
-                            <span class="text-white small flex-shrink-0" style="width: 85px;">{{ lang.name }}</span>
+                            <span class="text-white small flex-shrink-0 text-truncate" style="width: 100px;">{{
+                                lang.name }}</span>
                             <div class="progress flex-grow-1 rounded-pill"
                                 style="height: 12px; background-color: #0d1117;">
                                 <div class="progress-bar rounded-pill" role="progressbar"
                                     :style="{ width: lang.barWidth + '%', backgroundColor: '#80a5fe' }"></div>
                             </div>
-                            <span class="text-muted-github small flex-shrink-0 text-end" style="width: 20px;">{{
-                                lang.count }}</span>
+                            <span class="text-muted-github small flex-shrink-0 text-end font-monospace"
+                                style="width: 30px;">{{ lang.count }}</span>
                         </div>
                     </div>
 
@@ -206,12 +214,3 @@ const reposByLangList = computed(() => {
 
     </div>
 </template>
-
-<style scoped>
-/* Responsive vertical dividers for top stats on medium+ screens */
-@media (min-width: 768px) {
-    .stat-divider {
-        border-right: 1px solid #30363d;
-    }
-}
-</style>

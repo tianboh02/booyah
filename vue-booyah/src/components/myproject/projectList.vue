@@ -65,18 +65,23 @@ function timeAgo(isoString) {
 <template>
     <div class="repo-list-body container my-4">
 
+        <!-- Controls Header Row -->
         <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
-            <h4 class="text-white fw-bold mb-0">Repositories</h4>
+            <h3 class="h3 fw-bold text-white mb-0">Repositories</h3>
 
             <div class="d-flex align-items-center gap-3 flex-wrap">
-                <!-- Search -->
-                <div class="position-relative" style="min-width: 220px;">
-                    <span class="position-absolute top-50 start-0 translate-middle-y ms-2 pe-none small">🔍</span>
-                    <input v-model="searchQuery" type="text" class="form-control form-control-sm github-control ps-4"
-                        placeholder="Search repositories" />
+                <!-- Search Input -->
+                <div class="position-relative" style="min-width: 240px;">
+                    <!-- Centered Emoji Icon -->
+                    <span class="position-absolute top-50 start-0 translate-middle-y ms-2 pe-none opacity-75"
+                        style="font-size: 0.85rem; line-height: 1;">🔍</span>
+
+                    <!-- Adjusted Input Padding -->
+                    <input v-model="searchQuery" type="text" class="form-control form-control-sm github-control"
+                        style="padding-left: 1.85rem;" placeholder="Search repositories" />
                 </div>
 
-                <!-- Sort -->
+                <!-- Sort Select Box -->
                 <div class="d-flex align-items-center gap-2">
                     <span class="text-muted-github small text-nowrap">Sort by</span>
                     <select v-model="sortBy" class="form-select form-select-sm github-control w-auto">
@@ -88,6 +93,7 @@ function timeAgo(isoString) {
             </div>
         </div>
 
+        <!-- Repository List Cards -->
         <div v-if="filteredAndSortedRepos.length > 0">
             <div v-for="repo in filteredAndSortedRepos" :key="repo.id"
                 class="card mb-3 p-3 rounded-3 shadow-sm text-white">
@@ -102,23 +108,30 @@ function timeAgo(isoString) {
                     {{ repo.description || "No description" }}
                 </p>
 
+                <!-- Bottom Metadata Row with Monospace Metrics -->
                 <div class="d-flex align-items-center gap-3 text-muted-github small flex-wrap">
                     <div class="d-flex align-items-center gap-1">
-                        <span class="rounded-circle d-inline-block"
+                        <span class="rounded-circle d-inline-block flex-shrink-0"
                             :style="{ backgroundColor: getLangColor(repo.language || 'No language'), width: '10px', height: '10px' }"></span>
                         <span>{{ repo.language || 'No language' }}</span>
                     </div>
 
-                    <span>☆ {{ repo.stargazers_count }}</span>
-                    <span>Y {{ repo.forks_count }}</span>
-                    <span>Updated {{ timeAgo(repo.updated_at) }}</span>
+                    <span>☆ <span class="font-monospace">{{ repo.stargazers_count }}</span></span>
+                    <span>Y <span class="font-monospace">{{ repo.forks_count }}</span></span>
+                    <span class="font-monospace">Updated <span class="font-monospace">{{
+                            timeAgo(repo.updated_at)}}</span></span>
                 </div>
             </div>
         </div>
 
-        <!-- Empty Filter Results -->
-        <div v-else class="text-center py-5 text-muted-github card p-4">
-            No repositories found matching "{{ searchQuery }}"
+        <!-- Empty Filter/Repository Message -->
+        <div v-else class="text-center py-5 text-muted-github card p-4 rounded-3 shadow-sm">
+            <span v-if="searchQuery.trim()">
+                No repositories found matching "{{ searchQuery }}"
+            </span>
+            <span v-else>
+                No repositories found.
+            </span>
         </div>
 
     </div>

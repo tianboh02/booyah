@@ -2,7 +2,7 @@
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
 
-import MyProject from '@/components/myproject/myproject.vue'
+import ProjectList from '@/components/myproject/projectList.vue'
 import ProjectPageHeader from '@/components/myproject/projectPageHeader.vue'
 import ProjectStatsTable from '@/components/myproject/projectStatsTable.vue'
 
@@ -33,6 +33,6 @@ onMounted(() => {
     <main>
         <ProjectPageHeader />
         <ProjectStatsTable :repo-list="repoList" />
-        <MyProject :repo-list="repoList" />
+        <ProjectList :repo-list="repoList" />
     </main>
 </template>
