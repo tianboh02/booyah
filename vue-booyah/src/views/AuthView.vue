@@ -1,7 +1,7 @@
 <script setup>
 import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import axios from 'axios'
+import API from '@/api.js'; // Adjust path based on your folder structure
 
 const route = useRoute()
 const router = useRouter()
@@ -21,7 +21,7 @@ onMounted(async () => {
 
     try {
         // Send code to your backend using Axios
-        const response = await axios.post('http://localhost:8000/auth/githubOAuth', {
+        const response = await API.post('/auth/githubOAuth', {
             code
         })
 
