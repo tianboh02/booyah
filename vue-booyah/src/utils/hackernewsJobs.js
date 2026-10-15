@@ -3,7 +3,11 @@
 export const MIN_SALARY_BANDS = 10 // a role needs this many bands before its range is shown
 export const DEMAND_MONTHS = 3 // role demand + posts per month use the latest 3 complete months
 export const SALARY_MONTHS = 6 // salary bands use the latest 6
-export const CACHE_KEY = 'jobs-view-v1' // bump when the regex/parsing logic changes
+export const MIN_PLOT_BANDS = 5 // below this a role's bands are not shown at all (1-4 bands is one or two companies)
+export const MIN_ROLE_POSTS = 20 // below this work mode / tech are flagged as a low sample
+export const MIN_TREND_MONTHS = 3 // months that must load before a trend is shown
+export const TOP_N = 5 // rows shown before "Show all"; also how many technologies are listed
+export const CACHE_KEY = 'jobs-view-v2' // bump when the regex/parsing logic changes
 export const CACHE_TTL_MS = 6 * 60 * 60 * 1000 // 6 hours
 
 
@@ -22,6 +26,28 @@ export const ROLES = {
     'Designer': /\b(product|ux|ui|brand|visual)\s+designers?\b/i,
     'Engineering Manager': /\b(engineering\s+managers?|head\s+of\s+engineering|(director|vp)\s+of\s+engineering)\b/i,
 }
+
+const TECH = {
+    Python: /\bpython\b/i,
+    TypeScript: /\btypescript\b/i,
+    JavaScript: /\bjavascript\b/i,
+    React: /\breact\b/i,
+    'Node.js': /\bnode\.?js\b/i,
+    Java: /\bjava\b/i,
+    Go: /\bGo(lang)?\b/, // case-sensitive so the word "go" is ignored
+    Rust: /\brust\b/i,
+    'C++': /c\+\+/i,
+    Swift: /\bSwift\b/,
+    Kotlin: /\bkotlin\b/i,
+    Ruby: /\bRuby\b/,
+    SQL: /\bsql\b/i,
+    PostgreSQL: /\bpostgres(ql)?\b/i,
+    AWS: /\baws\b/i,
+    Kubernetes: /\bkubernetes\b|\bk8s\b/i,
+    Terraform: /\bterraform\b/i,
+    PyTorch: /\bpytorch\b/i,
+}
+const NO_TECH_ROLES = ['Product Manager', 'Designer', 'Engineering Manager'] // a tech card says nothing for these
 
 const DOLLAR_PREFIX = {
     US: 'USD', USD: 'USD', C: 'CAD', CA: 'CAD', CAD: 'CAD',
@@ -59,6 +85,15 @@ const isSeeker = (t) => /willing to relocate\s*:|r[ée]sum[ée]\s*\/\s*cv\s*:/i.
 const isDeadPost = (t) => /^\s*\[(flagged\vert{}dead)\]\s*$/i.test(t)
 const isJobPost = (t) => !isSeeker(t) && !isDeadPost(t)
 const rolesIn = (t) => Object.keys(ROLES).filter((r) => ROLES[r].test(t))
+const techIn = (t) => Object.keys(TECH).filter((n) => TECH[n].test(t))
+
+const modeIn = (t) => {
+    const remote = /\bremote\b/i.test(t) && !/\b(no|not|non)[- ]remote\b/i.test(t)
+    const onsite = /\bon-?site\b|\bin[- ]office\b|\bin[- ]person\b/i.test(t)
+    if (/\bhybrid\b/i.test(t)) return 'hybrid'
+    if (remote && onsite) return 'mixed'
+    return remote ? 'remote' : onsite ? 'onsite' : null
+}
 
 
 // ---------- Salary parsing ----------
@@ -107,6 +142,7 @@ const median = (a) => {
 // ---------- Analyse Thread ----------
 function analyseThread(item) {
     const roleCounts = {}
+    const detail = {} // per role: usable-salary posts, work-mode counts, tech counts
     const bands = []
     let posts = 0
     for (const c of item.children) {
@@ -116,6 +152,16 @@ function analyseThread(item) {
         posts++
         const postRoles = rolesIn(full)
         for (const r of postRoles) roleCounts[r] = (roleCounts[r] ?? 0) + 1
+        // header line (before the first paragraph) is the most reliable place for work mode
+        const mode = modeIn(toText(c.text.split(/<p>/i)[0])) ?? modeIn(full) ?? 'unspecified'
+        const techs = techIn(full)
+        const salaried = new Set()
+        for (const r of postRoles) {
+            const d = (detail[r] ??= { withSalary: 0, techPosts: 0, modes: {}, tech: {} })
+            d.modes[mode] = (d.modes[mode] ?? 0) + 1
+            if (techs.length) d.techPosts++
+            for (const t of techs) d.tech[t] = (d.tech[t] ?? 0) + 1
+        }
         const segs = c.text.split(/<p>|<br\s*\/?>|\n/i).map(toText)
         const postBands = segs.flatMap(findSalaries).length
         for (const seg of segs) {
@@ -129,17 +175,121 @@ function analyseThread(item) {
                     : ['(Role unclear)']
             for (const s of sals) {
                 if (s.currency !== 'USD') continue
-                for (const role of targets) bands.push({ author: c.author, role, lo: s.lo, hi: s.hi })
+                for (const role of targets) {
+                    bands.push({ author: c.author, role, lo: s.lo, hi: s.hi })
+                    salaried.add(role)
+                }
             }
         }
+        for (const r of salaried) if (detail[r]) detail[r].withSalary++
     }
-    return { posts, roleCounts, bands }
+    return { posts, roleCounts, detail, bands }
 }
 
 const roleLabel = (r) => r.replace(/ \/ /g, '/')
 const shortMonth = (m) => `${m.slice(0, 3)} ${m.slice(-4)}`
 
-function buildResults(summaries) {
+// ---------- Role detail (shown when a role is selected) ----------
+// Every block carries a status: 'ok' (render), 'thin' (render with a low-sample badge), 'none' (render `reason`).
+const k = (v) => Math.round(v / 1000)
+const pct = (n, total) => Math.round((100 * n) / total)
+const volume = (posts) => (posts >= MIN_ROLE_POSTS ? 'ok' : 'thin')
+
+const quantile = (a, q) => {
+    const s = [...a].sort((x, y) => x - y)
+    const i = (s.length - 1) * q
+    const lo = Math.floor(i)
+    return s[lo] + (s[Math.ceil(i)] - s[lo]) * (i - lo)
+}
+
+// most common $10k bucket (lower edge, in $k); ties go to the lower bucket
+function modeBin(a) {
+    const c = {}
+    for (const v of a) {
+        const b = Math.floor(v / 10000) * 10
+        c[b] = (c[b] ?? 0) + 1
+    }
+    return +Object.keys(c).sort((x, y) => c[y] - c[x] || x - y)[0]
+}
+
+const sumCounts = (list) =>
+    list.reduce((acc, o) => {
+        for (const [key, v] of Object.entries(o)) acc[key] = (acc[key] ?? 0) + v
+        return acc
+    }, {})
+
+function salaryDetail(bands) {
+    const n = bands.length
+    if (n < MIN_PLOT_BANDS) return { status: 'none', reason: n ? 'too-few' : 'no-bands', n }
+    const out = { status: 'thin', n, bands: bands.map((b) => ({ lo: k(b.lo), hi: k(b.hi) })) }
+    if (n < MIN_SALARY_BANDS) return out
+
+    const mids = bands.map((b) => (b.lo + b.hi) / 2)
+    return {
+        ...out,
+        status: 'ok',
+        stats: {
+            medianLo: k(median(bands.map((b) => b.lo))),
+            medianHi: k(median(bands.map((b) => b.hi))),
+            mean: k(mids.reduce((t, v) => t + v, 0) / n),
+            p25: k(quantile(mids, 0.25)),
+            p75: k(quantile(mids, 0.75)),
+            min: k(Math.min(...bands.map((b) => b.lo))),
+            max: k(Math.max(...bands.map((b) => b.hi))),
+            mode: modeBin(mids),
+        },
+    }
+}
+
+// two-proportion check: only call a move "up"/"down" when it clears ~2 standard errors
+function trendChange(a, b) {
+    const p = (a.count + b.count) / (a.posts + b.posts)
+    const se = Math.sqrt(p * (1 - p) * (1 / a.posts + 1 / b.posts))
+    const d = b.count / b.posts - a.count / a.posts
+    return a.count < 5 || b.count < 5 || Math.abs(d) < 2 * se ? 'steady' : d > 0 ? 'up' : 'down'
+}
+
+function roleDetail(role, summaries, months, bands) {
+    const valid = summaries.filter(Boolean)
+    const parts = valid.map((s) => s.detail[role] ?? {})
+    const posts = valid.reduce((t, s) => t + (s.roleCounts[role] ?? 0), 0)
+    const withSalary = parts.reduce((t, p) => t + (p.withSalary ?? 0), 0)
+    const techPosts = parts.reduce((t, p) => t + (p.techPosts ?? 0), 0)
+
+    // a failed month stays in place as a gap, never a 0
+    const points = summaries
+        .map((s, i) => {
+            const month = shortMonth(months[i])
+            if (!s) return { month, missing: true }
+            const count = s.roleCounts[role] ?? 0
+            return { month, share: pct(count, s.posts), count, posts: s.posts }
+        })
+        .reverse()
+    const seen = points.filter((p) => !p.missing)
+
+    return {
+        posts,
+        salary: salaryDetail(bands),
+        usableSalaryRate: { status: volume(posts), withSalary, posts, rate: pct(withSalary, posts) },
+        trend:
+            valid.length < MIN_TREND_MONTHS
+                ? { status: 'none', reason: 'no-history' }
+                : { status: 'ok', change: trendChange(seen[0], seen.at(-1)), points },
+        workMode: { status: volume(posts), posts, counts: sumCounts(parts.map((p) => p.modes ?? {})) },
+        tech: NO_TECH_ROLES.includes(role)
+            ? { status: 'none', reason: 'not-applicable' }
+            : {
+                status: volume(posts),
+                coverage: pct(techPosts, posts),
+                top: Object.entries(sumCounts(parts.map((p) => p.tech ?? {})))
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, TOP_N)
+                    .map(([name, count]) => ({ name, count, share: pct(count, posts) })),
+            },
+    }
+}
+
+function buildResults(summaries, months) {
     const demand = summaries.slice(0, DEMAND_MONTHS).filter(Boolean)
     const total = demand.reduce((sum, s) => sum + s.posts, 0)
 
@@ -174,10 +324,17 @@ function buildResults(summaries) {
         })
         .sort((a, b) => (b.high ?? -1) - (a.high ?? -1) || b.n - a.n)
 
+    const rolesDetail = Object.fromEntries(
+        Object.keys(ROLES)
+            .filter((r) => roleRows.some((x) => x.name === roleLabel(r)))
+            .map((r) => [roleLabel(r), roleDetail(r, summaries, months, byRole[r] ?? [])]),
+    )
+
     return {
         postsAnalysed: total,
         roles: roleRows,
         salaries: salaryList,
+        rolesDetail,
         postsPerMonth: demand.map((s) => ({ month: shortMonth(s.month), count: s.posts })).reverse(),
     }
 }
@@ -197,7 +354,8 @@ function writeCache(data) {
     } catch { }
 }
 
-export async function fetchHNJobsData() {
+// onProgress(done, total) fires once for the thread list and once per thread, for the loader
+export async function fetchHNJobsData(onProgress) {
     const cached = readCache()
     if (cached) {
         return { data: cached, warning: '' }
@@ -206,17 +364,22 @@ export async function fetchHNJobsData() {
     const threads = await latestThreads(SALARY_MONTHS)
     if (!threads.length) throw new Error('no hiring threads found')
 
+    const total = threads.length + 1
+    let done = 1
+    onProgress?.(done, total)
+
     const settled = await Promise.allSettled(
-        threads.map(async (t) => ({
-            month: monthOf(t),
-            ...analyseThread(await getJSON(`${API}/items/${t.objectID}`)),
-        })),
+        threads.map(async (t) => {
+            const summary = { month: monthOf(t), ...analyseThread(await getJSON(`${API}/items/${t.objectID}`)) }
+            onProgress?.(++done, total)
+            return summary
+        }),
     )
 
     const summaries = settled.map((s) => (s.status === 'fulfilled' ? s.value : null))
     if (!summaries.some(Boolean)) throw new Error('every thread failed to load')
 
-    const data = buildResults(summaries)
+    const data = buildResults(summaries, threads.map(monthOf))
     const failed = threads.filter((_, i) => !summaries[i]).map(monthOf)
     let warning = ''
 

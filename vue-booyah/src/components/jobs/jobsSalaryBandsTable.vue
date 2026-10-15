@@ -1,6 +1,6 @@
 <script setup>
-import { computed } from 'vue'
-import { MIN_SALARY_BANDS } from '@/utils/hackernewsJobs'
+import { computed, ref } from 'vue'
+import { MIN_SALARY_BANDS, TOP_N } from '@/utils/hackernewsJobs'
 
 const props = defineProps({
     salaries: { type: Array, default: () => [] }
@@ -11,6 +11,9 @@ const usd = (v) => `$${v}k`
 const salaryRows = computed(() =>
     props.salaries.filter((s) => s.n >= MIN_SALARY_BANDS && s.low !== null)
 )
+
+const showAll = ref(false)
+const visibleRows = computed(() => (showAll.value ? salaryRows.value : salaryRows.value.slice(0, TOP_N)))
 
 const thinRoles = computed(() =>
     props.salaries.filter((s) => s.n < MIN_SALARY_BANDS)
@@ -39,7 +42,7 @@ const thinRoles = computed(() =>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="s in salaryRows" :key="s.role" class="border-bottom-theme small">
+                        <tr v-for="s in visibleRows" :key="s.role" class="border-bottom-theme small">
                             <td class="bg-transparent py-3 role-name">{{ s.role }}</td>
                             <td class="bg-transparent py-3 font-monospace text-muted-github">{{ usd(s.low) }} to {{
                                 usd(s.high) }}</td>
@@ -48,6 +51,10 @@ const thinRoles = computed(() =>
                     </tbody>
                 </table>
             </div>
+            <button v-if="salaryRows.length > TOP_N" type="button"
+                class="btn btn-link btn-sm align-self-start px-0 mt-2" @click="showAll = !showAll">
+                {{ showAll ? `Show top ${TOP_N}` : `Show all ${salaryRows.length}` }}
+            </button>
 
             <!-- Thin Roles Badges -->
             <div v-if="thinRoles.length" class="mt-4 pt-3 border-top-theme">

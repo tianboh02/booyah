@@ -5,27 +5,36 @@ import { fetchHNJobsData } from '@/utils/hackernewsJobs'
 import JobsPageHeader from '@/components/jobs/jobsPageHeader.vue'
 import JobsOverviewCards from '@/components/jobs/jobsOverviewCards.vue'
 import JobsRoleDemandCards from '@/components/jobs/jobsRoleDemandCards.vue'
-import JobsSalaryBandsTable from '@/components/jobs/jobsSalaryBandsTable.vue'
+import JobsRoleDetail from '@/components/jobs/jobsRoleDetail.vue'
+import JobsLoadingSatellite from '@/components/jobs/jobsLoadingSatellite.vue'
 
 const loading = ref(true)
 const error = ref('')
 const warning = ref('')
+const progress = ref({ done: 0, total: 0 })
 
 const postsAnalysed = ref(0)
 const roles = ref([])
 const salaries = ref([])
 const postsPerMonth = ref([])
+const rolesDetail = ref({})
+const selectedRole = ref('')
 
 async function load() {
   loading.value = true
   error.value = ''
   warning.value = ''
+  progress.value = { done: 0, total: 0 }
+  selectedRole.value = ''
   try {
-    const { data, warning: warnMsg } = await fetchHNJobsData()
+    const { data, warning: warnMsg } = await fetchHNJobsData((done, total) => {
+      progress.value = { done, total }
+    })
     postsAnalysed.value = data.postsAnalysed
     roles.value = data.roles
     salaries.value = data.salaries
     postsPerMonth.value = data.postsPerMonth
+    rolesDetail.value = data.rolesDetail
     warning.value = warnMsg
   } catch (e) {
     console.error('JobsView: could not load job data', e)
@@ -43,20 +52,8 @@ onMounted(load)
     <!-- Clean Header Component -->
     <JobsPageHeader />
 
-    <!-- Skeleton Loading Placeholder -->
-    <div v-if="loading" class="placeholder-glow">
-      <div class="row row-cols-2 row-cols-md-4 g-3 mb-4">
-        <div v-for="n in 4" :key="n" class="col">
-          <div class="card p-3">
-            <span class="placeholder col-6 mb-2"></span>
-            <span class="placeholder col-8"></span>
-          </div>
-        </div>
-      </div>
-      <div class="card p-4">
-        <span v-for="n in 5" :key="n" class="placeholder col-12 mb-3"></span>
-      </div>
-    </div>
+    <!-- Satellite Loading Indicator (plan for sharing it across screens: see jobsLoadingSatellite.vue) -->
+    <JobsLoadingSatellite v-if="loading" :done="progress.done" :total="progress.total" />
 
     <!-- Loaded Content & Banners -->
     <template v-else>
@@ -64,9 +61,10 @@ onMounted(load)
         :roles="roles" :posts-per-month="postsPerMonth" @retry="load" />
 
       <template v-if="!error">
-        <JobsRoleDemandCards :roles="roles" :posts-per-month="postsPerMonth" />
+        <JobsRoleDemandCards :roles="roles" :posts-per-month="postsPerMonth" @select="selectedRole = $event" />
 
-        <JobsSalaryBandsTable :salaries="salaries" />
+        <JobsRoleDetail v-if="selectedRole" :role="selectedRole" :detail="rolesDetail[selectedRole]"
+          @close="selectedRole = ''" />
       </template>
     </template>
   </div>

@@ -1,15 +1,25 @@
 <script setup>
-defineProps({
+import { computed, ref } from 'vue'
+import { TOP_N } from '@/utils/hackernewsJobs'
+
+const props = defineProps({
     roles: { type: Array, default: () => [] },
     postsPerMonth: { type: Array, default: () => [] }
 })
+
+defineEmits(['select'])
+
+const showAll = ref(false)
+const visibleRoles = computed(() => (showAll.value ? props.roles : props.roles.slice(0, TOP_N)))
 </script>
 
 <template>
     <section class="mb-4">
         <div class="mb-3">
             <h2 class="h5 fw-bold section-title mb-1">Role demand</h2>
-            <p class="text-muted-github small mb-0">Share of job posts mentioning each role, last 3 months</p>
+            <p class="text-muted-github small mb-0">
+                Share of job posts mentioning each role, last 3 months. Select a role for details.
+            </p>
         </div>
 
         <div class="row g-3">
@@ -20,13 +30,18 @@ defineProps({
                         class="chart-placeholder text-muted-github small p-4 mb-3 text-center border border-dashed rounded-3">
                         Role demand chart coming soon
                     </div>
-                    <ul class="list-group list-group-flush">
-                        <li v-for="r in roles" :key="r.name"
-                            class="list-group-item bg-transparent item-label border-bottom-theme d-flex justify-content-between px-0 py-2 small">
+                    <div class="list-group list-group-flush">
+                        <button v-for="r in visibleRoles" :key="r.name" type="button"
+                            class="list-group-item list-group-item-action bg-transparent item-label border-bottom-theme d-flex justify-content-between px-0 py-2 small"
+                            @click="$emit('select', r.name)">
                             <span>{{ r.name }}</span>
                             <span class="font-monospace text-muted-github">{{ r.share }}%</span>
-                        </li>
-                    </ul>
+                        </button>
+                    </div>
+                    <button v-if="roles.length > TOP_N" type="button"
+                        class="btn btn-link btn-sm align-self-start px-0 mt-2" @click="showAll = !showAll">
+                        {{ showAll ? `Show top ${TOP_N}` : `Show all ${roles.length}` }}
+                    </button>
                 </div>
             </div>
 
