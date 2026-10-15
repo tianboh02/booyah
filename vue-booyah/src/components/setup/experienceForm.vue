@@ -21,7 +21,7 @@ const handleSubmit = async () => {
         const userStr = localStorage.getItem('user')
         const currentUser = userStr ? JSON.parse(userStr) : {}
 
-        // 2. Axios POST request sending currentUser.id to match backend req.body.userID
+        // 2. Axios PUT request sending currentUser.id to match backend req.body.userID
         const response = await API.put('/auth/updateExperience', {
             userID: currentUser.id,
             experience: selectedExperience.value
@@ -50,41 +50,89 @@ const handleSubmit = async () => {
 </script>
 
 <template>
-    <div class="container py-5" style="max-width: 480px;">
-        <h2 class="fw-bold mb-3 text-center">Select Experience Level</h2>
+    <div class="container py-5 d-flex justify-content-center align-items-center min-vh-100">
+        <div class="setup-card p-4 p-md-5 rounded-4 border shadow-sm w-100" style="max-width: 520px;">
+            <h2 class="fw-bold mb-2 text-center header-title">Select Experience Level</h2>
+            <p class="text-muted-github text-center small mb-4">
+                Tailor your Booyah workspace experience to match your developer background.
+            </p>
 
-        <!-- Error Alert -->
-        <div v-if="errorMessage" class="alert alert-danger py-2" role="alert">
-            {{ errorMessage }}
+            <!-- Error Alert -->
+            <div v-if="errorMessage" class="alert alert-danger py-2 small mb-4" role="alert">
+                {{ errorMessage }}
+            </div>
+
+            <form @submit.prevent="handleSubmit">
+                <div class="d-flex flex-column gap-3 mb-4">
+
+                    <!-- Option 1: New -->
+                    <label class="option-card p-3 rounded-3 border d-flex align-items-start gap-3 cursor-pointer"
+                        :class="{ 'selected': selectedExperience === 'New' }">
+                        <input class="form-check-input mt-1 flex-shrink-0" type="radio" name="experience" id="expNew"
+                            value="New" v-model="selectedExperience">
+                        <div>
+                            <div class="fw-semibold option-title">New Developer / Student</div>
+                            <div class="text-muted-github small mt-1">
+                                I am new to building and looking to discover trending skills and beginner-friendly
+                                projects.
+                            </div>
+                        </div>
+                    </label>
+
+                    <!-- Option 2: Practitioner -->
+                    <label class="option-card p-3 rounded-3 border d-flex align-items-start gap-3 cursor-pointer"
+                        :class="{ 'selected': selectedExperience === 'Practitioner' }">
+                        <input class="form-check-input mt-1 flex-shrink-0" type="radio" name="experience"
+                            id="expPractitioner" value="Practitioner" v-model="selectedExperience">
+                        <div>
+                            <div class="fw-semibold option-title">Practitioner / Experienced</div>
+                            <div class="text-muted-github small mt-1">
+                                I am an experienced developer managing active projects and tracking stack demand.
+                            </div>
+                        </div>
+                    </label>
+
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold"
+                    :disabled="!selectedExperience || isLoading">
+                    <span v-if="isLoading" class="spinner-border spinner-border-sm me-2" role="status"></span>
+                    <span>{{ isLoading ? 'Saving...' : 'Continue' }}</span>
+                </button>
+            </form>
         </div>
-
-        <form @submit.prevent="handleSubmit">
-            <!-- Option 1: New -->
-            <div class="form-check mb-3">
-                <input class="form-check-input" type="radio" name="experience" id="expNew" value="New"
-                    v-model="selectedExperience">
-                <label class="form-check-label" for="expNew">
-                    <div class="fw-bold">New</div>
-                    <div class="text-secondary small">I am new to building and looking to discover projects.</div>
-                </label>
-            </div>
-
-            <!-- Option 2: Practitioner -->
-            <div class="form-check mb-4">
-                <input class="form-check-input" type="radio" name="experience" id="expPractitioner" value="Practitioner"
-                    v-model="selectedExperience">
-                <label class="form-check-label" for="expPractitioner">
-                    <div class="fw-bold">Practitioner</div>
-                    <div class="text-secondary small">I am an experienced developer managing my own projects.</div>
-                </label>
-            </div>
-
-            <!-- Submit Button -->
-            <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold"
-                :disabled="!selectedExperience || isLoading">
-                <span v-if="isLoading" class="spinner-border spinner-border-sm me-2" role="status"></span>
-                <span>{{ isLoading ? 'Saving...' : 'Submit' }}</span>
-            </button>
-        </form>
     </div>
 </template>
+
+<style scoped>
+.setup-card {
+    background-color: var(--card-bg);
+    border-color: var(--card-border) !important;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.header-title,
+.option-title {
+    color: var(--app-text);
+}
+
+.option-card {
+    background-color: var(--github-control-bg);
+    border-color: var(--card-border) !important;
+    transition: all 0.2s ease;
+}
+
+.option-card:hover {
+    border-color: #3b82f6 !important;
+}
+
+.option-card.selected {
+    border-color: #3b82f6 !important;
+    background-color: rgba(59, 130, 246, 0.06);
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
+</style>

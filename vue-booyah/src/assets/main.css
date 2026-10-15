@@ -1,41 +1,71 @@
 /* src/assets/main.css */
 
-/* Override Bootstrap's body variables globally */
-:root,
+/* ==========================================================================
+   1. COLOR TOKEN DEFINITIONS
+   ========================================================================== */
 [data-bs-theme="dark"] {
-    --bs-body-bg: #0b0c0e !important;
-    --bs-body-bg-rgb: 11, 12, 14 !important;
-    --bs-dark-rgb: 11, 12, 14 !important;
+    --app-bg: #0b0c0e;
+    --app-text: #f3f4f6;
+    --card-bg: #0e1014;
+    --card-border: #202428;
+    --text-muted-github: #8b949e;
+    --badge-bg: #0e0f0f;
+    --badge-text: #adb3ba;
+    --badge-border: #454c53;
+    --github-control-bg: #0d1117;
+    --github-control-border: #30363d;
 }
 
-/* Force body and app container to full height black */
+[data-bs-theme="light"] {
+    --app-bg: #ffffff;
+    --app-text: #1f2328;
+    --card-bg: #f6f8fa;
+    --card-border: #d0d7de;
+    --text-muted-github: #656d76;
+    --badge-bg: #eff1f3;
+    --badge-text: #24292f;
+    --badge-border: #d0d7de;
+    --github-control-bg: #ffffff;
+    --github-control-border: #d0d7de;
+}
+
+/* ==========================================================================
+   2. GLOBAL BODY & CONTAINER STYLES
+   ========================================================================== */
 html,
 body,
 #app {
-    background-color: #0b0c0e !important;
-    color: #ffffff;
+    background-color: var(--app-bg) !important;
+    color: var(--app-text);
     min-height: 100vh;
     margin: 0;
     padding: 0;
+    transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-/* src/assets/main.css */
-
-/* Global Bootstrap Card Overrides */
+/* ==========================================================================
+   3. GLOBAL REUSABLE COMPONENT OVERRIDES
+   ========================================================================== */
 .card {
-    --bs-card-bg: #0e1014;
-    --bs-card-border-color: #202428;
-    background-color: #0e1014 !important;
-    border: 1px solid #202428 !important;
+    --bs-card-bg: var(--card-bg);
+    --bs-card-border-color: var(--card-border);
+    background-color: var(--card-bg) !important;
+    border: 1px solid var(--card-border) !important;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
-/* Global Reusable Theme Utilities */
 .text-muted-github {
-    color: #8b949e !important;
+    color: var(--text-muted-github) !important;
 }
 
 .badge-github {
-    background-color: #0e0f0f !important;
-    color: #adb3ba !important;
-    border: 1px solid #454c53 !important;
+    background-color: var(--badge-bg) !important;
+    color: var(--badge-text) !important;
+    border: 1px solid var(--badge-border) !important;
+}
+
+.github-control {
+    background-color: var(--github-control-bg) !important;
+    border-color: var(--github-control-border) !important;
+    color: var(--app-text) !important;
 }

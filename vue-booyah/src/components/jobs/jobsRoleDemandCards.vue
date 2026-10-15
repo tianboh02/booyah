@@ -8,7 +8,7 @@ defineProps({
 <template>
     <section class="mb-4">
         <div class="mb-3">
-            <h2 class="h5 fw-bold text-white mb-1">Role demand</h2>
+            <h2 class="h5 fw-bold section-title mb-1">Role demand</h2>
             <p class="text-muted-github small mb-0">Share of job posts mentioning each role, last 3 months</p>
         </div>
 
@@ -17,12 +17,12 @@ defineProps({
             <div class="col-md-6">
                 <div class="card p-4 h-100 rounded-3 shadow-sm">
                     <div
-                        class="chart-placeholder text-muted-github small p-4 mb-3 text-center border border-secondary border-dashed rounded-3">
+                        class="chart-placeholder text-muted-github small p-4 mb-3 text-center border border-dashed rounded-3">
                         Role demand chart coming soon
                     </div>
                     <ul class="list-group list-group-flush">
                         <li v-for="r in roles" :key="r.name"
-                            class="list-group-item bg-transparent text-white border-bottom-github d-flex justify-content-between px-0 py-2 small">
+                            class="list-group-item bg-transparent item-label border-bottom-theme d-flex justify-content-between px-0 py-2 small">
                             <span>{{ r.name }}</span>
                             <span class="font-monospace text-muted-github">{{ r.share }}%</span>
                         </li>
@@ -33,14 +33,14 @@ defineProps({
             <!-- Right Card: Posts Per Month -->
             <div class="col-md-6">
                 <div class="card p-4 h-100 rounded-3 shadow-sm">
-                    <h3 class="h6 fw-bold text-white mb-3">Posts per month</h3>
+                    <h3 class="h6 fw-bold section-title mb-3">Posts per month</h3>
                     <div
-                        class="chart-placeholder text-muted-github small p-4 mb-3 text-center border border-secondary border-dashed rounded-3">
+                        class="chart-placeholder text-muted-github small p-4 mb-3 text-center border border-dashed rounded-3">
                         Posts per month chart coming soon
                     </div>
                     <ul class="list-group list-group-flush">
                         <li v-for="p in postsPerMonth" :key="p.month"
-                            class="list-group-item bg-transparent text-white border-bottom-github d-flex justify-content-between px-0 py-2 small">
+                            class="list-group-item bg-transparent item-label border-bottom-theme d-flex justify-content-between px-0 py-2 small">
                             <span>{{ p.month }}</span>
                             <span class="font-monospace text-muted-github">{{ p.count }}</span>
                         </li>
@@ -52,11 +52,24 @@ defineProps({
 </template>
 
 <style scoped>
+.section-title,
+.item-label {
+    color: var(--app-text);
+    transition: color 0.2s ease;
+}
+
+.chart-placeholder {
+    background-color: var(--github-control-bg);
+    border-color: var(--card-border) !important;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
 .border-dashed {
     border-style: dashed !important;
 }
 
-.border-bottom-github {
-    border-bottom: 1px solid #30363d !important;
+.border-bottom-theme {
+    border-bottom: 1px solid var(--card-border) !important;
+    transition: border-color 0.2s ease;
 }
 </style>

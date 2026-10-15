@@ -67,16 +67,14 @@ function timeAgo(isoString) {
 
         <!-- Controls Header Row -->
         <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
-            <h3 class="h3 fw-bold text-white mb-0">Repositories</h3>
+            <h3 class="h3 fw-bold section-title mb-0">Repositories</h3>
 
             <div class="d-flex align-items-center gap-3 flex-wrap">
                 <!-- Search Input -->
                 <div class="position-relative" style="min-width: 240px;">
-                    <!-- Centered Emoji Icon -->
                     <span class="position-absolute top-50 start-0 translate-middle-y ms-2 pe-none opacity-75"
                         style="font-size: 0.85rem; line-height: 1;">🔍</span>
 
-                    <!-- Adjusted Input Padding -->
                     <input v-model="searchQuery" type="text" class="form-control form-control-sm github-control"
                         style="padding-left: 1.85rem;" placeholder="Search repositories" />
                 </div>
@@ -95,10 +93,9 @@ function timeAgo(isoString) {
 
         <!-- Repository List Cards -->
         <div v-if="filteredAndSortedRepos.length > 0">
-            <div v-for="repo in filteredAndSortedRepos" :key="repo.id"
-                class="card mb-3 p-3 rounded-3 shadow-sm text-white">
+            <div v-for="repo in filteredAndSortedRepos" :key="repo.id" class="card mb-3 p-3 rounded-3 shadow-sm">
                 <div class="d-flex align-items-center gap-2 mb-2">
-                    <h5 class="card-title h6 fw-bold mb-0 text-white">{{ repo.name }}</h5>
+                    <h5 class="card-title h6 fw-bold mb-0">{{ repo.name }}</h5>
                     <span class="badge badge-github rounded-pill text-capitalize fw-normal px-2 py-1">
                         {{ repo.private ? "Private" : "Public" }}
                     </span>
@@ -108,7 +105,7 @@ function timeAgo(isoString) {
                     {{ repo.description || "No description" }}
                 </p>
 
-                <!-- Bottom Metadata Row with Monospace Metrics -->
+                <!-- Bottom Metadata Row -->
                 <div class="d-flex align-items-center gap-3 text-muted-github small flex-wrap">
                     <div class="d-flex align-items-center gap-1">
                         <span class="rounded-circle d-inline-block flex-shrink-0"
@@ -116,10 +113,12 @@ function timeAgo(isoString) {
                         <span>{{ repo.language || 'No language' }}</span>
                     </div>
 
+                    <!-- Monospace restricted to numbers only -->
                     <span>☆ <span class="font-monospace">{{ repo.stargazers_count }}</span></span>
                     <span>Y <span class="font-monospace">{{ repo.forks_count }}</span></span>
-                    <span class="font-monospace">Updated <span class="font-monospace">{{
-                            timeAgo(repo.updated_at)}}</span></span>
+
+                    <!-- Standard prose font for date -->
+                    <span>Updated {{ timeAgo(repo.updated_at) }}</span>
                 </div>
             </div>
         </div>
@@ -138,16 +137,13 @@ function timeAgo(isoString) {
 </template>
 
 <style scoped>
-.github-control {
-    background-color: #0d1117;
-    border-color: #30363d;
-    color: #f0f6fc;
+.section-title,
+.card-title {
+    color: var(--app-text);
 }
 
 .github-control:focus {
-    background-color: #0d1117;
-    border-color: #58a6ff;
-    color: #f0f6fc;
+    border-color: #58a6ff !important;
     box-shadow: 0 0 0 3px rgba(56, 139, 253, 0.3);
 }
 </style>

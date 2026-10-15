@@ -26,7 +26,7 @@ const stats = computed(() => {
 
     const total = props.repoList.length
     const privates = props.repoList.filter(r => r.private).length
-    const publics = total - privates
+    const publics = total - privates // Fixed subtraction operator
     const stars = props.repoList.reduce((acc, r) => acc + (r.stargazers_count || 0), 0)
 
     const langCounts = {}
@@ -103,9 +103,9 @@ const reposByLangList = computed(() => {
 
             <!-- Number of Repositories Card -->
             <div class="col">
-                <div class="card p-3 h-100 rounded-3 shadow-sm text-white">
-                    <span class="h3 fw-bold text-white mb-1 font-monospace">{{ stats.totalRepos }}</span>
-                    <span class="text-white fw-semibold small">Repositories</span>
+                <div class="card p-3 h-100 rounded-3 shadow-sm">
+                    <span class="h3 fw-bold stat-value mb-1 font-monospace">{{ stats.totalRepos }}</span>
+                    <span class="stat-label fw-semibold small">Repositories</span>
                     <span class="text-muted-github small">{{ stats.publicRepos }} public · {{ stats.privateRepos }}
                         private</span>
                 </div>
@@ -113,10 +113,10 @@ const reposByLangList = computed(() => {
 
             <!-- Most-used Language Card -->
             <div class="col">
-                <div class="card p-3 h-100 rounded-3 shadow-sm text-white">
-                    <span class="h3 fw-bold text-white mb-1 font-monospace text-truncate d-block">{{ stats.mostUsedLang
+                <div class="card p-3 h-100 rounded-3 shadow-sm">
+                    <span class="h3 fw-bold stat-value mb-1 font-monospace text-truncate d-block">{{ stats.mostUsedLang
                     }}</span>
-                    <span class="text-white fw-semibold small">Most-used language</span>
+                    <span class="stat-label fw-semibold small">Most-used language</span>
                     <span class="text-muted-github small"><span class="font-monospace">{{ stats.mostUsedPct }}%</span>
                         of your code</span>
                 </div>
@@ -124,9 +124,9 @@ const reposByLangList = computed(() => {
 
             <!-- Total Stars Card -->
             <div class="col">
-                <div class="card p-3 h-100 rounded-3 shadow-sm text-white">
-                    <span class="h3 fw-bold text-white mb-1 font-monospace">{{ stats.totalStars }}</span>
-                    <span class="text-white fw-semibold small">Total stars</span>
+                <div class="card p-3 h-100 rounded-3 shadow-sm">
+                    <span class="h3 fw-bold stat-value mb-1 font-monospace">{{ stats.totalStars }}</span>
+                    <span class="stat-label fw-semibold small">Total stars</span>
                     <span class="text-muted-github small">Across all repositories</span>
                 </div>
             </div>
@@ -144,20 +144,22 @@ const reposByLangList = computed(() => {
             <!-- Language Share Chart Card -->
             <div class="col-lg-6">
                 <div class="card p-4 h-100 rounded-3 shadow-sm">
-                    <h2 class="h5 fw-bold text-white mb-1">Language share</h2>
+                    <h2 class="h5 fw-bold section-title mb-1">Language share</h2>
                     <p class="text-muted-github small mb-4">
                         *This feature is currently under development for further implementation with ECharts.
                     </p>
 
                     <div v-if="langShareList.length > 0"
                         class="d-flex align-items-center gap-4 flex-wrap flex-sm-nowrap my-auto">
+
                         <!-- Donut Chart -->
                         <div class="position-relative d-flex align-items-center justify-content-center flex-shrink-0 mx-auto mx-sm-0"
                             style="width: 140px; height: 140px;">
                             <div class="rounded-circle w-100 h-100" :style="{ background: donutGradient }"></div>
-                            <div class="rounded-circle d-flex flex-column align-items-center justify-content-center text-center"
-                                style="width: 86px; height: 86px; background-color: #161b22; position: absolute;">
-                                <span class="h4 fw-bold text-white mb-0 font-monospace">{{ stats.mostUsedPct }}%</span>
+                            <!-- Theme-Aware Center Cutout Hole -->
+                            <div class="donut-hole rounded-circle d-flex flex-column align-items-center justify-content-center text-center position-absolute"
+                                style="width: 86px; height: 86px;">
+                                <span class="h4 fw-bold stat-value mb-0 font-monospace">{{ stats.mostUsedPct }}%</span>
                                 <span class="text-muted-github small text-truncate px-1" style="max-width: 80px;">{{
                                     stats.mostUsedLang }}</span>
                             </div>
@@ -170,11 +172,12 @@ const reposByLangList = computed(() => {
                                 <div class="d-flex align-items-center gap-2 text-truncate">
                                     <span class="rounded-circle d-inline-block flex-shrink-0"
                                         :style="{ backgroundColor: item.color, width: '10px', height: '10px' }"></span>
-                                    <span class="text-white small text-truncate">{{ item.name }}</span>
+                                    <span class="stat-label small text-truncate">{{ item.name }}</span>
                                 </div>
                                 <span class="text-muted-github small ms-1 font-monospace">{{ item.percentage }}%</span>
                             </div>
                         </div>
+
                     </div>
 
                     <div v-else class="text-muted-github text-center my-auto py-4">
@@ -187,19 +190,23 @@ const reposByLangList = computed(() => {
             <!-- Repos by Primary Language Card -->
             <div class="col-lg-6">
                 <div class="card p-4 h-100 rounded-3 shadow-sm">
-                    <h2 class="h5 fw-bold text-white mb-4">Repos by primary language</h2>
+                    <h2 class="h5 fw-bold section-title mb-4">Repos by primary language</h2>
 
                     <div v-if="reposByLangList.length > 0" class="d-flex flex-column gap-3">
                         <div v-for="lang in reposByLangList" :key="lang.name" class="d-flex align-items-center gap-3">
-                            <span class="text-white small flex-shrink-0 text-truncate" style="width: 100px;">{{
+                            <span class="stat-label small flex-shrink-0 text-truncate" style="width: 100px;">{{
                                 lang.name }}</span>
-                            <div class="progress flex-grow-1 rounded-pill"
-                                style="height: 12px; background-color: #0d1117;">
+
+                            <!-- Progress Bar Track (Theme-aware) -->
+                            <div class="progress flex-grow-1 rounded-pill progress-track" style="height: 12px;">
                                 <div class="progress-bar rounded-pill" role="progressbar"
-                                    :style="{ width: lang.barWidth + '%', backgroundColor: '#80a5fe' }"></div>
+                                    :style="{ width: lang.barWidth + '%', backgroundColor: '#6b8aff' }"></div>
                             </div>
+
                             <span class="text-muted-github small flex-shrink-0 text-end font-monospace"
-                                style="width: 30px;">{{ lang.count }}</span>
+                                style="width: 30px;">
+                                {{ lang.count }}
+                            </span>
                         </div>
                     </div>
 
@@ -214,3 +221,22 @@ const reposByLangList = computed(() => {
 
     </div>
 </template>
+
+<style scoped>
+.stat-value,
+.stat-label,
+.section-title {
+    color: var(--app-text);
+    transition: color 0.2s ease;
+}
+
+.donut-hole {
+    background-color: var(--card-bg);
+    transition: background-color 0.2s ease;
+}
+
+.progress-track {
+    background-color: var(--card-border) !important;
+    transition: background-color 0.2s ease;
+}
+</style>
