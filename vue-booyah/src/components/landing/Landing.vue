@@ -6,7 +6,6 @@ import { useTheme } from '@/composables/useTheme'
 
 const { theme } = useTheme()
 
-//test
 
 // ---------- Typed.js Setup ----------
 const typedTarget = ref(null)
