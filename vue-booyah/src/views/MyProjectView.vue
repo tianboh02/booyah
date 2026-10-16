@@ -7,6 +7,10 @@ import ProjectPageHeader from '@/components/myproject/projectPageHeader.vue'
 import ProjectStatsTable from '@/components/myproject/projectStatsTable.vue'
 
 const repoList = ref([])
+const loading = ref(true)
+
+// The language currently in focus. Charts and the repo list both read and write it.
+const selectedLang = ref(null)
 
 async function getRepos() {
     const token = localStorage.getItem('auth_token')
@@ -21,6 +25,8 @@ async function getRepos() {
         repoList.value = githubResponse.data
     } catch (error) {
         console.error(error)
+    } finally {
+        loading.value = false
     }
 }
 
@@ -31,8 +37,8 @@ onMounted(() => {
 
 <template>
     <main>
-        <ProjectPageHeader />
-        <ProjectStatsTable :repo-list="repoList" />
-        <ProjectList :repo-list="repoList" />
+        <ProjectPageHeader :repo-list="repoList" :loading="loading" />
+        <ProjectStatsTable v-model:selected-lang="selectedLang" :repo-list="repoList" :loading="loading" />
+        <ProjectList v-model:selected-lang="selectedLang" :repo-list="repoList" :loading="loading" />
     </main>
 </template>
