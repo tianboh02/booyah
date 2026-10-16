@@ -1,7 +1,7 @@
 <script setup>
 import { computed } from 'vue'
 import { getLangColor } from '@/utils/langColors'
-import { REPOS_PER_CATEGORY } from '@/utils/top5Categories'
+import { langOf, visibleProjects } from '@/utils/top5Categories'
 import { vSpotlight, useCountUp } from '@/utils/motion'
 
 const props = defineProps({
@@ -11,13 +11,10 @@ const props = defineProps({
 
 const emit = defineEmits(['open', 'save', 'update:selectedLang'])
 
-const langOf = (p) => p.language || 'No language'
 const shortStars = (n) => (n >= 1000 ? `${Math.round(n / 100) / 10}k` : String(n))
 
 // the category holds every project that passed the checks; filter first, then keep the top few
-const rows = computed(() =>
-    props.category.projects.filter((p) => !props.selectedLang || langOf(p) === props.selectedLang).slice(0, REPOS_PER_CATEGORY)
-)
+const rows = computed(() => visibleProjects(props.category, props.selectedLang))
 
 const builders = useCountUp(() => props.category.builders)
 

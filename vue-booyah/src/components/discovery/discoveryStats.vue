@@ -1,7 +1,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { getLangColor } from '@/utils/langColors'
-import { REPOS_PER_CATEGORY } from '@/utils/top5Categories'
+import { langOf, visibleProjects } from '@/utils/top5Categories'
 import { vSpotlight, vTilt, useCountUp } from '@/utils/motion'
 
 const props = defineProps({
@@ -9,13 +9,10 @@ const props = defineProps({
     selectedLang: { type: String, default: null }
 })
 
-const langOf = (p) => p.language || 'No language'
-
 // Count what the cards actually show: the top few per category, after the language filter.
-const shown = (match) =>
-    props.categories.flatMap((c) => c.projects.filter(match).slice(0, REPOS_PER_CATEGORY))
-const allShown = computed(() => shown(() => true))
-const focused = computed(() => shown((p) => !props.selectedLang || langOf(p) === props.selectedLang))
+const shown = (lang) => props.categories.flatMap((c) => visibleProjects(c, lang))
+const allShown = computed(() => shown(null))
+const focused = computed(() => shown(props.selectedLang))
 
 const stats = computed(() => {
     const counts = {}
