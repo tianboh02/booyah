@@ -56,8 +56,9 @@ onMounted(() => requestAnimationFrame(() => (ready.value = true)))
         <div class="col">
             <div v-tilt="5" v-spotlight class="card stat-card p-3 h-100 rounded-3 shadow-sm"
                 :class="{ 'is-in': ready, 'is-focused': selectedLang }" :style="{ '--i': 1, '--accent': langColor }">
-                <span class="h3 fw-bold stat-value mb-1 font-monospace text-truncate d-block">
-                    <span class="lang-dot me-2"></span>{{ stats.lang }}
+                <span class="h3 fw-bold stat-value mb-1 font-monospace d-flex align-items-center gap-2 min-w-0">
+                    <span class="lang-dot flex-shrink-0"></span>
+                    <span class="text-truncate">{{ stats.lang }}</span>
                 </span>
                 <span class="stat-label fw-semibold small">
                     {{ selectedLang ? 'Selected language' : 'Most-used language' }}
@@ -138,9 +139,10 @@ onMounted(() => requestAnimationFrame(() => (ready.value = true)))
     position: absolute;
     top: 0;
     left: 0;
+    right: 0;
     height: 2px;
-    width: 100%;
-    background: linear-gradient(90deg, var(--accent), transparent);
+    /* fades in from the left, peaks in the middle, fades out to the right */
+    background: linear-gradient(90deg, transparent, var(--accent) 50%, transparent);
     transform: scaleX(0);
     transform-origin: left;
     transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
@@ -157,8 +159,14 @@ onMounted(() => requestAnimationFrame(() => (ready.value = true)))
     height: 12px;
     border-radius: 50%;
     background-color: var(--accent);
-    box-shadow: 0 0 12px var(--accent);
+    /* two layers: a tight core and a wide soft halo, so the glow fades out smoothly */
+    box-shadow: 0 0 6px color-mix(in srgb, var(--accent) 70%, transparent),
+        0 0 18px 4px color-mix(in srgb, var(--accent) 30%, transparent);
     transition: background-color 0.4s ease, box-shadow 0.4s ease;
+}
+
+.min-w-0 {
+    min-width: 0;
 }
 
 @media (prefers-reduced-motion: reduce) {

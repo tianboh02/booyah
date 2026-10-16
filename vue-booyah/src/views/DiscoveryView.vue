@@ -92,42 +92,42 @@ onMounted(load)
             <template v-else>
                 <DiscoveryStats v-if="categories.length" :categories="categories" :selected-lang="selectedLang" />
 
-                <div class="alert badge-github text-muted-github border mb-3 small py-2 px-3" role="note">
-                    💡 Categories are ranked by number of builders. Projects within a category are ranked by Show HN
-                    points, not GitHub stars. Only repositories with at least {{ MIN_STARS }} stars are shown.
-                </div>
-
-                <!-- Language filter -->
-                <div class="d-flex flex-wrap align-items-center gap-3 mb-3">
+                <!-- Controls row (same layout as the My Project repository list) -->
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-2">
                     <div class="d-flex align-items-center gap-2 flex-wrap">
-                        <span class="text-muted-github small text-nowrap">Language</span>
-                        <div class="btn-group" role="group" aria-label="Filter by language">
-                            <button type="button" class="btn btn-sm lang-btn" :class="{ active: !selectedLang }"
-                                :aria-pressed="!selectedLang" @click="selectedLang = null">All</button>
-                            <button v-for="l in languages" :key="l" type="button"
-                                class="btn btn-sm lang-btn d-inline-flex align-items-center gap-2"
-                                :class="{ active: selectedLang === l }" :aria-pressed="selectedLang === l"
-                                @click="selectedLang = selectedLang === l ? null : l">
-                                <span class="btn-dot rounded-circle" :style="{ '--c': getLangColor(l) }"></span>{{ l }}
+                        <h2 class="h3 fw-bold section-title mb-0">Top categories</h2>
+                        <span v-if="selectedLang" class="text-muted-github small font-monospace"
+                            :title="`Top ${REPOS_PER_CATEGORY} per category shown`">{{ shownTotal }}/{{ matchTotal }}</span>
+
+                        <Transition name="chip">
+                            <button v-if="selectedLang" type="button"
+                                class="filter-chip d-inline-flex align-items-center gap-2 rounded-pill ps-3 pe-2 py-1"
+                                :style="{ '--c': getLangColor(selectedLang) }"
+                                :aria-label="'Clear ' + selectedLang + ' filter'" @click="selectedLang = null">
+                                <span class="chip-dot rounded-circle"></span>
+                                <span class="small fw-semibold">{{ selectedLang }}</span>
+                                <span
+                                    class="chip-x rounded-circle d-inline-flex align-items-center justify-content-center">✕</span>
                             </button>
-                        </div>
+                        </Transition>
                     </div>
 
-                    <Transition name="chip">
-                        <button v-if="selectedLang" type="button"
-                            class="filter-chip d-inline-flex align-items-center gap-2 rounded-pill ps-3 pe-2 py-1"
-                            :style="{ '--c': getLangColor(selectedLang) }" :aria-label="'Clear ' + selectedLang + ' filter'"
-                            @click="selectedLang = null">
-                            <span class="chip-dot rounded-circle"></span>
-                            <span class="small fw-semibold">{{ selectedLang }}</span>
-                            <span class="text-muted-github small font-monospace"
-                                :title="`Top ${REPOS_PER_CATEGORY} per category shown`">{{ shownTotal }}/{{ matchTotal
-                                }}</span>
-                            <span
-                                class="chip-x rounded-circle d-inline-flex align-items-center justify-content-center">✕</span>
-                        </button>
-                    </Transition>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="text-muted-github small text-nowrap">Language</span>
+                        <div class="btn-group flex-wrap" role="group" aria-label="Filter by language">
+                            <button type="button" class="btn btn-sm lang-btn" :class="{ active: !selectedLang }"
+                                :aria-pressed="!selectedLang" @click="selectedLang = null">All</button>
+                            <button v-for="l in languages" :key="l" type="button" class="btn btn-sm lang-btn"
+                                :class="{ active: selectedLang === l }" :aria-pressed="selectedLang === l"
+                                @click="selectedLang = selectedLang === l ? null : l">{{ l }}</button>
+                        </div>
+                    </div>
                 </div>
+
+                <p class="text-muted-github small mb-3" role="note">
+                    Categories are ranked by number of builders. Projects within a category are ranked by Show HN
+                    points, not GitHub stars. Only repositories with at least {{ MIN_STARS }} stars are shown.
+                </p>
 
                 <TransitionGroup name="cat" tag="div" appear class="row row-cols-1 row-cols-lg-2 g-3">
                     <div v-for="(c, i) in categories" :key="c.id" class="col" :style="{ '--i': i }">
@@ -145,6 +145,10 @@ onMounted(load)
 
 <style scoped>
 /* --- Language buttons + chip (same look as the My Project filters) -------- */
+.section-title {
+    color: var(--app-text);
+}
+
 .lang-btn {
     color: var(--app-text);
     background-color: transparent;
@@ -166,12 +170,6 @@ onMounted(load)
 
 .lang-btn:focus-visible {
     box-shadow: 0 0 0 3px rgba(56, 139, 253, 0.4);
-}
-
-.btn-dot {
-    width: 8px;
-    height: 8px;
-    background-color: var(--c);
 }
 
 .filter-chip {

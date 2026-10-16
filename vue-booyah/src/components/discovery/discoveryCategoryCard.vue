@@ -36,10 +36,9 @@ const toggleLang = (lang) => emit('update:selectedLang', props.selectedLang === 
             </span>
         </header>
 
-        <ul v-if="rows.length" class="list-unstyled mb-0">
-            <li v-for="p in rows" :key="p.id" class="project-row d-flex align-items-center gap-3 px-2"
-                :style="{ '--lang': getLangColor(langOf(p)) }">
-                <span class="d-flex align-items-center gap-2 flex-grow-1 min-w-0">
+        <ul v-if="rows.length" class="rows list-unstyled mb-0">
+            <li v-for="p in rows" :key="p.id" class="project-row" :style="{ '--lang': getLangColor(langOf(p)) }">
+                <span class="d-flex align-items-center gap-2 min-w-0">
                     <button type="button" class="project-link btn btn-link p-0 text-start font-monospace text-truncate"
                         :aria-label="`Open details for ${p.id}`" @click="$emit('open', p)">
                         <span class="text-muted-github">{{ p.owner }}/</span>{{ p.name }}
@@ -52,7 +51,7 @@ const toggleLang = (lang) => emit('update:selectedLang', props.selectedLang === 
                 </span>
 
                 <!-- Clicking the language filters every category by it -->
-                <span class="lang-col">
+                <span class="min-w-0">
                     <button type="button" class="lang-link d-inline-flex align-items-center gap-1 rounded-2 small"
                         :class="{ 'is-selected': selectedLang === langOf(p) }" :aria-pressed="selectedLang === langOf(p)"
                         :title="selectedLang === langOf(p) ? 'Clear filter' : 'Filter by ' + langOf(p)"
@@ -62,10 +61,10 @@ const toggleLang = (lang) => emit('update:selectedLang', props.selectedLang === 
                     </button>
                 </span>
 
-                <span class="metric text-muted-github small font-monospace points-col" title="Show HN points">▲ {{ p.hnPoints
+                <span class="metric text-muted-github small font-monospace" title="Show HN points">▲ {{ p.hnPoints
                     }}</span>
 
-                <span class="metric meta-star text-muted-github small font-monospace stars-col" title="GitHub stars">
+                <span class="metric meta-star text-muted-github small font-monospace" title="GitHub stars">
                     <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
                         <path d="M8 .25l2.3 4.66 5.15.75-3.72 3.63.88 5.13L8 12.04l-4.61 2.38.88-5.13L.55 5.66l5.15-.75z" />
                     </svg>
@@ -73,14 +72,17 @@ const toggleLang = (lang) => emit('update:selectedLang', props.selectedLang === 
                 </span>
 
                 <button type="button" class="bookmark-btn btn btn-sm btn-link p-0 text-muted-github"
-                    :aria-label="`Save ${p.id}`" @click="$emit('save', p)">🔖</button>
+                    :aria-label="`Save ${p.id}`" @click="$emit('save', p)">
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor"
+                        stroke-width="1.5" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M3.5 2.5h9v11.2L8 10.6l-4.5 3.1z" />
+                    </svg>
+                </button>
             </li>
         </ul>
-        <p v-else-if="selectedLang" class="text-muted-github small text-center py-4 mb-0">
-            No {{ selectedLang }} projects in this category this month.
-        </p>
-        <p v-else class="text-muted-github small text-center py-4 mb-0">
-            No projects in this category passed the checks this month.
+        <p v-else class="rows empty d-flex align-items-center justify-content-center text-muted-github small mb-0">
+            {{ selectedLang ? `No ${selectedLang} projects in this category this month.` :
+                'No projects in this category passed the checks this month.' }}
         </p>
     </section>
 </template>
@@ -134,11 +136,22 @@ const toggleLang = (lang) => emit('update:selectedLang', props.selectedLang === 
 }
 
 /* --- Rows ------------------------------------------------------------------ */
+/* Fixed columns so every row lines up: name | language | HN points | stars | save */
 .project-row {
     position: relative;
-    min-height: 44px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 6rem 3.75rem 4rem 1.5rem;
+    align-items: center;
+    column-gap: 0.75rem;
+    height: 44px;
+    padding: 0 0.5rem;
     border-radius: 0.4rem;
     transition: background-color 0.2s ease;
+}
+
+/* Every card is as tall as five rows, filtered or not, so the grid never jumps */
+.rows {
+    min-height: calc(5 * 44px);
 }
 
 .project-row:hover {
@@ -188,11 +201,6 @@ const toggleLang = (lang) => emit('update:selectedLang', props.selectedLang === 
     transform: translateX(0);
 }
 
-.lang-col {
-    width: 7rem;
-    flex: none;
-}
-
 .lang-link {
     max-width: 100%;
     color: var(--text-muted-github);
@@ -204,11 +212,16 @@ const toggleLang = (lang) => emit('update:selectedLang', props.selectedLang === 
     transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
-.lang-link:hover,
-.lang-link.is-selected {
+.lang-link:hover {
     color: var(--app-text);
     background-color: color-mix(in srgb, var(--lang) 16%, transparent);
     border-color: color-mix(in srgb, var(--lang) 55%, transparent);
+}
+
+/* the active filter is shown by the chip above, so the rows only bold it */
+.lang-link.is-selected {
+    color: var(--app-text);
+    font-weight: 600;
 }
 
 .lang-link:focus-visible,
@@ -222,7 +235,6 @@ const toggleLang = (lang) => emit('update:selectedLang', props.selectedLang === 
     width: 8px;
     height: 8px;
     background-color: var(--lang);
-    box-shadow: 0 0 8px color-mix(in srgb, var(--lang) 70%, transparent);
 }
 
 /* HN points first (it is the sort key), then stars */
@@ -232,14 +244,6 @@ const toggleLang = (lang) => emit('update:selectedLang', props.selectedLang === 
     justify-content: flex-end;
     gap: 0.25rem;
     white-space: nowrap;
-}
-
-.points-col {
-    width: 4rem;
-}
-
-.stars-col {
-    width: 4.5rem;
 }
 
 .meta-star svg {
