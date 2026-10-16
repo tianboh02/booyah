@@ -8,6 +8,7 @@ import MyProjectView from '@/views/MyProjectView.vue'
 import SavedView from '@/views/SavedView.vue'
 import SettingsView from '@/views/SettingsView.vue'
 import SetupView from '@/views/SetupView.vue'
+import axios from 'axios'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -80,8 +81,13 @@ function getUserExperience() {
   }
 }
 
+function clearAuth() {
+  localStorage.removeItem('auth_token')
+  localStorage.removeItem('user')
+}
+
 // Global Navigation Guard
-router.beforeEach((to) => {
+router.beforeEach(async (to) => {
   const isAuthenticated = !!(localStorage.getItem('auth_token') && localStorage.getItem('user'))
   const isPublicRoute = to.meta.isPublic === true
 
@@ -93,12 +99,34 @@ router.beforeEach((to) => {
     return true
   }
 
+  const userAuthKey = localStorage.getItem('auth_token')
+
+  // 2. Validate token against GitHub API
+  try {
+    await axios.get('https://api.github.com/user', {
+      headers: {
+        'Authorization': `Bearer ${userAuthKey}`,
+        'X-GitHub-Api-Version': '2022-11-28',
+        'Accept': 'application/vnd.github+json'
+      }
+    })
+  } catch (error) {
+    console.warn('Auth token expired or invalid. Clearing session.', error)
+    clearAuth()
+
+    // Alert user on the current page BEFORE navigating away
+    alert('Session has expired, please login again.')
+
+    if (!isPublicRoute) {
+      return { name: 'landing' }
+    }
+    return true
+  }
+
   const rawExperience = getUserExperience()
   const exp = rawExperience ? rawExperience.toLowerCase() : null
 
-  console.log(exp)
-
-  // 2. Authenticated user without experience set -> force setup page
+  // 3. Authenticated user without experience set -> force setup page
   if (exp === null) {
     if (to.name !== 'setup') {
       return { name: 'setup' }
@@ -106,7 +134,7 @@ router.beforeEach((to) => {
     return true // Allow remaining on setup page without looping
   }
 
-  // 3. Authenticated user with experience trying to access public or setup pages
+  // 4. Authenticated user with experience trying to access public or setup pages
   if (isPublicRoute || to.name === 'setup') {
     if (exp === 'new') {
       return { name: 'discovery' }
@@ -117,7 +145,7 @@ router.beforeEach((to) => {
     return { name: 'discovery' }
   }
 
-  // 4. Authenticated user navigating to valid protected pages
+  // 5. Authenticated user navigating to valid protected pages
   return true
 })
 
