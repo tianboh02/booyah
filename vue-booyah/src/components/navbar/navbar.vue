@@ -5,6 +5,7 @@ import defaultAvatar from '@/assets/login.png'
 import logoSvg from '@/assets/booyah-logo1.png'
 import ThemeToggle from '@/components/navbar/themeToggle.vue'
 import { useTheme } from '@/composables/useTheme'
+import GitHubSSO from '../landing/GitHubSSO.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -34,6 +35,7 @@ const userAvatar = computed(() => currentUser.value.avatar || defaultAvatar)
 const userHandle = computed(() => currentUser.value.name || 'User')
 const userExperience = computed(() => currentUser.value.experience || 'New')
 const showNav = computed(() => isLogin.value && route.path !== '/setup')
+const showLogin = computed(() => route.path == '/')
 
 onMounted(() => {
     initTheme()
@@ -92,6 +94,9 @@ function logout() {
             <!-- Right Side Controls (Always Visible) -->
             <div class="d-flex align-items-center gap-3 ms-auto">
                 <!-- Theme Toggle Switch (Always Visible) -->
+                <div v-if="showLogin">
+                    <GitHubSSO />
+                </div>
                 <ThemeToggle />
 
                 <!-- User Profile Dropdown (Logged In Only) -->

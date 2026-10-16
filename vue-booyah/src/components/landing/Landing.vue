@@ -117,9 +117,9 @@ const particlesOptions = computed(() => {
             </p>
 
             <!-- GitHub SSO Button Container -->
-            <div class="mb-3">
+            <!-- <div class="mb-3">
                 <GitHubSSO />
-            </div>
+            </div> -->
 
             <!-- Disclaimer -->
             <p class="text-muted-github small lh-base mb-5" style="max-width: 680px;">
