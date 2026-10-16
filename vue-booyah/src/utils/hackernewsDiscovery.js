@@ -2,7 +2,6 @@
 
 import {
     BUCKET_BY_ID,
-    REPOS_PER_CATEGORY,
     TOP_CATEGORIES,
     classify,
     extractRepo,
@@ -10,7 +9,7 @@ import {
     rankCategories,
 } from '@/utils/top5Categories'
 
-export const CACHE_KEY = 'discovery-view-v4' // bump when the regex/parsing logic changes
+export const CACHE_KEY = 'discovery-view-v5' // bump when the regex/parsing logic changes
 export const CACHE_TTL_MS = 6 * 60 * 60 * 1000 // 6 hours
 const HN_DAYS = 30 // Show HN window
 const HN_MIN_POINTS = 10 // ignore posts nobody noticed
@@ -98,8 +97,8 @@ function buildCategories(topCats, candidates) {
         const pool = candidates
             .filter((c) => c.post.bucket === cat.id && c.gh)
             .sort((a, b) => b.post.points - a.post.points || b.gh.stargazers_count - a.gh.stargazers_count)
+        // keep every survivor: the card slices to REPOS_PER_CATEGORY after the language filter
         for (const c of pool) {
-            if (projects.length >= REPOS_PER_CATEGORY) break
             const key = c.gh.full_name.toLowerCase()
             if (taken.has(key)) continue
             taken.add(key)
