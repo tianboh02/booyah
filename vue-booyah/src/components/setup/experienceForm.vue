@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import API from '@/api'
 import { getLangColor } from '@/utils/langColors'
@@ -17,10 +17,11 @@ const props = defineProps({
     }
 })
 const emit = defineEmits(['update:experience'])
-const selectedExperience = computed({
-    get: () => props.experience,
-    set: (v) => emit('update:experience', v)
-})
+// The form keeps its own selection, so the cards and Continue always agree with
+// the radio buttons. It also stays in sync with the parent when one is connected.
+const selectedExperience = ref(props.experience)
+watch(() => props.experience, (v) => (selectedExperience.value = v))
+watch(selectedExperience, (v) => emit('update:experience', v))
 
 const isLoading = ref(false)
 const errorMessage = ref('')
