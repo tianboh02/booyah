@@ -87,8 +87,11 @@ const toggleLang = (lang) => {
                     </button>
                 </span>
 
-                <span class="metric text-muted-github small font-monospace" title="Show HN points">
-                    ▲ {{ project.hnPoints }}
+                <span class="metric meta-hn text-muted-github small font-monospace" title="Show HN points">
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                        <path d="M8 3l6 10H2z" />
+                    </svg>
+                    <span>{{ project.hnPoints }}</span>
                 </span>
 
                 <span class="metric meta-star text-muted-github small font-monospace" title="GitHub stars">
@@ -96,7 +99,7 @@ const toggleLang = (lang) => {
                         <path
                             d="M8 .25l2.3 4.66 5.15.75-3.72 3.63.88 5.13L8 12.04l-4.61 2.38.88-5.13L.55 5.66l5.15-.75z" />
                     </svg>
-                    {{ shortStars(project.stars) }}
+                    <span>{{ shortStars(project.stars) }}</span>
                 </span>
 
                 <button type="button" class="bookmark-btn btn btn-sm btn-link p-0 text-muted-github" :class="{
@@ -184,7 +187,7 @@ const toggleLang = (lang) => {
 .project-row {
     position: relative;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 6rem 3.75rem 4rem 1.5rem;
+    grid-template-columns: minmax(0, 1fr) 6rem 3.5rem 3.5rem 1.5rem;
     align-items: center;
     column-gap: 0.75rem;
     height: 44px;
@@ -288,20 +291,47 @@ const toggleLang = (lang) => {
 .metric {
     display: inline-flex;
     align-items: center;
-    justify-content: flex-end;
+    justify-content: flex-start;
     gap: 0.25rem;
     white-space: nowrap;
 }
 
-.meta-star svg {
-    transition:
-        transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
-        color 0.2s ease;
+/* Fixed-width, right-aligned number keeps icons lined up while staying close to them. */
+.metric span {
+    min-width: 4ch;
+    text-align: right;
 }
 
-.project-row:hover .meta-star svg {
+.metric svg {
+    flex-shrink: 0;
+}
+
+/* HN triangle lights up orange, with a small lift and glow, only when hovered directly. */
+.meta-hn svg {
+    transition:
+        transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+        color 0.2s ease,
+        filter 0.2s ease;
+}
+
+.meta-hn svg:hover {
+    color: #ff6600;
+    transform: translateY(-2px);
+    filter: drop-shadow(0 0 4px rgba(255, 102, 0, 0.7));
+}
+
+.meta-star svg {
+    transition:
+        transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+        color 0.2s ease,
+        filter 0.2s ease;
+}
+
+/* Same rule as the HN triangle: only reacts when the icon itself is hovered. */
+.meta-star svg:hover {
     color: #e3b341;
     transform: rotate(72deg) scale(1.2);
+    filter: drop-shadow(0 0 4px rgba(227, 179, 65, 0.7));
 }
 
 .bookmark-btn {
@@ -365,6 +395,7 @@ const toggleLang = (lang) => {
     .project-link,
     .row-arrow,
     .meta-star svg,
+    .meta-hn svg,
     .bookmark-btn {
         transition: none !important;
     }
@@ -374,7 +405,8 @@ const toggleLang = (lang) => {
     }
 
     .cat-card:hover,
-    .project-row:hover .meta-star svg,
+    .meta-star svg:hover,
+    .meta-hn svg:hover,
     .bookmark-btn:active {
         transform: none;
     }

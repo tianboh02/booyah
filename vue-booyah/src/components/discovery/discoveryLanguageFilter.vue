@@ -1,12 +1,12 @@
 <script setup>
-import { computed } from 'vue'
-import { getLangColor } from '@/utils/langColors'
+import { computed, ref } from 'vue'
 import {
     MIN_STARS,
     REPOS_PER_CATEGORY,
     langOf,
     visibleProjects
 } from '@/utils/top5Categories'
+import DiscoveryLangPill from '@/components/discovery/discoveryLangPill.vue'
 
 const LANG_BUTTONS = 6
 
@@ -60,64 +60,51 @@ const shownTotal = computed(() =>
 const toggle = (lang) => {
     selectedLang.value = selectedLang.value === lang ? null : lang
 }
+
+// Info popover: opens on hover, focus or click; closes when the pointer or focus leaves it.
+const infoOpen = ref(false)
+
+const note = `Categories are ranked by number of builders. Projects within a category are ranked by Show HN points, not GitHub stars. Only repositories with at least ${MIN_STARS} stars are shown.`
 </script>
 
 <template>
-    <div>
-        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-2">
-            <div class="d-flex align-items-center gap-2 flex-wrap">
-                <h2 class="h3 fw-bold section-title mb-0">
-                    Top categories
-                </h2>
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
+        <div class="d-flex align-items-center gap-2">
+            <h2 class="h4 fw-bold section-title mb-0">
+                Top categories
+            </h2>
 
-                <span v-if="selectedLang" class="text-muted-github small font-monospace"
-                    :title="`Top ${REPOS_PER_CATEGORY} per category shown`">
-                    {{ shownTotal }}/{{ matchTotal }}
-                </span>
+            <div class="info position-relative d-inline-flex" @mouseenter="infoOpen = true"
+                @mouseleave="infoOpen = false" @focusout="infoOpen = false" @keydown.esc="infoOpen = false">
+                <button type="button" class="info-btn d-inline-flex align-items-center justify-content-center rounded-circle"
+                    aria-label="How categories and projects are ranked" :aria-expanded="infoOpen"
+                    aria-controls="discovery-info" @click="infoOpen = true">
+                    i
+                </button>
 
-                <Transition name="chip">
-                    <button v-if="selectedLang" type="button"
-                        class="filter-chip d-inline-flex align-items-center gap-2 rounded-pill ps-3 pe-2 py-1"
-                        :style="{ '--c': getLangColor(selectedLang) }" :aria-label="`Clear ${selectedLang} filter`"
-                        @click="selectedLang = null">
-                        <span class="chip-dot rounded-circle d-inline-block"></span>
-
-                        <span class="small fw-semibold">
-                            {{ selectedLang }}
-                        </span>
-
-                        <span class="chip-x rounded-circle d-inline-flex align-items-center justify-content-center">
-                            ✕
-                        </span>
-                    </button>
-                </Transition>
-            </div>
-
-            <div class="d-flex align-items-center gap-2 flex-wrap">
-                <span class="text-muted-github small text-nowrap">
-                    Language
-                </span>
-
-                <div class="btn-group flex-wrap" role="group" aria-label="Filter by language">
-                    <button type="button" class="btn btn-sm lang-btn" :class="{ active: !selectedLang }"
-                        :aria-pressed="!selectedLang" @click="selectedLang = null">
-                        All
-                    </button>
-
-                    <button v-for="lang in languages" :key="lang" type="button" class="btn btn-sm lang-btn"
-                        :class="{ active: selectedLang === lang }" :aria-pressed="selectedLang === lang"
-                        @click="toggle(lang)">
-                        {{ lang }}
-                    </button>
+                <!-- Transparent top padding bridges the gap so the box stays open while the pointer moves into it. -->
+                <div v-if="infoOpen" id="discovery-info" class="info-pop position-absolute" role="note">
+                    <p class="info-box small mb-0 rounded-3 shadow p-3">
+                        {{ note }}
+                    </p>
                 </div>
             </div>
+
+            <span v-if="selectedLang" class="text-muted-github small font-monospace"
+                :title="`Top ${REPOS_PER_CATEGORY} per category shown`">
+                {{ shownTotal }}/{{ matchTotal }}
+            </span>
         </div>
 
-        <p class="text-muted-github small mb-3" role="note">
-            Categories are ranked by number of builders. Projects within a
-            category are ranked by Show HN points, not GitHub stars. Only
-            repositories with at least {{ MIN_STARS }} stars are shown.
-        </p>
+        <div class="d-flex align-items-center gap-1 flex-wrap" role="group" aria-label="Filter by language">
+            <button type="button" class="all-pill rounded-pill small" :class="{ 'is-active': !selectedLang }"
+                :aria-pressed="!selectedLang" @click="selectedLang = null">
+                All
+            </button>
+
+            <DiscoveryLangPill v-for="lang in languages" :key="lang" outlined :lang="lang"
+                :active="selectedLang === lang" @click="toggle(lang)" />
+        </div>
     </div>
 </template>
 
@@ -126,85 +113,72 @@ const toggle = (lang) => {
     color: var(--app-text);
 }
 
-/* Language filter buttons */
-.lang-btn {
-    color: var(--app-text);
-    background-color: transparent;
-    border: 1px solid var(--card-border);
+.info-btn {
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    color: #58a6ff;
+    background-color: color-mix(in srgb, #58a6ff 14%, transparent);
+    border: 1.5px solid color-mix(in srgb, #58a6ff 60%, transparent);
+    font: italic 700 0.85rem/1 Georgia, serif;
+    cursor: pointer;
     transition:
         background-color 0.2s ease,
-        color 0.2s ease,
-        border-color 0.2s ease;
+        color 0.2s ease;
 }
 
-.lang-btn:hover {
-    background-color: color-mix(in srgb, #58a6ff 12%, transparent);
-    color: var(--app-text);
-}
-
-.lang-btn.active {
-    background-color: #58a6ff;
-    border-color: #58a6ff;
+.info-btn:hover,
+.info-btn[aria-expanded='true'] {
     color: #0d1117;
-    font-weight: 600;
+    background-color: #58a6ff;
 }
 
-.lang-btn:focus-visible {
-    box-shadow: 0 0 0 3px rgba(56, 139, 253, 0.4);
+.info-pop {
+    top: 100%;
+    left: 50%;
+    transform: translateX(-20px);
+    z-index: 20;
+    padding-top: 0.5rem;
+    width: min(320px, 80vw);
 }
 
-/* Selected language chip */
-.filter-chip {
+.info-box {
     color: var(--app-text);
-    background-color: color-mix(in srgb, var(--c) 14%, var(--card-bg));
-    border: 1px solid color-mix(in srgb, var(--c) 55%, var(--card-border));
-    transition:
-        background-color 0.2s ease,
-        border-color 0.2s ease;
+    background-color: var(--card-bg);
+    border: 1px solid var(--card-border);
+    line-height: 1.5;
 }
 
-.filter-chip:hover {
-    background-color: color-mix(in srgb, var(--c) 26%, var(--card-bg));
-}
-
-.filter-chip:focus-visible {
+.info-btn:focus-visible,
+.all-pill:focus-visible {
     outline: none;
     box-shadow: 0 0 0 3px rgba(56, 139, 253, 0.4);
 }
 
-.chip-dot {
-    width: 9px;
-    height: 9px;
-    background-color: var(--c);
-    box-shadow: 0 0 8px var(--c);
-}
-
-.chip-x {
-    width: 18px;
-    height: 18px;
-    font-size: 0.6rem;
-    background-color: color-mix(in srgb, var(--c) 25%, transparent);
-}
-
-/* Selected chip transition */
-.chip-enter-active,
-.chip-leave-active {
+/* Matches the language pills, neutral instead of tinted. */
+.all-pill {
+    color: var(--text-muted-github);
+    background: transparent;
+    border: 1px solid var(--card-border);
+    padding: 0.15rem 0.7rem;
     transition:
-        opacity 0.25s ease,
-        transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+        background-color 0.2s ease,
+        color 0.2s ease;
 }
 
-.chip-enter-from,
-.chip-leave-to {
-    opacity: 0;
-    transform: scale(0.85);
+.all-pill:hover,
+.all-pill.is-active {
+    color: var(--app-text);
+    background-color: var(--badge-bg);
+}
+
+.all-pill.is-active {
+    font-weight: 600;
 }
 
 @media (prefers-reduced-motion: reduce) {
-
-    .chip-enter-active,
-    .chip-leave-active,
-    .lang-btn {
+    .all-pill,
+    .info-btn {
         transition: none !important;
     }
 }
