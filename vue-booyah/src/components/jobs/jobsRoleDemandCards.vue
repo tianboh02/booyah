@@ -1,7 +1,5 @@
 <script setup>
-import { computed, ref } from 'vue'
-import { TOP_N } from '@/utils/hackernewsJobs'
-import { vSpotlight } from '@/utils/motion'
+import { computed } from 'vue'
 
 const props = defineProps({
     roles: { type: Array, default: () => [] },
@@ -9,9 +7,6 @@ const props = defineProps({
 })
 
 defineEmits(['select'])
-
-const showAll = ref(false)
-const visibleRoles = computed(() => (showAll.value ? props.roles : props.roles.slice(0, TOP_N)))
 
 // bars are scaled to the biggest value so the top row fills the track
 const topShare = computed(() => Math.max(...props.roles.map((r) => r.share), 1))
@@ -32,8 +27,9 @@ const topCount = computed(() => Math.max(...props.postsPerMonth.map((p) => p.cou
             <div class="col-md-6">
                 <div v-spotlight class="panel card p-3 h-100 rounded-3 shadow-sm">
                     <h3 class="h6 fw-bold section-title pb-2 mb-2 panel-head">Roles</h3>
-                    <ul class="list-unstyled mb-0">
-                        <li v-for="(r, i) in visibleRoles" :key="r.name" :style="{ '--i': i }" class="role-item">
+                    <!-- All roles; the list scrolls inside the card instead of expanding it. -->
+                    <ul class="roles-scroll list-unstyled mb-0">
+                        <li v-for="(r, i) in roles" :key="r.name" :style="{ '--i': i }" class="role-item">
                             <button type="button" class="role-row w-100 text-start" @click="$emit('select', r.name)">
                                 <span class="d-flex align-items-center gap-2 small">
                                     <span class="role-name flex-grow-1 text-truncate">{{ r.name }}</span>
@@ -50,10 +46,6 @@ const topCount = computed(() => Math.max(...props.postsPerMonth.map((p) => p.cou
                             </button>
                         </li>
                     </ul>
-                    <button v-if="roles.length > TOP_N" type="button"
-                        class="btn btn-link btn-sm align-self-start px-0 mt-2" @click="showAll = !showAll">
-                        {{ showAll ? `Show top ${TOP_N}` : `Show all ${roles.length}` }}
-                    </button>
                 </div>
             </div>
 
@@ -122,6 +114,36 @@ const topCount = computed(() => Math.max(...props.postsPerMonth.map((p) => p.cou
 
 .panel-head {
     border-bottom: 1px solid var(--card-border);
+}
+
+/* --- Scrollable roles list --------------------------------------------------- */
+/* Thin, rounded thumb that is muted at rest and turns accent blue when the list is hovered. */
+.roles-scroll {
+    max-height: 18rem; /* about five and a half rows, so the cut-off row hints at more */
+    overflow-y: auto;
+    padding-right: 0.25rem;
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--text-muted-github) 45%, transparent) transparent;
+}
+
+.roles-scroll:hover {
+    scrollbar-color: #58a6ff transparent;
+}
+
+/* Fallback for browsers without scrollbar-color */
+@supports not (scrollbar-color: auto) {
+    .roles-scroll::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .roles-scroll::-webkit-scrollbar-thumb {
+        border-radius: 999px;
+        background: color-mix(in srgb, var(--text-muted-github) 45%, transparent);
+    }
+
+    .roles-scroll:hover::-webkit-scrollbar-thumb {
+        background: #58a6ff;
+    }
 }
 
 /* --- Rows ------------------------------------------------------------------ */
