@@ -2,6 +2,8 @@
 import { ref, computed } from 'vue'
 import { getLangColor } from '@/utils/langColors'
 import { vSpotlight } from '@/utils/motion'
+import CardRing from '@/components/ring/CardRing.vue'
+import RingCaption from '@/components/ring/RingCaption.vue'
 
 const props = defineProps({
     repoList: {
@@ -88,6 +90,8 @@ function timeAgo(isoString) {
     const years = Math.floor(days / 365)
     return `${years} year${years > 1 ? 's' : ''} ago`
 }
+
+const pad = (n) => String(n).padStart(2, '0')
 </script>
 
 <template>
@@ -132,8 +136,8 @@ function timeAgo(isoString) {
                 <!-- Sort Button Group -->
                 <div class="d-flex align-items-center gap-2">
                     <span class="text-muted-github small text-nowrap">Sort by</span>
-                    <div class="btn-group" role="group" aria-label="Sort repositories">
-                        <button v-for="opt in sortOptions" :key="opt.value" type="button" class="btn btn-sm sort-btn"
+                    <div class="d-flex flex-wrap gap-1" role="group" aria-label="Sort repositories">
+                        <button v-for="opt in sortOptions" :key="opt.value" type="button" class="sort-btn rounded-pill small"
                             :class="{ active: sortBy === opt.value }" :aria-pressed="sortBy === opt.value"
                             @click="sortBy = opt.value">
                             {{ opt.label }}
@@ -152,69 +156,74 @@ function timeAgo(isoString) {
             </div>
         </div>
 
-        <!-- Repository Cards Stack -->
-        <TransitionGroup v-else-if="filteredAndSortedRepos.length > 0" name="repo" tag="div" appear
-            class="position-relative">
-            <div v-for="(repo, index) in filteredAndSortedRepos" :key="repo.id" v-spotlight
-                class="repo-card card mb-3 p-3 rounded-3 shadow-sm" :style="{
-                    '--lang': getLangColor(langOf(repo)),
-                    '--i': Math.min(index, 10)
-                }">
-                <div class="d-flex align-items-center gap-2 mb-2">
-                    <h5 class="card-title h6 fw-bold mb-0">
-                        <a :href="repo.html_url" target="_blank" rel="noopener noreferrer"
-                            class="repo-link stretched-link">
-                            {{ repo.name }}
-                            <span class="visually-hidden">(opens on GitHub)</span>
-                        </a>
-                    </h5>
-                    <span class="badge badge-github rounded-pill text-capitalize fw-normal px-2 py-1">
-                        {{ repo.private ? "Private" : "Public" }}
-                    </span>
-                    <svg class="repo-arrow ms-auto" width="16" height="16" viewBox="0 0 16 16" fill="none"
-                        stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"
-                        aria-hidden="true">
-                        <path d="M5 11L11 5M6 5h5v5" />
-                    </svg>
-                </div>
-
-                <p class="card-text text-muted-github small mb-3">
-                    {{ repo.description || "No description" }}
-                </p>
-
-                <!-- Metadata Row -->
-                <div class="d-flex align-items-center gap-3 text-muted-github small flex-wrap">
-                    <button type="button" class="lang-link d-flex align-items-center gap-1 rounded-2"
-                        :class="{ 'is-selected': selectedLang === langOf(repo) }"
-                        :title="selectedLang === langOf(repo) ? 'Clear filter' : 'Filter by ' + langOf(repo)"
-                        @click="toggleLang(langOf(repo))">
-                        <span class="lang-dot rounded-circle d-inline-block flex-shrink-0"></span>
-                        <span>{{ langOf(repo) }}</span>
-                    </button>
-
-                    <span class="meta-star d-inline-flex align-items-center gap-1">
-                        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
-                            <path
-                                d="M8 .25l2.3 4.66 5.15.75-3.72 3.63.88 5.13L8 12.04l-4.61 2.38.88-5.13L.55 5.66l5.15-.75z" />
+        <!-- Repository Cards Ring -->
+        <CardRing v-else-if="filteredAndSortedRepos.length > 0" :items="filteredAndSortedRepos" item-key="id"
+            item-label="name" card-width="min(440px, 86vw)" label="Repositories">
+            <template #card="{ item: repo }">
+                <div v-spotlight class="repo-card card h-100 p-3 rounded-3 shadow-sm"
+                    :style="{ '--lang': getLangColor(langOf(repo)) }">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <h5 class="card-title h6 fw-bold mb-0">
+                            <a :href="repo.html_url" target="_blank" rel="noopener noreferrer"
+                                class="repo-link stretched-link">
+                                {{ repo.name }}
+                                <span class="visually-hidden">(opens on GitHub)</span>
+                            </a>
+                        </h5>
+                        <span class="badge badge-github rounded-pill text-capitalize fw-normal px-2 py-1">
+                            {{ repo.private ? "Private" : "Public" }}
+                        </span>
+                        <svg class="repo-arrow ms-auto" width="16" height="16" viewBox="0 0 16 16" fill="none"
+                            stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"
+                            aria-hidden="true">
+                            <path d="M5 11L11 5M6 5h5v5" />
                         </svg>
-                        <span class="font-monospace">{{ repo.stargazers_count }}</span>
-                    </span>
+                    </div>
 
-                    <span class="d-inline-flex align-items-center gap-1">
-                        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor"
-                            stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
-                            <circle cx="4" cy="3" r="1.6" />
-                            <circle cx="12" cy="3" r="1.6" />
-                            <circle cx="8" cy="13" r="1.6" />
-                            <path d="M4 4.6v1.2c0 1 .8 1.7 1.7 1.7h4.6c.9 0 1.7-.7 1.7-1.7V4.6M8 7.5v4" />
-                        </svg>
-                        <span class="font-monospace">{{ repo.forks_count }}</span>
-                    </span>
+                    <p class="card-text text-muted-github small mb-3">
+                        {{ repo.description || "No description" }}
+                    </p>
 
-                    <span>Updated {{ timeAgo(repo.updated_at) }}</span>
+                    <!-- Metadata Row -->
+                    <div class="d-flex align-items-center gap-3 text-muted-github small flex-wrap">
+                        <button type="button" class="lang-link d-flex align-items-center gap-1 rounded-2"
+                            :class="{ 'is-selected': selectedLang === langOf(repo) }"
+                            :title="selectedLang === langOf(repo) ? 'Clear filter' : 'Filter by ' + langOf(repo)"
+                            @click="toggleLang(langOf(repo))">
+                            <span class="lang-dot rounded-circle d-inline-block flex-shrink-0"></span>
+                            <span>{{ langOf(repo) }}</span>
+                        </button>
+
+                        <span class="meta-star d-inline-flex align-items-center gap-1">
+                            <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                                <path
+                                    d="M8 .25l2.3 4.66 5.15.75-3.72 3.63.88 5.13L8 12.04l-4.61 2.38.88-5.13L.55 5.66l5.15-.75z" />
+                            </svg>
+                            <span class="font-monospace">{{ repo.stargazers_count }}</span>
+                        </span>
+
+                        <span class="d-inline-flex align-items-center gap-1">
+                            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor"
+                                stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
+                                <circle cx="4" cy="3" r="1.6" />
+                                <circle cx="12" cy="3" r="1.6" />
+                                <circle cx="8" cy="13" r="1.6" />
+                                <path d="M4 4.6v1.2c0 1 .8 1.7 1.7 1.7h4.6c.9 0 1.7-.7 1.7-1.7V4.6M8 7.5v4" />
+                            </svg>
+                            <span class="font-monospace">{{ repo.forks_count }}</span>
+                        </span>
+
+                        <span>Updated {{ timeAgo(repo.updated_at) }}</span>
+                    </div>
                 </div>
-            </div>
-        </TransitionGroup>
+            </template>
+
+            <template #caption="{ item: repo, index, total }">
+                <RingCaption :title="repo.name" :index="pad(index + 1)" :accent="getLangColor(langOf(repo))"
+                    :subtitle="`${langOf(repo)} · ★ ${repo.stargazers_count}`"
+                    :meta="`Repo ${pad(index + 1)} / ${pad(total)} — Updated ${timeAgo(repo.updated_at)}`" />
+            </template>
+        </CardRing>
 
         <!-- Empty Filter/Repository Message -->
         <div v-else class="text-center py-5 text-muted-github card p-4 rounded-3 shadow-sm">
@@ -309,22 +318,22 @@ function timeAgo(isoString) {
     box-shadow: 0 0 0 3px rgba(56, 139, 253, 0.3);
 }
 
+/* Outlined pill; active is a neutral fill (same as the Discovery language pills). */
 .sort-btn {
-    color: var(--app-text);
+    color: var(--text-muted-github);
     background-color: transparent;
     border: 1px solid var(--card-border);
-    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+    padding: 0.15rem 0.7rem;
+    transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-.sort-btn:hover {
-    background-color: color-mix(in srgb, #58a6ff 12%, transparent);
+.sort-btn:hover,
+.sort-btn.active {
     color: var(--app-text);
+    background-color: var(--badge-bg);
 }
 
 .sort-btn.active {
-    background-color: #58a6ff;
-    border-color: #58a6ff;
-    color: #0d1117;
     font-weight: 600;
 }
 
@@ -455,45 +464,8 @@ function timeAgo(isoString) {
     transform: rotate(72deg) scale(1.2);
 }
 
-/* --- List transitions ----------------------------------------------------- */
-.repo-enter-active {
-    animation: repo-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
-    animation-delay: calc(var(--i) * 50ms);
-}
-
-.repo-leave-active {
-    position: absolute;
-    left: 0;
-    right: 0;
-    transition: opacity 0.2s ease, transform 0.2s ease;
-}
-
-.repo-leave-to {
-    opacity: 0;
-    transform: scale(0.97);
-}
-
-.repo-move {
-    transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-@keyframes repo-in {
-    from {
-        opacity: 0;
-        transform: translateY(18px) scale(0.98);
-    }
-
-    to {
-        opacity: 1;
-        transform: none;
-    }
-}
-
 @media (prefers-reduced-motion: reduce) {
 
-    .repo-enter-active,
-    .repo-leave-active,
-    .repo-move,
     .chip-enter-active,
     .chip-leave-active {
         animation: none !important;
