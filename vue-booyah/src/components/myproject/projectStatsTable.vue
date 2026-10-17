@@ -12,7 +12,6 @@ const props = defineProps({
         type: Boolean,
         default: false
     },
-    // Shared with the repository list via v-model:selected-lang
     selectedLang: {
         type: String,
         default: null
@@ -37,7 +36,6 @@ function scrollToList() {
 
 const hasData = computed(() => props.repoList && props.repoList.length > 0)
 
-// Repos the top stat cards describe: everything, or just the focused language.
 const scopedRepos = computed(() =>
     props.selectedLang ? props.repoList.filter(r => langOf(r) === props.selectedLang) : props.repoList
 )
@@ -63,7 +61,6 @@ const stats = computed(() => {
     const publics = total - privates
     const stars = scoped.reduce((acc, r) => acc + (r.stargazers_count || 0), 0)
 
-    // Language counts always use the full list so the charts never shrink.
     const langCounts = {}
     all.forEach(r => {
         const lang = langOf(r)
@@ -72,7 +69,6 @@ const stats = computed(() => {
 
     const sortedLangs = Object.entries(langCounts).sort((a, b) => b[1] - a[1])
 
-    // Headline language: the focused one, otherwise the top real language.
     let headline
     if (props.selectedLang && langCounts[props.selectedLang] !== undefined) {
         headline = [props.selectedLang, langCounts[props.selectedLang]]
@@ -97,12 +93,10 @@ const stats = computed(() => {
 const topLangColor = computed(() => getLangColor(stats.value.mostUsedLang))
 const cardAccent = computed(() => (props.selectedLang ? topLangColor.value : '#58a6ff'))
 
-// Animated numbers (they re-count whenever the focus changes)
 const repoCount = useCountUp(() => stats.value.totalRepos)
 const starCount = useCountUp(() => stats.value.totalStars)
 const topPct = useCountUp(() => stats.value.mostUsedPct)
 
-// Flips to true a couple of frames after data arrives so CSS transitions have a start state.
 const ready = ref(false)
 watch(
     hasData,
@@ -115,7 +109,6 @@ watch(
     { immediate: true }
 )
 
-// Language share breakdown for legend
 const langShareList = computed(() => {
     if (!hasData.value) return []
 
@@ -127,7 +120,6 @@ const langShareList = computed(() => {
     }))
 })
 
-// Donut: one SVG circle per language (pathLength = 100, so lengths are percentages)
 const donutSegments = computed(() => {
     if (!hasData.value) return []
     const total = props.repoList.length
@@ -139,7 +131,7 @@ const donutSegments = computed(() => {
             idx,
             color: getLangColor(name),
             pct: Math.round(len),
-            dash: Math.max(len - 0.9, 0.1), // small visual gap between segments
+            dash: Math.max(len - 0.9, 0.1),
             offset: acc + 0.45
         }
         acc += len
@@ -147,7 +139,6 @@ const donutSegments = computed(() => {
     })
 })
 
-// Hovering previews a language in the donut centre without changing the filter.
 const hoveredLang = ref(null)
 const activeLang = computed(() => hoveredLang.value || props.selectedLang)
 const centerPct = computed(() => {
@@ -159,7 +150,6 @@ const centerPct = computed(() => {
 const centerLabel = computed(() => hoveredLang.value || stats.value.mostUsedLang)
 const glowColor = computed(() => (activeLang.value ? getLangColor(activeLang.value) : topLangColor.value))
 
-// Repos by primary language bar chart
 const reposByLangList = computed(() => {
     const sorted = stats.value.sortedLangs
     if (sorted.length === 0) return []
@@ -178,9 +168,8 @@ const focusedCount = computed(() => scopedRepos.value.length)
 </script>
 
 <template>
-    <div class="graph-body container my-4">
-
-        <!-- Loading skeleton (Bootstrap placeholders) -->
+    <div class="container my-4">
+        <!-- Loading Skeleton -->
         <div v-if="loading" class="row row-cols-1 row-cols-md-3 g-3 mb-4">
             <div v-for="n in 3" :key="n" class="col">
                 <div class="card p-3 h-100 rounded-3 shadow-sm placeholder-glow">
@@ -193,8 +182,6 @@ const focusedCount = computed(() => scopedRepos.value.length)
 
         <!-- Top Stats Cards Grid -->
         <div v-else-if="hasData" class="row row-cols-1 row-cols-md-3 g-3 mb-4">
-
-            <!-- Number of Repositories Card -->
             <div class="col">
                 <div v-tilt="5" v-spotlight class="card stat-card p-3 h-100 rounded-3 shadow-sm"
                     :class="{ 'is-in': ready, 'is-focused': selectedLang }"
@@ -203,28 +190,28 @@ const focusedCount = computed(() => scopedRepos.value.length)
                     <span class="stat-label fw-semibold small text-truncate">
                         {{ selectedLang ? selectedLang + ' repositories' : 'Repositories' }}
                     </span>
-                    <span class="text-muted-github small">{{ stats.publicRepos }} public · {{ stats.privateRepos }}
-                        private</span>
+                    <span class="text-muted-github small">
+                        {{ stats.publicRepos }} public · {{ stats.privateRepos }} private
+                    </span>
                 </div>
             </div>
 
-            <!-- Most-used / Selected Language Card -->
             <div class="col">
                 <div v-tilt="5" v-spotlight class="card stat-card p-3 h-100 rounded-3 shadow-sm"
                     :class="{ 'is-in': ready, 'is-focused': selectedLang }"
                     :style="{ '--i': 1, '--accent': topLangColor }">
                     <span class="h3 fw-bold stat-value mb-1 font-monospace text-truncate d-block">
-                        <span class="lang-dot me-2"></span>{{ stats.mostUsedLang }}
+                        <span class="lang-dot rounded-circle me-2 d-inline-block"></span>{{ stats.mostUsedLang }}
                     </span>
                     <span class="stat-label fw-semibold small">
                         {{ selectedLang ? 'Selected language' : 'Most-used language' }}
                     </span>
-                    <span class="text-muted-github small"><span class="font-monospace">{{ topPct }}%</span>
-                        of your code</span>
+                    <span class="text-muted-github small">
+                        <span class="font-monospace">{{ topPct }}%</span> of your code
+                    </span>
                 </div>
             </div>
 
-            <!-- Total Stars Card -->
             <div class="col">
                 <div v-tilt="5" v-spotlight class="card stat-card p-3 h-100 rounded-3 shadow-sm"
                     :class="{ 'is-in': ready, 'is-focused': selectedLang }"
@@ -239,17 +226,14 @@ const focusedCount = computed(() => scopedRepos.value.length)
                     </span>
                 </div>
             </div>
-
         </div>
 
-        <!-- Empty State Fallback Card -->
         <div v-else class="card p-4 mb-4 rounded-3 shadow-sm text-muted-github text-center py-3">
             No repository data detected.
         </div>
 
         <!-- Bottom Stat Row -->
         <div class="row g-4">
-
             <!-- Language Share Chart Card -->
             <div class="col-lg-6">
                 <div v-spotlight class="card panel p-4 h-100 rounded-3 shadow-sm">
@@ -261,27 +245,27 @@ const focusedCount = computed(() => scopedRepos.value.length)
                             </p>
                         </div>
 
-                        <!-- Focus chip: shows what is selected and lets you jump to / clear it -->
                         <Transition name="chip">
                             <div v-if="selectedLang"
                                 class="focus-chip d-flex align-items-center gap-2 rounded-pill ps-3 pe-1 py-1"
                                 :style="{ '--c': topLangColor }">
-                                <span class="chip-dot rounded-circle"></span>
+                                <span class="chip-dot rounded-circle d-inline-block"></span>
                                 <span class="small fw-semibold stat-label">{{ selectedLang }}</span>
                                 <button type="button" class="chip-btn btn btn-sm rounded-pill px-2"
                                     @click="scrollToList">
                                     Show {{ focusedCount }} ↓
                                 </button>
                                 <button type="button" class="chip-close btn btn-sm rounded-circle p-0"
-                                    aria-label="Clear language filter" @click="clearLang">✕</button>
+                                    aria-label="Clear language filter" @click="clearLang">
+                                    ✕
+                                </button>
                             </div>
                         </Transition>
                     </div>
 
                     <div v-if="langShareList.length > 0"
                         class="d-flex align-items-center gap-4 flex-wrap flex-sm-nowrap my-auto">
-
-                        <!-- Donut Chart (click a segment to focus a language) -->
+                        <!-- Donut Chart -->
                         <div class="donut position-relative d-flex align-items-center justify-content-center flex-shrink-0 mx-auto mx-sm-0"
                             :class="{ 'is-in': ready, 'has-focus': activeLang }"
                             :style="{ width: '150px', height: '150px', '--glow': glowColor }">
@@ -307,7 +291,6 @@ const focusedCount = computed(() => scopedRepos.value.length)
                                 </g>
                             </svg>
 
-                            <!-- Theme-Aware Center -->
                             <div class="donut-hole rounded-circle d-flex flex-column align-items-center justify-content-center text-center position-absolute pe-none"
                                 style="width: 88px; height: 88px;">
                                 <span class="h4 fw-bold stat-value mb-0 font-monospace">{{ centerPct }}%</span>
@@ -334,11 +317,10 @@ const focusedCount = computed(() => scopedRepos.value.length)
                                         <span class="stat-label small text-truncate">{{ item.name }}</span>
                                     </span>
                                     <span class="text-muted-github small ms-1 font-monospace">{{ item.percentage
-                                        }}%</span>
+                                    }}%</span>
                                 </button>
                             </div>
                         </div>
-
                     </div>
 
                     <div v-else class="text-muted-github text-center my-auto py-4">
@@ -348,7 +330,6 @@ const focusedCount = computed(() => scopedRepos.value.length)
                     <p v-if="langShareList.length > 0 && !selectedLang" class="text-muted-github small mt-4 mb-0">
                         Click a language to filter your repositories.
                     </p>
-
                 </div>
             </div>
 
@@ -365,10 +346,10 @@ const focusedCount = computed(() => scopedRepos.value.length)
                             }" :style="{ '--c': lang.color }" :aria-pressed="selectedLang === lang.name"
                             @click="toggleLang(lang.name)" @mouseenter="hoveredLang = lang.name"
                             @mouseleave="hoveredLang = null">
-                            <span class="stat-label small flex-shrink-0 text-truncate" style="width: 100px;">{{
-                                lang.name }}</span>
+                            <span class="stat-label small flex-shrink-0 text-truncate" style="width: 100px;">
+                                {{ lang.name }}
+                            </span>
 
-                            <!-- Progress Bar Track (Theme-aware) -->
                             <div class="progress flex-grow-1 rounded-pill progress-track" style="height: 12px;">
                                 <div class="progress-bar bar-fill rounded-pill" role="progressbar" :style="{
                                     width: ready ? lang.barWidth + '%' : '0%',
@@ -387,12 +368,9 @@ const focusedCount = computed(() => scopedRepos.value.length)
                     <div v-else class="text-muted-github text-center my-auto py-4">
                         No repository language data detected.
                     </div>
-
                 </div>
             </div>
-
         </div>
-
     </div>
 </template>
 
@@ -404,7 +382,7 @@ const focusedCount = computed(() => scopedRepos.value.length)
     transition: color 0.2s ease;
 }
 
-/* --- Cursor spotlight (shared by stat cards and panels) ------------------ */
+/* --- Spotlight ------------------------------------------------------------- */
 .stat-card,
 .panel {
     position: relative;
@@ -455,7 +433,6 @@ const focusedCount = computed(() => scopedRepos.value.length)
     box-shadow: 0 10px 30px -12px color-mix(in srgb, var(--accent) 45%, transparent) !important;
 }
 
-/* Accent line that draws itself along the top edge */
 .stat-card::after {
     content: '';
     position: absolute;
@@ -475,10 +452,8 @@ const focusedCount = computed(() => scopedRepos.value.length)
 }
 
 .lang-dot {
-    display: inline-block;
     width: 12px;
     height: 12px;
-    border-radius: 50%;
     background-color: var(--accent);
     box-shadow: 0 0 12px var(--accent);
     transition: background-color 0.4s ease, box-shadow 0.4s ease;
@@ -534,7 +509,7 @@ const focusedCount = computed(() => scopedRepos.value.length)
     transform: scale(0.85) translateY(-4px);
 }
 
-/* --- Donut ----------------------------------------------------------------- */
+/* --- Donut Chart ----------------------------------------------------------- */
 .donut-svg {
     overflow: visible;
     filter: drop-shadow(0 0 10px color-mix(in srgb, var(--glow) 35%, transparent));
@@ -580,7 +555,6 @@ const focusedCount = computed(() => scopedRepos.value.length)
     translate: 0 0;
 }
 
-/* Shared look for every clickable language row (legend + bars) */
 .legend-btn,
 .bar-row {
     background: transparent;
@@ -628,7 +602,7 @@ const focusedCount = computed(() => scopedRepos.value.length)
     box-shadow: 0 0 10px var(--c);
 }
 
-/* --- Bars ------------------------------------------------------------------ */
+/* --- Progress Bars --------------------------------------------------------- */
 .progress-track {
     background-color: var(--card-border) !important;
     transition: background-color 0.2s ease;
@@ -644,7 +618,6 @@ const focusedCount = computed(() => scopedRepos.value.length)
     box-shadow: 0 0 12px var(--c);
 }
 
-/* Soft sheen that sweeps across once the bar has grown */
 .bar-fill::after {
     content: '';
     position: absolute;

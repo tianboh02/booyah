@@ -9,22 +9,27 @@ import ProjectStatsTable from '@/components/myproject/projectStatsTable.vue'
 const repoList = ref([])
 const loading = ref(true)
 
-// The language currently in focus. Charts and the repo list both read and write it.
+// Shared language selection for the statistics and repository list.
 const selectedLang = ref(null)
 
 async function getRepos() {
     const token = localStorage.getItem('auth_token')
+
     const headers = {
-        'Authorization': 'Bearer ' + token,
+        Authorization: `Bearer ${token}`,
         'X-GitHub-Api-Version': '2022-11-28',
-        'Accept': 'application/vnd.github+json'
+        Accept: 'application/vnd.github+json',
     }
 
     try {
-        const githubResponse = await axios.get("https://api.github.com/user/repos", { headers })
-        repoList.value = githubResponse.data
+        const { data } = await axios.get(
+            'https://api.github.com/user/repos',
+            { headers },
+        )
+
+        repoList.value = data
     } catch (error) {
-        console.error(error)
+        console.error('Failed to fetch repositories:', error)
     } finally {
         loading.value = false
     }
@@ -36,9 +41,11 @@ onMounted(() => {
 </script>
 
 <template>
-    <main>
+    <main class="container py-4">
         <ProjectPageHeader :repo-list="repoList" :loading="loading" />
+
         <ProjectStatsTable v-model:selected-lang="selectedLang" :repo-list="repoList" :loading="loading" />
+
         <ProjectList v-model:selected-lang="selectedLang" :repo-list="repoList" :loading="loading" />
     </main>
 </template>

@@ -14,38 +14,57 @@ const props = defineProps({
 
 const emit = defineEmits(['open', 'save', 'update:selectedLang'])
 
-const isSaved = (p) => !!props.savedMap[p.ghUrl]
-const isPending = (p) => props.pendingLinks.has(p.ghUrl)
+const isSaved = (project) => !!props.savedMap[project.ghUrl]
+const isPending = (project) => props.pendingLinks.has(project.ghUrl)
 
-const shortStars = (n) => (n >= 1000 ? `${Math.round(n / 100) / 10}k` : String(n))
+const shortStars = (count) =>
+    count >= 1000 ? `${Math.round(count / 100) / 10}k` : String(count)
 
-// the category holds every project that passed the checks; filter first, then keep the top few
-const rows = computed(() => visibleProjects(props.category, props.selectedLang))
+// Filter projects by language, then display the top projects for the category.
+const rows = computed(() =>
+    visibleProjects(props.category, props.selectedLang)
+)
 
 const builders = useCountUp(() => props.category.builders)
 
-const toggleLang = (lang) => emit('update:selectedLang', props.selectedLang === lang ? null : lang)
+const toggleLang = (lang) => {
+    emit(
+        'update:selectedLang',
+        props.selectedLang === lang ? null : lang
+    )
+}
 </script>
 
 <template>
     <section v-spotlight class="cat-card card h-100 p-3 rounded-3 shadow-sm" :aria-label="category.name">
         <header class="d-flex align-items-center justify-content-between gap-2 pb-2 mb-2 card-head">
             <div class="d-flex align-items-baseline gap-2 min-w-0">
-                <span class="text-muted-github small font-monospace">{{ String(category.rank).padStart(2, '0') }}</span>
-                <h2 class="h6 fw-bold section-title mb-0">{{ category.name }}</h2>
+                <span class="text-muted-github small font-monospace">
+                    {{ String(category.rank).padStart(2, '0') }}
+                </span>
+
+                <h2 class="h6 fw-bold section-title mb-0">
+                    {{ category.name }}
+                </h2>
             </div>
+
             <span class="badge badge-github rounded-pill fw-normal px-2 py-1 text-nowrap">
-                <span class="font-monospace">{{ builders }}</span> builders this month
+                <span class="font-monospace">{{ builders }}</span>
+                builders this month
             </span>
         </header>
 
         <ul v-if="rows.length" class="rows list-unstyled mb-0">
-            <li v-for="p in rows" :key="p.id" class="project-row" :style="{ '--lang': getLangColor(langOf(p)) }">
+            <li v-for="project in rows" :key="project.id" class="project-row"
+                :style="{ '--lang': getLangColor(langOf(project)) }">
                 <span class="d-flex align-items-center gap-2 min-w-0">
                     <button type="button" class="project-link btn btn-link p-0 text-start font-monospace text-truncate"
-                        :aria-label="`Open details for ${p.id}`" @click="$emit('open', p)">
-                        <span class="text-muted-github">{{ p.owner }}/</span>{{ p.name }}
+                        :aria-label="`Open details for ${project.id}`" @click="emit('open', project)">
+                        <span class="text-muted-github">
+                            {{ project.owner }}/
+                        </span>{{ project.name }}
                     </button>
+
                     <svg class="row-arrow flex-shrink-0" width="14" height="14" viewBox="0 0 16 16" fill="none"
                         stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"
                         aria-hidden="true">
@@ -53,33 +72,43 @@ const toggleLang = (lang) => emit('update:selectedLang', props.selectedLang === 
                     </svg>
                 </span>
 
-                <!-- Clicking the language filters every category by it -->
+                <!-- Clicking a language filters every category by that language. -->
                 <span class="min-w-0">
                     <button type="button" class="lang-link d-inline-flex align-items-center gap-1 rounded-2 small"
-                        :class="{ 'is-selected': selectedLang === langOf(p) }"
-                        :aria-pressed="selectedLang === langOf(p)"
-                        :title="selectedLang === langOf(p) ? 'Clear filter' : 'Filter by ' + langOf(p)"
-                        @click="toggleLang(langOf(p))">
+                        :class="{ 'is-selected': selectedLang === langOf(project) }"
+                        :aria-pressed="selectedLang === langOf(project)" :title="selectedLang === langOf(project)
+                                ? 'Clear filter'
+                                : 'Filter by ' + langOf(project)
+                            " @click="toggleLang(langOf(project))">
                         <span class="lang-dot rounded-circle d-inline-block flex-shrink-0"></span>
-                        <span class="text-truncate">{{ langOf(p) }}</span>
+                        <span class="text-truncate">
+                            {{ langOf(project) }}
+                        </span>
                     </button>
                 </span>
 
-                <span class="metric text-muted-github small font-monospace" title="Show HN points">▲ {{ p.hnPoints
-                }}</span>
+                <span class="metric text-muted-github small font-monospace" title="Show HN points">
+                    ▲ {{ project.hnPoints }}
+                </span>
 
                 <span class="metric meta-star text-muted-github small font-monospace" title="GitHub stars">
                     <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
                         <path
                             d="M8 .25l2.3 4.66 5.15.75-3.72 3.63.88 5.13L8 12.04l-4.61 2.38.88-5.13L.55 5.66l5.15-.75z" />
                     </svg>
-                    {{ shortStars(p.stars) }}
+                    {{ shortStars(project.stars) }}
                 </span>
 
-                <button type="button" class="bookmark-btn btn btn-sm btn-link p-0 text-muted-github"
-                    :class="{ 'is-saved': isSaved(p), 'is-pending': isPending(p) }" :aria-pressed="isSaved(p)"
-                    :aria-busy="isPending(p)" :aria-label="isSaved(p) ? `Remove ${p.id} from saved` : `Save ${p.id}`"
-                    :title="isSaved(p) ? 'Saved. Click to remove' : 'Save project'" @click="$emit('save', p)">
+                <button type="button" class="bookmark-btn btn btn-sm btn-link p-0 text-muted-github" :class="{
+                    'is-saved': isSaved(project),
+                    'is-pending': isPending(project)
+                }" :aria-pressed="isSaved(project)" :aria-busy="isPending(project)" :aria-label="isSaved(project)
+                            ? `Remove ${project.id} from saved`
+                            : `Save ${project.id}`
+                        " :title="isSaved(project)
+                            ? 'Saved. Click to remove'
+                            : 'Save project'
+                        " @click="emit('save', project)">
                     <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"
                         stroke-linejoin="round" aria-hidden="true">
                         <path d="M3.5 2.5h9v11.2L8 10.6l-4.5 3.1z" />
@@ -87,9 +116,13 @@ const toggleLang = (lang) => emit('update:selectedLang', props.selectedLang === 
                 </button>
             </li>
         </ul>
+
         <p v-else class="rows empty d-flex align-items-center justify-content-center text-muted-github small mb-0">
-            {{ selectedLang ? `No ${selectedLang} projects in this category this month.` :
-                'No projects in this category passed the checks this month.' }}
+            {{
+                selectedLang
+                    ? `No ${selectedLang} projects in this category this month.`
+                    : 'No projects in this category passed the checks this month.'
+            }}
         </p>
     </section>
 </template>
@@ -99,12 +132,15 @@ const toggleLang = (lang) => emit('update:selectedLang', props.selectedLang === 
     min-width: 0;
 }
 
-/* --- Card: lift + cursor spotlight (same recipe as the My Project cards) -- */
+/* Card spotlight and hover effect */
 .cat-card {
     position: relative;
     overflow: hidden;
     isolation: isolate;
-    transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.25s ease, box-shadow 0.25s ease;
+    transition:
+        transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+        border-color 0.25s ease,
+        box-shadow 0.25s ease;
 }
 
 .cat-card::before {
@@ -125,7 +161,9 @@ const toggleLang = (lang) => emit('update:selectedLang', props.selectedLang === 
 
 .cat-card:hover {
     transform: translateY(-3px);
-    border-color: color-mix(in srgb, #58a6ff 50%, var(--card-border)) !important;
+    border-color: color-mix(in srgb,
+            #58a6ff 50%,
+            var(--card-border)) !important;
     box-shadow: 0 14px 30px -16px color-mix(in srgb, #58a6ff 55%, transparent) !important;
 }
 
@@ -142,8 +180,7 @@ const toggleLang = (lang) => emit('update:selectedLang', props.selectedLang === 
     color: var(--app-text);
 }
 
-/* --- Rows ------------------------------------------------------------------ */
-/* Fixed columns so every row lines up: name | language | HN points | stars | save */
+/* Custom grid keeps project metadata aligned across all rows. */
 .project-row {
     position: relative;
     display: grid;
@@ -156,7 +193,7 @@ const toggleLang = (lang) => emit('update:selectedLang', props.selectedLang === 
     transition: background-color 0.2s ease;
 }
 
-/* Every card is as tall as five rows, filtered or not, so the grid never jumps */
+/* Keep card height stable when filtering projects. */
 .rows {
     min-height: calc(5 * 44px);
 }
@@ -165,7 +202,7 @@ const toggleLang = (lang) => emit('update:selectedLang', props.selectedLang === 
     background-color: var(--badge-bg);
 }
 
-/* Language-coloured edge that grows in on hover */
+/* Language-colored edge appears on hover. */
 .project-row::after {
     content: '';
     position: absolute;
@@ -200,7 +237,9 @@ const toggleLang = (lang) => emit('update:selectedLang', props.selectedLang === 
     color: var(--lang);
     opacity: 0;
     transform: translateX(-8px);
-    transition: opacity 0.25s ease, transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+    transition:
+        opacity 0.25s ease,
+        transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .project-row:hover .row-arrow {
@@ -216,7 +255,10 @@ const toggleLang = (lang) => emit('update:selectedLang', props.selectedLang === 
     padding: 0.1rem 0.4rem;
     margin-left: -0.4rem;
     cursor: pointer;
-    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+    transition:
+        background-color 0.2s ease,
+        border-color 0.2s ease,
+        color 0.2s ease;
 }
 
 .lang-link:hover {
@@ -225,7 +267,6 @@ const toggleLang = (lang) => emit('update:selectedLang', props.selectedLang === 
     border-color: color-mix(in srgb, var(--lang) 55%, transparent);
 }
 
-/* the active filter is shown by the chip above, so the rows only bold it */
 .lang-link.is-selected {
     color: var(--app-text);
     font-weight: 600;
@@ -244,7 +285,6 @@ const toggleLang = (lang) => emit('update:selectedLang', props.selectedLang === 
     background-color: var(--lang);
 }
 
-/* HN points first (it is the sort key), then stars */
 .metric {
     display: inline-flex;
     align-items: center;
@@ -254,7 +294,9 @@ const toggleLang = (lang) => emit('update:selectedLang', props.selectedLang === 
 }
 
 .meta-star svg {
-    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.2s ease;
+    transition:
+        transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+        color 0.2s ease;
 }
 
 .project-row:hover .meta-star svg {
@@ -263,7 +305,9 @@ const toggleLang = (lang) => emit('update:selectedLang', props.selectedLang === 
 }
 
 .bookmark-btn {
-    transition: transform 0.15s ease, color 0.2s ease;
+    transition:
+        transform 0.15s ease,
+        color 0.2s ease;
 }
 
 .bookmark-btn:hover {
@@ -274,7 +318,7 @@ const toggleLang = (lang) => emit('update:selectedLang', props.selectedLang === 
     transform: scale(0.85);
 }
 
-/* Saved: the bookmark fills in and pops once */
+/* Saved bookmark fills and animates. */
 .bookmark-btn svg path {
     fill: transparent;
     transition: fill 0.25s ease;
@@ -292,7 +336,7 @@ const toggleLang = (lang) => emit('update:selectedLang', props.selectedLang === 
     fill: currentColor;
 }
 
-/* A request is in flight: keep the new look but make it clear it is not final */
+/* Indicate an in-flight save request. */
 .bookmark-btn.is-pending {
     opacity: 0.6;
     pointer-events: none;

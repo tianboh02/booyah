@@ -12,7 +12,6 @@ const props = defineProps({
         type: Boolean,
         default: false
     },
-    // Shared with the stats charts via v-model:selected-lang
     selectedLang: {
         type: String,
         default: null
@@ -21,7 +20,6 @@ const props = defineProps({
 
 const emit = defineEmits(['update:selectedLang'])
 
-// Two-way data binding states
 const searchQuery = ref('')
 const sortBy = ref('updated')
 
@@ -43,16 +41,13 @@ function clearLang() {
 
 const selectedColor = computed(() => (props.selectedLang ? getLangColor(props.selectedLang) : '#58a6ff'))
 
-// Filter and sort repositories dynamically
 const filteredAndSortedRepos = computed(() => {
     let list = [...props.repoList]
 
-    // Filter by the language chosen in the charts
     if (props.selectedLang) {
         list = list.filter(repo => langOf(repo) === props.selectedLang)
     }
 
-    // Filter by name or description
     if (searchQuery.value.trim()) {
         const query = searchQuery.value.toLowerCase()
         list = list.filter(repo => {
@@ -62,14 +57,12 @@ const filteredAndSortedRepos = computed(() => {
         })
     }
 
-    // Sort logic
     list.sort((a, b) => {
         if (sortBy.value === 'name') {
             return a.name.localeCompare(b.name)
         } else if (sortBy.value === 'stars') {
             return (b.stargazers_count || 0) - (a.stargazers_count || 0)
         } else {
-            // Default: Last updated
             return new Date(b.updated_at || 0) - new Date(a.updated_at || 0)
         }
     })
@@ -98,8 +91,7 @@ function timeAgo(isoString) {
 </script>
 
 <template>
-    <div id="repo-list" class="repo-list-body container my-4">
-
+    <div id="repo-list" class="container my-4">
         <!-- Controls Header Row -->
         <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
             <div class="d-flex align-items-center gap-2 flex-wrap">
@@ -112,9 +104,9 @@ function timeAgo(isoString) {
                 <Transition name="chip">
                     <button v-if="selectedLang" type="button"
                         class="filter-chip d-inline-flex align-items-center gap-2 rounded-pill ps-3 pe-2 py-1"
-                        :style="{ '--c': selectedColor }" @click="clearLang"
-                        :aria-label="'Clear ' + selectedLang + ' filter'">
-                        <span class="chip-dot rounded-circle"></span>
+                        :style="{ '--c': selectedColor }" :aria-label="`Clear ${selectedLang} filter`"
+                        @click="clearLang">
+                        <span class="chip-dot rounded-circle d-inline-block"></span>
                         <span class="small fw-semibold">{{ selectedLang }}</span>
                         <span
                             class="chip-x rounded-circle d-inline-flex align-items-center justify-content-center">✕</span>
@@ -123,7 +115,7 @@ function timeAgo(isoString) {
             </div>
 
             <div class="d-flex align-items-center gap-3 flex-wrap">
-                <!-- Search Input (grows on focus) -->
+                <!-- Search Input -->
                 <div class="search-wrap position-relative">
                     <svg class="search-icon position-absolute top-50 start-0 translate-middle-y ms-2 pe-none" width="14"
                         height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"
@@ -137,10 +129,10 @@ function timeAgo(isoString) {
                         aria-label="Search repositories" />
                 </div>
 
-                <!-- Sort: Bootstrap button group -->
+                <!-- Sort Button Group -->
                 <div class="d-flex align-items-center gap-2">
                     <span class="text-muted-github small text-nowrap">Sort by</span>
-                    <div class="btn-group sort-group" role="group" aria-label="Sort repositories">
+                    <div class="btn-group" role="group" aria-label="Sort repositories">
                         <button v-for="opt in sortOptions" :key="opt.value" type="button" class="btn btn-sm sort-btn"
                             :class="{ active: sortBy === opt.value }" :aria-pressed="sortBy === opt.value"
                             @click="sortBy = opt.value">
@@ -151,7 +143,7 @@ function timeAgo(isoString) {
             </div>
         </div>
 
-        <!-- Loading skeleton (Bootstrap placeholders) -->
+        <!-- Loading skeleton -->
         <div v-if="loading">
             <div v-for="n in 4" :key="n" class="card mb-3 p-3 rounded-3 shadow-sm placeholder-glow">
                 <span class="placeholder col-3 mb-2"></span>
@@ -160,20 +152,21 @@ function timeAgo(isoString) {
             </div>
         </div>
 
-        <!-- Repository List Cards -->
+        <!-- Repository Cards Stack -->
         <TransitionGroup v-else-if="filteredAndSortedRepos.length > 0" name="repo" tag="div" appear
-            class="repo-stack position-relative">
+            class="position-relative">
             <div v-for="(repo, index) in filteredAndSortedRepos" :key="repo.id" v-spotlight
                 class="repo-card card mb-3 p-3 rounded-3 shadow-sm" :style="{
                     '--lang': getLangColor(langOf(repo)),
                     '--i': Math.min(index, 10)
                 }">
-
                 <div class="d-flex align-items-center gap-2 mb-2">
                     <h5 class="card-title h6 fw-bold mb-0">
                         <a :href="repo.html_url" target="_blank" rel="noopener noreferrer"
-                            class="repo-link stretched-link">{{ repo.name }}<span class="visually-hidden">
-                                (opens on GitHub)</span></a>
+                            class="repo-link stretched-link">
+                            {{ repo.name }}
+                            <span class="visually-hidden">(opens on GitHub)</span>
+                        </a>
                     </h5>
                     <span class="badge badge-github rounded-pill text-capitalize fw-normal px-2 py-1">
                         {{ repo.private ? "Private" : "Public" }}
@@ -189,9 +182,8 @@ function timeAgo(isoString) {
                     {{ repo.description || "No description" }}
                 </p>
 
-                <!-- Bottom Metadata Row -->
+                <!-- Metadata Row -->
                 <div class="d-flex align-items-center gap-3 text-muted-github small flex-wrap">
-                    <!-- Clicking the language filters the whole page by it -->
                     <button type="button" class="lang-link d-flex align-items-center gap-1 rounded-2"
                         :class="{ 'is-selected': selectedLang === langOf(repo) }"
                         :title="selectedLang === langOf(repo) ? 'Clear filter' : 'Filter by ' + langOf(repo)"
@@ -200,7 +192,6 @@ function timeAgo(isoString) {
                         <span>{{ langOf(repo) }}</span>
                     </button>
 
-                    <!-- Monospace restricted to numbers only -->
                     <span class="meta-star d-inline-flex align-items-center gap-1">
                         <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
                             <path
@@ -208,6 +199,7 @@ function timeAgo(isoString) {
                         </svg>
                         <span class="font-monospace">{{ repo.stargazers_count }}</span>
                     </span>
+
                     <span class="d-inline-flex align-items-center gap-1">
                         <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor"
                             stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
@@ -219,7 +211,6 @@ function timeAgo(isoString) {
                         <span class="font-monospace">{{ repo.forks_count }}</span>
                     </span>
 
-                    <!-- Standard prose font for date -->
                     <span>Updated {{ timeAgo(repo.updated_at) }}</span>
                 </div>
             </div>
@@ -243,7 +234,6 @@ function timeAgo(isoString) {
                 <button type="button" class="btn btn-sm sort-btn" @click="clearLang">Show all languages</button>
             </div>
         </div>
-
     </div>
 </template>
 
@@ -347,11 +337,9 @@ function timeAgo(isoString) {
     position: relative;
     overflow: hidden;
     isolation: isolate;
-    transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.25s ease,
-        box-shadow 0.25s ease;
+    transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.25s ease, box-shadow 0.25s ease;
 }
 
-/* Spotlight that follows the cursor, tinted by the repo's language color */
 .repo-card::before {
     content: '';
     position: absolute;
@@ -365,7 +353,6 @@ function timeAgo(isoString) {
             transparent 70%);
 }
 
-/* Colored edge that grows in on hover */
 .repo-card::after {
     content: '';
     position: absolute;
@@ -393,7 +380,6 @@ function timeAgo(isoString) {
     transform: scaleY(1);
 }
 
-/* Repo name is the card's link (Bootstrap stretched-link covers the whole card) */
 .repo-link {
     color: var(--app-text);
     text-decoration: none;
@@ -424,7 +410,6 @@ function timeAgo(isoString) {
     box-shadow: 0 0 8px color-mix(in srgb, var(--lang) 70%, transparent);
 }
 
-/* Language label doubles as a filter toggle */
 .lang-link {
     color: inherit;
     background: transparent;
@@ -470,7 +455,7 @@ function timeAgo(isoString) {
     transform: rotate(72deg) scale(1.2);
 }
 
-/* --- List transitions: staggered entrance + smooth re-ordering ------------- */
+/* --- List transitions ----------------------------------------------------- */
 .repo-enter-active {
     animation: repo-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
     animation-delay: calc(var(--i) * 50ms);

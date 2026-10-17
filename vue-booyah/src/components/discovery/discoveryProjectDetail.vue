@@ -10,7 +10,6 @@ defineProps({
 
 defineEmits(['close', 'save'])
 
-// native <dialog>: the browser provides the backdrop mask, Esc-to-close and focus trap
 const dialog = ref(null)
 
 onMounted(() => {
@@ -22,13 +21,12 @@ onBeforeUnmount(() => document.body.classList.remove('overflow-hidden'))
 </script>
 
 <template>
-    <!-- clicking the dimmed backdrop lands on the <dialog> itself, which closes it -->
-    <dialog ref="dialog" class="project-dialog" aria-labelledby="project-dialog-title" @close="$emit('close')"
-        @click.self="dialog.close()">
-        <div class="card p-4 rounded-3 shadow">
+    <dialog ref="dialog" class="project-dialog border-0 bg-transparent p-0 text-reset"
+        aria-labelledby="project-dialog-title" @close="$emit('close')" @click.self="dialog.close()">
+        <div class="card p-4 rounded-3 shadow overflow-auto">
             <div class="d-flex justify-content-between align-items-start mb-3">
                 <div>
-                    <p class="small mb-1 category-name">{{ project.categoryName }}</p>
+                    <p class="small mb-1 text-primary">{{ project.categoryName }}</p>
                     <h2 id="project-dialog-title" class="h5 fw-bold font-monospace section-title mb-0 text-break">
                         <span class="text-muted-github">{{ project.owner }}/</span>{{ project.name }}
                     </h2>
@@ -73,23 +71,14 @@ onBeforeUnmount(() => document.body.classList.remove('overflow-hidden'))
 .project-dialog {
     width: min(640px, 92vw);
     max-width: none;
-    padding: 0;
-    border: 0;
-    background: transparent;
-    color: inherit;
 }
 
 .project-dialog .card {
     max-height: 90vh;
-    overflow-y: auto;
 }
 
 .section-title {
     color: var(--app-text);
-}
-
-.category-name {
-    color: var(--bs-primary);
 }
 
 .meta {

@@ -1,6 +1,11 @@
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue'
-import { UNDO_MS, itemCategory, itemLang, useSavedLibrary } from '@/utils/savedLibrary'
+import {
+    UNDO_MS,
+    itemCategory,
+    itemLang,
+    useSavedLibrary,
+} from '@/utils/savedLibrary'
 
 import SavedPageHeader from '@/components/saved/savedPageHeader.vue'
 import SavedStats from '@/components/saved/savedStats.vue'
@@ -8,52 +13,92 @@ import SavedToolbar from '@/components/saved/savedToolbar.vue'
 import SavedList from '@/components/saved/savedList.vue'
 import SavedUndoToast from '@/components/saved/savedUndoToast.vue'
 
-const { items, loading, error, lastRemoved, load, remove, undo, dismissUndo } = useSavedLibrary()
+const {
+    items,
+    loading,
+    error,
+    lastRemoved,
+    load,
+    remove,
+    undo,
+    dismissUndo,
+} = useSavedLibrary()
 
-// Shared by the charts, the toolbar chips, the cards and the list
+// Shared filters for the statistics, toolbar, and list.
 const selectedCategory = ref(null)
 const selectedLang = ref(null)
 const search = ref('')
 const sortBy = ref('newest')
 
-// Category + language focus. The top stat cards describe this set.
+// Filter items by category and language.
 const focusItems = computed(() =>
-    items.value.filter(i =>
-        (!selectedCategory.value || itemCategory(i) === selectedCategory.value) &&
-        (!selectedLang.value || itemLang(i) === selectedLang.value)
-    )
+    items.value.filter(item =>
+        (!selectedCategory.value ||
+            itemCategory(item) === selectedCategory.value) &&
+        (!selectedLang.value ||
+            itemLang(item) === selectedLang.value),
+    ),
 )
 
-// Focus + search + sort. This is what the list shows.
+// Apply search and sorting to the focused items.
 const visibleItems = computed(() => {
     let list = [...focusItems.value]
 
-    const q = search.value.trim().toLowerCase()
-    if (q) {
-        list = list.filter(i =>
-            [i.name, i.owner, i.description, itemCategory(i)].some(v => v?.toLowerCase().includes(q))
+    const query = search.value.trim().toLowerCase()
+
+    if (query) {
+        list = list.filter(item =>
+            [
+                item.name,
+                item.owner,
+                item.description,
+                itemCategory(item),
+            ].some(value => value?.toLowerCase().includes(query)),
         )
     }
 
     list.sort((a, b) => {
-        if (sortBy.value === 'name') return a.name.localeCompare(b.name)
-        if (sortBy.value === 'stars') return (b.stars || 0) - (a.stars || 0)
-        // newest: a Mongo _id starts with a timestamp
+        if (sortBy.value === 'name') {
+            return a.name.localeCompare(b.name)
+        }
+
+        if (sortBy.value === 'stars') {
+            return (b.stars || 0) - (a.stars || 0)
+        }
+
+        // MongoDB IDs begin with a timestamp.
         return String(b._id).localeCompare(String(a._id))
     })
 
     return list
 })
 
-// If the last project of a focused category / language is removed, drop that focus
-watch(items, (list) => {
-    if (selectedCategory.value && !list.some(i => itemCategory(i) === selectedCategory.value)) {
-        selectedCategory.value = null
-    }
-    if (selectedLang.value && !list.some(i => i.status === 'ok' && itemLang(i) === selectedLang.value)) {
-        selectedLang.value = null
-    }
-}, { deep: true })
+// Clear filters when their selected category or language no longer exists.
+watch(
+    items,
+    list => {
+        if (
+            selectedCategory.value &&
+            !list.some(
+                item => itemCategory(item) === selectedCategory.value,
+            )
+        ) {
+            selectedCategory.value = null
+        }
+
+        if (
+            selectedLang.value &&
+            !list.some(
+                item =>
+                    item.status === 'ok' &&
+                    itemLang(item) === selectedLang.value,
+            )
+        ) {
+            selectedLang.value = null
+        }
+    },
+    { deep: true },
+)
 
 function resetFilters() {
     selectedCategory.value = null
@@ -61,34 +106,51 @@ function resetFilters() {
     search.value = ''
 }
 
-const toggleCategory = (name) => (selectedCategory.value = selectedCategory.value === name ? null : name)
-const toggleLang = (name) => (selectedLang.value = selectedLang.value === name ? null : name)
+function toggleCategory(name) {
+    selectedCategory.value =
+        selectedCategory.value === name ? null : name
+}
+
+function toggleLang(name) {
+    selectedLang.value =
+        selectedLang.value === name ? null : name
+}
 
 onMounted(load)
 </script>
 
 <template>
-    <div class="container my-4">
+    <main class="container my-4">
         <SavedPageHeader :items="items" :loading="loading" />
 
-        <div v-if="error" class="alert alert-danger d-flex align-items-center justify-content-between mb-3"
+        <!-- Error message -->
+        <div v-if="error"
+            class="alert alert-danger d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-2 mb-3"
             role="alert">
             <span>{{ error }}</span>
-            <button type="button" class="btn btn-sm btn-outline-danger" @click="load">Try again</button>
+
+            <button type="button"
+                class="btn btn-sm btn-outline-danger flex-shrink-0 align-self-start align-self-sm-center" @click="load">
+                Try again
+            </button>
         </div>
 
+        <!-- Saved project statistics -->
         <SavedStats v-if="loading || items.length" v-model:selected-category="selectedCategory"
             v-model:selected-lang="selectedLang" :items="items" :scoped="focusItems" :loading="loading" />
 
+        <!-- Search and sorting toolbar -->
         <SavedToolbar v-if="!loading && items.length" v-model:search="search" v-model:sort-by="sortBy"
             v-model:selected-category="selectedCategory" v-model:selected-lang="selectedLang"
             :shown="visibleItems.length" :total="items.length" />
 
+        <!-- Saved projects list -->
         <SavedList v-if="!error || items.length" :items="visibleItems" :total="items.length" :loading="loading"
             :selected-category="selectedCategory" :selected-lang="selectedLang" @remove="remove"
             @toggle-category="toggleCategory" @toggle-lang="toggleLang" @reset="resetFilters" />
 
+        <!-- Undo removal notification -->
         <SavedUndoToast :removed="lastRemoved ? lastRemoved.item : null" :duration="UNDO_MS" @undo="undo"
             @dismiss="dismissUndo" />
-    </div>
+    </main>
 </template>

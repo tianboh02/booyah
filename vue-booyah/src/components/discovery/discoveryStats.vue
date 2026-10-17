@@ -9,7 +9,6 @@ const props = defineProps({
     selectedLang: { type: String, default: null }
 })
 
-// Count what the cards actually show: the top few per category, after the language filter.
 const shown = (lang) => props.categories.flatMap((c) => visibleProjects(c, lang))
 const allShown = computed(() => shown(null))
 const focused = computed(() => shown(props.selectedLang))
@@ -32,7 +31,6 @@ const langPct = useCountUp(() => stats.value.langPct)
 
 const langColor = computed(() => getLangColor(stats.value.lang))
 
-// flips on the next frame so the cards animate in from their resting state
 const ready = ref(false)
 onMounted(() => requestAnimationFrame(() => (ready.value = true)))
 </script>
@@ -54,14 +52,15 @@ onMounted(() => requestAnimationFrame(() => (ready.value = true)))
             <div v-tilt="5" v-spotlight class="card stat-card p-3 h-100 rounded-3 shadow-sm"
                 :class="{ 'is-in': ready, 'is-focused': selectedLang }" :style="{ '--i': 1, '--accent': langColor }">
                 <span class="h3 fw-bold stat-value mb-1 font-monospace d-flex align-items-center gap-2 min-w-0">
-                    <span class="lang-dot flex-shrink-0"></span>
+                    <span class="lang-dot d-inline-block rounded-circle flex-shrink-0"></span>
                     <span class="text-truncate">{{ stats.lang }}</span>
                 </span>
                 <span class="stat-label fw-semibold small">
                     {{ selectedLang ? 'Selected language' : 'Most-used language' }}
                 </span>
-                <span class="text-muted-github small"><span class="font-monospace">{{ langPct }}%</span>
-                    of the projects shown</span>
+                <span class="text-muted-github small">
+                    <span class="font-monospace">{{ langPct }}%</span> of the projects shown
+                </span>
             </div>
         </div>
 
@@ -86,7 +85,6 @@ onMounted(() => requestAnimationFrame(() => (ready.value = true)))
     transition: color 0.2s ease;
 }
 
-/* --- Same look as the My Project stat cards -------------------------------- */
 .stat-card {
     position: relative;
     overflow: hidden;
@@ -130,7 +128,7 @@ onMounted(() => requestAnimationFrame(() => (ready.value = true)))
     box-shadow: 0 10px 30px -12px color-mix(in srgb, var(--accent) 45%, transparent) !important;
 }
 
-/* Accent line that draws itself along the top edge */
+/* Top accent line */
 .stat-card::after {
     content: '';
     position: absolute;
@@ -138,7 +136,6 @@ onMounted(() => requestAnimationFrame(() => (ready.value = true)))
     left: 0;
     right: 0;
     height: 2px;
-    /* fades in from the left, peaks in the middle, fades out to the right */
     background: linear-gradient(90deg, transparent, var(--accent) 50%, transparent);
     transform: scaleX(0);
     transform-origin: left;
@@ -151,12 +148,9 @@ onMounted(() => requestAnimationFrame(() => (ready.value = true)))
 }
 
 .lang-dot {
-    display: inline-block;
     width: 12px;
     height: 12px;
-    border-radius: 50%;
     background-color: var(--accent);
-    /* two layers: a tight core and a wide soft halo, so the glow fades out smoothly */
     box-shadow: 0 0 6px color-mix(in srgb, var(--accent) 70%, transparent),
         0 0 18px 4px color-mix(in srgb, var(--accent) 30%, transparent);
     transition: background-color 0.4s ease, box-shadow 0.4s ease;
