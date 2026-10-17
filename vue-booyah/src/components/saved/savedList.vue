@@ -3,6 +3,7 @@ import SavedCard from '@/components/saved/savedCard.vue'
 import CardRing from '@/components/ring/CardRing.vue'
 import RingCaption from '@/components/ring/RingCaption.vue'
 import { categoryColor, itemCategory } from '@/utils/savedLibrary'
+import { useViewMode } from '@/composables/useViewMode'
 
 defineProps({
     // already filtered and sorted
@@ -15,6 +16,9 @@ defineProps({
 })
 
 defineEmits(['remove', 'toggle-category', 'toggle-lang', 'reset'])
+
+// Shared with the toolbar's toggle (same key), so the view lives in neither parent nor URL.
+const view = useViewMode('saved')
 
 const pad = (n) => String(n).padStart(2, '0')
 </script>
@@ -31,21 +35,30 @@ const pad = (n) => String(n).padStart(2, '0')
             </div>
         </div>
 
-        <!-- Cards Ring -->
-        <CardRing v-else-if="items.length" class="saved-ring" :items="items" item-key="_id" item-label="name"
-            card-width="min(440px, 86vw)" label="Saved projects">
-            <template #card="{ item }">
-                <SavedCard :item="item" :selected-category="selectedCategory" :selected-lang="selectedLang"
-                    @remove="$emit('remove', $event)" @toggle-category="$emit('toggle-category', $event)"
-                    @toggle-lang="$emit('toggle-lang', $event)" />
-            </template>
+        <!-- Cards: carousel or the original stack, picked by the toolbar toggle -->
+        <Transition v-else-if="items.length" name="view-swap" mode="out-in">
+            <CardRing v-if="view === 'carousel'" key="carousel" class="saved-ring" :items="items" item-key="_id"
+                item-label="name" card-width="min(440px, 86vw)" label="Saved projects">
+                <template #card="{ item }">
+                    <SavedCard :item="item" :selected-category="selectedCategory" :selected-lang="selectedLang"
+                        @remove="$emit('remove', $event)" @toggle-category="$emit('toggle-category', $event)"
+                        @toggle-lang="$emit('toggle-lang', $event)" />
+                </template>
 
-            <template #caption="{ item, index, total }">
-                <RingCaption :title="item.name" :index="pad(index + 1)"
-                    :accent="categoryColor(itemCategory(item))" :subtitle="itemCategory(item)"
-                    :meta="`Saved ${pad(index + 1)} / ${pad(total)}`" />
-            </template>
-        </CardRing>
+                <template #caption="{ item, index, total }">
+                    <RingCaption :title="item.name" :index="pad(index + 1)"
+                        :accent="categoryColor(itemCategory(item))" :subtitle="itemCategory(item)"
+                        :meta="`Saved ${pad(index + 1)} / ${pad(total)}`" />
+                </template>
+            </CardRing>
+
+            <TransitionGroup v-else key="list" name="saved" tag="div" appear class="saved-stack position-relative">
+                <SavedCard v-for="(item, index) in items" :key="item._id" :item="item"
+                    :selected-category="selectedCategory" :selected-lang="selectedLang"
+                    :style="{ '--i': Math.min(index, 10) }" @remove="$emit('remove', $event)"
+                    @toggle-category="$emit('toggle-category', $event)" @toggle-lang="$emit('toggle-lang', $event)" />
+            </TransitionGroup>
+        </Transition>
 
         <!-- Nothing saved at all -->
         <div v-else-if="total === 0" class="empty card rounded-3 shadow-sm text-center p-5">
@@ -116,8 +129,59 @@ const pad = (n) => String(n).padStart(2, '0')
     margin-bottom: 0 !important;
 }
 
+/* --- Switching between carousel and list ------------------------------------- */
+.view-swap-enter-active,
+.view-swap-leave-active {
+    transition: opacity 0.25s ease, transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.view-swap-enter-from,
+.view-swap-leave-to {
+    opacity: 0;
+    transform: translateY(8px);
+}
+
+/* --- List transitions: staggered entrance, smooth re-ordering, fly-out removal --- */
+.saved-enter-active {
+    animation: saved-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: calc(var(--i) * 50ms);
+}
+
+.saved-leave-active {
+    position: absolute;
+    left: 0;
+    right: 0;
+    transition: opacity 0.3s ease, transform 0.35s cubic-bezier(0.55, 0, 0.7, 0.2);
+}
+
+.saved-leave-to {
+    opacity: 0;
+    transform: translateX(60px) scale(0.96);
+}
+
+.saved-move {
+    transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes saved-in {
+    from {
+        opacity: 0;
+        transform: translateY(18px) scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
 @media (prefers-reduced-motion: reduce) {
 
+    .view-swap-enter-active,
+    .view-swap-leave-active,
+    .saved-enter-active,
+    .saved-leave-active,
+    .saved-move,
     .empty-mark {
         animation: none !important;
         transition: none !important;

@@ -1,6 +1,8 @@
 <script setup>
 import { getLangColor } from '@/utils/langColors'
 import { categoryColor } from '@/utils/savedLibrary'
+import { useViewMode } from '@/composables/useViewMode'
+import ViewToggle from '@/components/ring/ViewToggle.vue'
 
 defineProps({
     shown: { type: Number, default: 0 },
@@ -17,6 +19,9 @@ const sortOptions = [
     { value: 'name', label: 'Name' },
     { value: 'stars', label: 'Stars' }
 ]
+
+// Carousel or list; savedList reads the same remembered value.
+const view = useViewMode('saved')
 </script>
 
 <template>
@@ -73,6 +78,8 @@ const sortOptions = [
                     </button>
                 </div>
             </div>
+
+            <ViewToggle v-model="view" />
         </div>
     </div>
 </template>
