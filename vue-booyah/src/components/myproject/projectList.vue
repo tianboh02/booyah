@@ -104,7 +104,7 @@ const pad = (n) => String(n).padStart(2, '0')
 </script>
 
 <template>
-    <div id="repo-list" class="container my-4">
+    <div id="repo-list" class="mb-4">
         <!-- Repo card, written once and used by both the carousel and the list -->
         <DefineRepoCard v-slot="{ repo, index, inRing }">
             <div v-spotlight class="repo-card card p-3 rounded-3 shadow-sm" :class="inRing ? 'h-100' : 'mb-3'"

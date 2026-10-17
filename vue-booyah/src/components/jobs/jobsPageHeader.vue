@@ -1,7 +1,7 @@
 <script setup>
 import { computed } from 'vue'
 import { langColors } from '@/utils/langColors'
-import JobsHeaderCard from '@/components/jobs/jobsHeaderCard.vue'
+import PageHeader from '@/components/shared/PageHeader.vue'
 
 const props = defineProps({
     rolesDetail: { type: Object, default: () => ({}) },
@@ -31,7 +31,7 @@ const status = computed(() => {
 </script>
 
 <template>
-    <JobsHeaderCard title="Jobs"
+    <PageHeader title="Jobs"
         subtitle='Which roles companies are hiring for and what they post as pay, from Hacker News "Who is Hiring" threads.'
         :status="status" :live="live" :colors="colors" />
 </template>

@@ -168,7 +168,7 @@ const focusedCount = computed(() => scopedRepos.value.length)
 </script>
 
 <template>
-    <div class="container my-4">
+    <div class="mb-4">
         <!-- Loading Skeleton -->
         <div v-if="loading" class="row row-cols-1 row-cols-md-3 g-3 mb-4">
             <div v-for="n in 3" :key="n" class="col">

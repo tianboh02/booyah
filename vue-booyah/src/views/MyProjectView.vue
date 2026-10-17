@@ -41,11 +41,11 @@ onMounted(() => {
 </script>
 
 <template>
-    <main class="container py-4">
+    <div class="container my-4">
         <ProjectPageHeader :repo-list="repoList" :loading="loading" />
 
         <ProjectStatsTable v-model:selected-lang="selectedLang" :repo-list="repoList" :loading="loading" />
 
         <ProjectList v-model:selected-lang="selectedLang" :repo-list="repoList" :loading="loading" />
-    </main>
+    </div>
 </template>

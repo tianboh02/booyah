@@ -82,7 +82,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <main class="container my-4">
+    <div class="container my-4">
         <DiscoveryPageHeader :categories="categories" :loading="loading" :error="!!error" />
 
         <JobsLoadingSatellite v-if="loading" :done="progress.done" :total="progress.total" />
@@ -110,5 +110,5 @@ onMounted(() => {
                     @close="selectedProject = null" @save="saveFromDetail" />
             </template>
         </template>
-    </main>
+    </div>
 </template>

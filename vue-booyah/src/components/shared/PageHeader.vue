@@ -1,6 +1,11 @@
 <script setup>
-// Header card at the top of a page: drifting aurora, dot grid, letter-by-letter title, status pill.
-// Same look as the My Projects and Discovery headers.
+// Header card at the top of every page: drifting aurora, dot grid, letter-by-letter title, status pill.
+// Each page wraps this in its own xxxPageHeader.vue, which only decides the text, status and colours.
+//
+// Slots:
+//  - subtitle: rich subtitle content (falls back to the `subtitle` prop)
+//  - marker:   replaces the pulse dot inside the status pill
+//  - aside:    content on the right of the card (hidden below the sm breakpoint)
 import { computed } from 'vue'
 
 const props = defineProps({
@@ -19,31 +24,42 @@ const orbColors = computed(() => [0, 1, 2].map((i) => props.colors[i] || FALLBAC
 </script>
 
 <template>
-    <div class="header-body mb-4">
+    <div class="mb-4">
         <div class="hero rounded-4 p-4 p-md-5 position-relative overflow-hidden">
 
             <!-- Aurora -->
-            <div class="aurora" aria-hidden="true">
-                <span class="orb orb-1" :style="{ '--c': orbColors[0] }"></span>
-                <span class="orb orb-2" :style="{ '--c': orbColors[1] }"></span>
-                <span class="orb orb-3" :style="{ '--c': orbColors[2] }"></span>
+            <div class="aurora position-absolute top-0 start-0 w-100 h-100" aria-hidden="true">
+                <span class="orb orb-1 position-absolute rounded-circle" :style="{ '--c': orbColors[0] }"></span>
+                <span class="orb orb-2 position-absolute rounded-circle" :style="{ '--c': orbColors[1] }"></span>
+                <span class="orb orb-3 position-absolute rounded-circle" :style="{ '--c': orbColors[2] }"></span>
             </div>
-            <div class="dots" aria-hidden="true"></div>
+            <div class="dots position-absolute top-0 start-0 w-100 h-100" aria-hidden="true"></div>
 
-            <div class="position-relative hero-content">
-                <h1 class="page-title display-5 fw-bold mb-2" :aria-label="title">
-                    <span v-for="l in letters" :key="l.i" class="letter" aria-hidden="true" :style="{ '--i': l.i }">{{
-                        l.ch }}</span>
-                </h1>
+            <div class="position-relative d-flex align-items-center justify-content-between gap-4">
+                <div>
+                    <h1 class="page-title display-5 fw-bold mb-2" :aria-label="title">
+                        <span v-for="l in letters" :key="l.i" class="letter d-inline-block" aria-hidden="true"
+                            :style="{ '--i': l.i }">{{ l.ch }}</span>
+                    </h1>
 
-                <p v-if="subtitle" class="hero-sub text-muted-github mb-3">{{ subtitle }}</p>
+                    <p v-if="$slots.subtitle || subtitle" class="hero-sub text-muted-github"
+                        :class="status ? 'mb-3' : 'mb-0'">
+                        <slot name="subtitle">{{ subtitle }}</slot>
+                    </p>
 
-                <span v-if="status"
-                    class="status-pill badge rounded-pill fw-normal d-inline-flex align-items-center gap-2 px-3 py-2"
-                    :class="{ 'is-live': live }">
-                    <span class="pulse-dot"></span>
-                    <span>{{ status }}</span>
-                </span>
+                    <span v-if="status"
+                        class="status-pill badge rounded-pill fw-normal d-inline-flex align-items-center gap-2 px-3 py-2"
+                        :class="{ 'is-live': live }">
+                        <slot name="marker">
+                            <span class="pulse-dot position-relative rounded-circle d-inline-block"></span>
+                        </slot>
+                        <span>{{ status }}</span>
+                    </span>
+                </div>
+
+                <div v-if="$slots.aside" class="hero-aside d-none d-sm-block">
+                    <slot name="aside" />
+                </div>
             </div>
         </div>
     </div>
@@ -64,18 +80,14 @@ const orbColors = computed(() => [0, 1, 2].map((i) => props.colors[i] || FALLBAC
 
 /* --- Aurora ------------------------------------------------------------ */
 .aurora {
-    position: absolute;
-    inset: 0;
     z-index: -2;
     filter: blur(60px) saturate(1.2);
     opacity: 0.55;
 }
 
 .orb {
-    position: absolute;
     width: 46%;
     aspect-ratio: 1;
-    border-radius: 50%;
     background-color: var(--c);
     transition: background-color 1.4s ease;
     will-change: transform;
@@ -119,8 +131,6 @@ const orbColors = computed(() => [0, 1, 2].map((i) => props.colors[i] || FALLBAC
 
 /* Dot grid that fades toward the bottom so text stays readable */
 .dots {
-    position: absolute;
-    inset: 0;
     z-index: -1;
     background-image: radial-gradient(var(--card-border) 1px, transparent 1px);
     background-size: 22px 22px;
@@ -130,7 +140,6 @@ const orbColors = computed(() => [0, 1, 2].map((i) => props.colors[i] || FALLBAC
 
 /* --- The one orchestrated entrance -------------------------------------- */
 .letter {
-    display: inline-block;
     opacity: 0;
     transform: translateY(60%) rotate(6deg);
     animation: letter-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
@@ -145,7 +154,8 @@ const orbColors = computed(() => [0, 1, 2].map((i) => props.colors[i] || FALLBAC
 }
 
 .hero-sub,
-.status-pill {
+.status-pill,
+.hero-aside {
     opacity: 0;
     animation: fade-up 0.7s ease forwards;
 }
@@ -154,7 +164,8 @@ const orbColors = computed(() => [0, 1, 2].map((i) => props.colors[i] || FALLBAC
     animation-delay: 0.65s;
 }
 
-.status-pill {
+.status-pill,
+.hero-aside {
     animation-delay: 0.8s;
 }
 
@@ -181,9 +192,7 @@ const orbColors = computed(() => [0, 1, 2].map((i) => props.colors[i] || FALLBAC
 .pulse-dot {
     width: 8px;
     height: 8px;
-    border-radius: 50%;
     background-color: #6e7681;
-    position: relative;
 }
 
 .is-live .pulse-dot {
@@ -217,13 +226,15 @@ const orbColors = computed(() => [0, 1, 2].map((i) => props.colors[i] || FALLBAC
     .letter,
     .hero-sub,
     .status-pill,
+    .hero-aside,
     .is-live .pulse-dot::after {
         animation: none !important;
     }
 
     .letter,
     .hero-sub,
-    .status-pill {
+    .status-pill,
+    .hero-aside {
         opacity: 1;
         transform: none;
     }

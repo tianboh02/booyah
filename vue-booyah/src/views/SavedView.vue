@@ -120,7 +120,7 @@ onMounted(load)
 </script>
 
 <template>
-    <main class="container my-4">
+    <div class="container my-4">
         <SavedPageHeader :items="items" :loading="loading" />
 
         <!-- Error message -->
@@ -152,5 +152,5 @@ onMounted(load)
         <!-- Undo removal notification -->
         <SavedUndoToast :removed="lastRemoved ? lastRemoved.item : null" :duration="UNDO_MS" @undo="undo"
             @dismiss="dismissUndo" />
-    </main>
+    </div>
 </template>
