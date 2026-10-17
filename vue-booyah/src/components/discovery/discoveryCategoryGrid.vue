@@ -22,7 +22,7 @@ const pad = (n) => String(n).padStart(2, '0')
 
 <template>
     <!-- Category cards on a rotating ring; the front card is the one you can use. -->
-    <CardRing :items="categories" item-key="id" item-label="name" card-width="min(560px, 90vw)" :radius="0.95"
+    <CardRing :items="categories" item-key="id" item-label="name" card-width="min(560px, 90vw)" :radius="1.2"
         label="Top categories this month">
         <template #card="{ item: category }">
             <DiscoveryCategoryCard v-model:selected-lang="selectedLang" :category="category" :saved-map="savedMap"

@@ -28,7 +28,7 @@ const pad = (n) => String(n).padStart(2, '0')
         </div>
 
         <!-- Roles: one card per role on a rotating ring -->
-        <CardRing :items="roles" item-key="name" item-label="name" card-width="min(300px, 80vw)" :radius="1.1" label="Roles">
+        <CardRing :items="roles" item-key="name" item-label="name" card-width="min(300px, 80vw)" :radius="1.4" label="Roles">
             <template #card="{ item: r, index: i }">
                 <div v-spotlight class="panel card p-3 h-100 rounded-3 shadow-sm" :style="{ '--i': 0 }">
                     <h3 class="h6 fw-bold section-title pb-2 mb-2 panel-head d-flex justify-content-between">

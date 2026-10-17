@@ -12,8 +12,10 @@ const props = defineProps({
     // most cards on the ring at once; longer lists cycle through this window
     slots: { type: Number, default: 7 },
     cardWidth: { type: String, default: 'min(360px, 86vw)' },
-    // ring radius as a multiple of the card width
-    radius: { type: Number, default: 1 },
+    // ring radius as a multiple of the card width; wide enough that the front card stands apart
+    radius: { type: Number, default: 1.3 },
+    // how far side cards turn toward their angle on the ring, in degrees
+    turn: { type: Number, default: 38 },
     label: { type: String, default: 'Cards' }
 })
 
@@ -22,7 +24,7 @@ const activeModel = defineModel('active', { type: Number, default: 0 })
 // Must match `perspective` on .ring-platform.
 const PERSPECTIVE = 1600
 // How far back the ring reaches, as a multiple of the radius.
-const DEPTH = 1.2
+const DEPTH = 1.6
 // Room above the highest card for its hover callout, in px.
 const CALLOUT_ROOM = 96
 
@@ -81,9 +83,12 @@ function place(el, i) {
 
     el.style.transform =
         `translate3d(${R * Math.sin(a)}px, ${-lift * depth}px, ${-R * DEPTH * depth}px) ` +
-        `rotateY(${(Math.sin(a) * 22).toFixed(2)}deg)`
-    el.style.opacity = String((1 - 0.35 * depth) * fade)
-    el.style.filter = depth > 0.6 ? `blur(${((depth - 0.6) * 3.5).toFixed(2)}px)` : 'none'
+        `rotateY(${(Math.sin(a) * props.turn).toFixed(2)}deg)`
+    // How present a card is: 1 at the front, dropping quickly toward the back. The CSS turns
+    // it into opacity, blur, greyscale and dimming, with values tuned per theme.
+    el.style.setProperty('--vis', ((1 - depth) ** 1.5).toFixed(3))
+    el.style.setProperty('--blur', (Math.max(0, depth - 0.2) * 4).toFixed(2))
+    el.style.setProperty('--fade', fade.toFixed(3))
     el.style.zIndex = String(Math.round((1 - depth) * 100) + 1)
     el.style.visibility = fade > 0 ? 'visible' : 'hidden'
 }
@@ -103,7 +108,7 @@ function measure() {
 
     cardPx = slot.offsetWidth || cardPx
     cardH = slot.offsetHeight || cardH
-    lift = Math.round(cardH * 0.45)
+    lift = Math.round(cardH * 0.38)
 
     const R = radiusPx()
     const cy = cardH / 2
@@ -250,6 +255,33 @@ onUpdated(() => {
 </template>
 
 <style scoped>
+/* --- Theme: how far back cards recede and how much the front card pops ------- */
+/* Dark: back cards dim toward black; the front card gets an accent glow. */
+.card-ring {
+    --ring-accent: #58a6ff;
+    --ring-min-op: 0.15;
+    --ring-dim: 0.55;
+    --ring-gray: 0.5;
+    --ring-front-shadow:
+        0 0 0 1px color-mix(in srgb, var(--ring-accent) 60%, transparent),
+        0 0 56px -12px color-mix(in srgb, var(--ring-accent) 55%, transparent),
+        0 32px 64px -24px rgba(0, 0, 0, 0.9);
+    --ring-pool: color-mix(in srgb, var(--ring-accent) 28%, transparent);
+}
+
+/* Light: back cards wash out toward white; the front card lifts on a crisp shadow. */
+[data-bs-theme='light'] .card-ring {
+    --ring-accent: #0969da;
+    --ring-min-op: 0.18;
+    --ring-dim: 0;
+    --ring-gray: 0.75;
+    --ring-front-shadow:
+        0 0 0 1px color-mix(in srgb, var(--ring-accent) 45%, transparent),
+        0 30px 56px -20px rgba(31, 35, 40, 0.4),
+        0 10px 20px -10px rgba(31, 35, 40, 0.25);
+    --ring-pool: color-mix(in srgb, var(--ring-accent) 16%, transparent);
+}
+
 /* --- Stage ---------------------------------------------------------------- */
 /* Room above for the lifted far side; the mask fades cards out at the container edges. */
 .ring-stage {
@@ -287,15 +319,38 @@ onUpdated(() => {
     perspective: 1600px;
 }
 
+/* --vis / --blur / --fade come from place(); hovering a back card brings most of it back. */
 .ring-slot {
+    --v: max(var(--vis, 1), var(--hover, 0) * 0.85);
     position: relative;
     grid-area: 1 / 1;
     width: var(--card-w);
-    will-change: transform, opacity;
+    opacity: calc((var(--ring-min-op) + (1 - var(--ring-min-op)) * var(--v)) * var(--fade, 1));
+    filter: blur(calc(var(--blur, 0) * (1 - var(--hover, 0)) * 1px)) grayscale(calc((1 - var(--v)) * var(--ring-gray))) brightness(calc(1 - (1 - var(--v)) * var(--ring-dim)));
+    will-change: transform, opacity, filter;
 }
 
 .ring-slot:not(.is-front) {
     cursor: pointer;
+}
+
+.ring-slot:not(.is-front):hover {
+    --hover: 1;
+}
+
+/* The front card is never filtered, so its text stays sharp. */
+.ring-slot.is-front {
+    filter: none;
+}
+
+/* Front card: accent ring + glow (dark) or lifted shadow (light). */
+.ring-card {
+    border-radius: var(--bs-border-radius-lg);
+    transition: box-shadow 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.ring-slot.is-front .ring-card {
+    box-shadow: var(--ring-front-shadow);
 }
 
 /* --- Platform disc ---------------------------------------------------------- */
@@ -309,7 +364,10 @@ onUpdated(() => {
     border-radius: 50%;
     overflow: hidden;
     pointer-events: none;
-    background: radial-gradient(closest-side, transparent 55%, color-mix(in srgb, var(--card-border) 45%, transparent)),
+    /* A pool of light under the front card, then the rim shading, then the disc colour. */
+    background:
+        radial-gradient(ellipse 30% 42% at 50% 82%, var(--ring-pool), transparent 70%),
+        radial-gradient(closest-side, transparent 55%, color-mix(in srgb, var(--card-border) 45%, transparent)),
         color-mix(in srgb, var(--card-bg) 75%, var(--app-bg));
     border: 1px solid var(--card-border);
     box-shadow:
@@ -501,6 +559,7 @@ onUpdated(() => {
 @media (prefers-reduced-motion: reduce) {
 
     .ring-arrow,
+    .ring-card,
     .pager-bar::before,
     .pager-thumb,
     .ring-callout,
