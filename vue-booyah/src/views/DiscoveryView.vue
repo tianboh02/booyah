@@ -1,6 +1,7 @@
 <script setup>
 import { onMounted, ref } from 'vue'
 import { fetchDiscoveryData } from '@/utils/hackernewsDiscovery'
+import { useSavedProjects } from '@/utils/savedProjects'
 
 import DiscoveryPageHeader from '@/components/discovery/discoveryPageHeader.vue'
 import DiscoveryBanners from '@/components/discovery/discoveryBanners.vue'
@@ -19,6 +20,9 @@ const categories = ref([])
 const selectedProject = ref(null)
 // The language in focus. The filter bar, the stat cards and each row's language label all share it.
 const selectedLang = ref(null)
+
+// Saved projects: bookmark state for the current user
+const { saved, pending, error: saveError, loadSaved, toggleSave } = useSavedProjects()
 
 async function load() {
     loading.value = true
@@ -45,11 +49,20 @@ function openProject(category, project) {
     selectedProject.value = { ...project, categoryName: category.name }
 }
 
-function saveProject() {
-    // TODO: save to the backend (POST /createSave with userID, projectlink, category)
+// Bookmark clicked on a row: toggles the save (POST /createSave or DELETE /deleteSave)
+function saveFromCard(category, project) {
+    toggleSave(project, category.name)
 }
 
-onMounted(load)
+// Save button inside the detail dialog (the project already carries categoryName)
+function saveFromDetail(project) {
+    toggleSave(project, project.categoryName)
+}
+
+onMounted(() => {
+    load()
+    loadSaved()
+})
 </script>
 
 <template>
@@ -62,14 +75,21 @@ onMounted(load)
         <template v-else>
             <DiscoveryBanners :warning="warning" :error="error" @retry="load" />
 
+            <!-- Save / unsave failures -->
+            <div v-if="saveError" class="alert alert-danger alert-dismissible py-2 px-3 small mb-3" role="alert">
+                {{ saveError }}
+                <button type="button" class="btn-close" aria-label="Dismiss" @click="saveError = ''"></button>
+            </div>
+
             <template v-if="!error">
                 <DiscoveryStats v-if="categories.length" :categories="categories" :selected-lang="selectedLang" />
                 <DiscoveryLanguageFilter v-model:selected-lang="selectedLang" :categories="categories" />
-                <DiscoveryCategoryGrid v-model:selected-lang="selectedLang" :categories="categories"
-                    @open="openProject" @save="saveProject" />
+                <DiscoveryCategoryGrid v-model:selected-lang="selectedLang" :categories="categories" :saved-map="saved"
+                    :pending-links="pending" @open="openProject" @save="saveFromCard" />
 
                 <DiscoveryProjectDetail v-if="selectedProject" :project="selectedProject"
-                    @close="selectedProject = null" @save="saveProject" />
+                    :saved="!!saved[selectedProject.ghUrl]" :saving="pending.has(selectedProject.ghUrl)"
+                    @close="selectedProject = null" @save="saveFromDetail" />
             </template>
         </template>
     </div>

@@ -3,7 +3,9 @@ import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { getLangColor } from '@/utils/langColors'
 
 defineProps({
-    project: { type: Object, required: true }
+    project: { type: Object, required: true },
+    saved: { type: Boolean, default: false },
+    saving: { type: Boolean, default: false }
 })
 
 defineEmits(['close', 'save'])
@@ -50,7 +52,15 @@ onBeforeUnmount(() => document.body.classList.remove('overflow-hidden'))
             </div>
 
             <div class="d-flex justify-content-end flex-wrap gap-2">
-                <button type="button" class="btn btn-outline-secondary" @click="$emit('save', project)">🔖 Save</button>
+                <button type="button" class="save-btn btn d-inline-flex align-items-center gap-2"
+                    :class="saved ? 'btn-outline-primary active' : 'btn-outline-secondary'" :aria-pressed="saved"
+                    :disabled="saving" @click="$emit('save', project)">
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"
+                        stroke-linejoin="round" aria-hidden="true">
+                        <path d="M3.5 2.5h9v11.2L8 10.6l-4.5 3.1z" />
+                    </svg>
+                    {{ saved ? 'Saved' : 'Save' }}
+                </button>
                 <a :href="project.ghUrl" target="_blank" rel="noopener noreferrer" class="btn btn-primary">
                     View on GitHub
                 </a>
@@ -85,6 +95,15 @@ onBeforeUnmount(() => document.body.classList.remove('overflow-hidden'))
 .meta {
     background-color: var(--badge-bg);
     border: 1px solid var(--card-border);
+}
+
+.save-btn svg path {
+    fill: transparent;
+    transition: fill 0.25s ease;
+}
+
+.save-btn.active svg path {
+    fill: currentColor;
 }
 
 .project-dialog[open] {

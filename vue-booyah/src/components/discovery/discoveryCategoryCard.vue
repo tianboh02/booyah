@@ -6,10 +6,16 @@ import { vSpotlight, useCountUp } from '@/utils/motion'
 
 const props = defineProps({
     category: { type: Object, required: true },
-    selectedLang: { type: String, default: null }
+    selectedLang: { type: String, default: null },
+    // { [ghUrl]: saveId } and the set of ghUrls with a request in flight
+    savedMap: { type: Object, default: () => ({}) },
+    pendingLinks: { type: Object, default: () => new Set() }
 })
 
 const emit = defineEmits(['open', 'save', 'update:selectedLang'])
+
+const isSaved = (p) => !!props.savedMap[p.ghUrl]
+const isPending = (p) => props.pendingLinks.has(p.ghUrl)
 
 const shortStars = (n) => (n >= 1000 ? `${Math.round(n / 100) / 10}k` : String(n))
 
@@ -50,7 +56,8 @@ const toggleLang = (lang) => emit('update:selectedLang', props.selectedLang === 
                 <!-- Clicking the language filters every category by it -->
                 <span class="min-w-0">
                     <button type="button" class="lang-link d-inline-flex align-items-center gap-1 rounded-2 small"
-                        :class="{ 'is-selected': selectedLang === langOf(p) }" :aria-pressed="selectedLang === langOf(p)"
+                        :class="{ 'is-selected': selectedLang === langOf(p) }"
+                        :aria-pressed="selectedLang === langOf(p)"
                         :title="selectedLang === langOf(p) ? 'Clear filter' : 'Filter by ' + langOf(p)"
                         @click="toggleLang(langOf(p))">
                         <span class="lang-dot rounded-circle d-inline-block flex-shrink-0"></span>
@@ -59,19 +66,22 @@ const toggleLang = (lang) => emit('update:selectedLang', props.selectedLang === 
                 </span>
 
                 <span class="metric text-muted-github small font-monospace" title="Show HN points">▲ {{ p.hnPoints
-                    }}</span>
+                }}</span>
 
                 <span class="metric meta-star text-muted-github small font-monospace" title="GitHub stars">
                     <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
-                        <path d="M8 .25l2.3 4.66 5.15.75-3.72 3.63.88 5.13L8 12.04l-4.61 2.38.88-5.13L.55 5.66l5.15-.75z" />
+                        <path
+                            d="M8 .25l2.3 4.66 5.15.75-3.72 3.63.88 5.13L8 12.04l-4.61 2.38.88-5.13L.55 5.66l5.15-.75z" />
                     </svg>
                     {{ shortStars(p.stars) }}
                 </span>
 
                 <button type="button" class="bookmark-btn btn btn-sm btn-link p-0 text-muted-github"
-                    :aria-label="`Save ${p.id}`" @click="$emit('save', p)">
-                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor"
-                        stroke-width="1.5" stroke-linejoin="round" aria-hidden="true">
+                    :class="{ 'is-saved': isSaved(p), 'is-pending': isPending(p) }" :aria-pressed="isSaved(p)"
+                    :aria-busy="isPending(p)" :aria-label="isSaved(p) ? `Remove ${p.id} from saved` : `Save ${p.id}`"
+                    :title="isSaved(p) ? 'Saved. Click to remove' : 'Save project'" @click="$emit('save', p)">
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"
+                        stroke-linejoin="round" aria-hidden="true">
                         <path d="M3.5 2.5h9v11.2L8 10.6l-4.5 3.1z" />
                     </svg>
                 </button>
@@ -264,6 +274,44 @@ const toggleLang = (lang) => emit('update:selectedLang', props.selectedLang === 
     transform: scale(0.85);
 }
 
+/* Saved: the bookmark fills in and pops once */
+.bookmark-btn svg path {
+    fill: transparent;
+    transition: fill 0.25s ease;
+}
+
+.bookmark-btn.is-saved {
+    color: #58a6ff !important;
+}
+
+.bookmark-btn.is-saved svg {
+    animation: bookmark-pop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.bookmark-btn.is-saved svg path {
+    fill: currentColor;
+}
+
+/* A request is in flight: keep the new look but make it clear it is not final */
+.bookmark-btn.is-pending {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+@keyframes bookmark-pop {
+    0% {
+        transform: scale(1) rotate(0deg);
+    }
+
+    40% {
+        transform: scale(1.5) rotate(-12deg);
+    }
+
+    100% {
+        transform: scale(1) rotate(0deg);
+    }
+}
+
 @media (prefers-reduced-motion: reduce) {
 
     .cat-card,
@@ -275,6 +323,10 @@ const toggleLang = (lang) => emit('update:selectedLang', props.selectedLang === 
     .meta-star svg,
     .bookmark-btn {
         transition: none !important;
+    }
+
+    .bookmark-btn.is-saved svg {
+        animation: none;
     }
 
     .cat-card:hover,
