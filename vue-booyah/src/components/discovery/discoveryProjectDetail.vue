@@ -3,12 +3,13 @@ import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { getLangColor } from '@/utils/langColors'
 
 defineProps({
-    project: { type: Object, required: true }
+    project: { type: Object, required: true },
+    saved: { type: Boolean, default: false },
+    saving: { type: Boolean, default: false }
 })
 
 defineEmits(['close', 'save'])
 
-// native <dialog>: the browser provides the backdrop mask, Esc-to-close and focus trap
 const dialog = ref(null)
 
 onMounted(() => {
@@ -20,13 +21,12 @@ onBeforeUnmount(() => document.body.classList.remove('overflow-hidden'))
 </script>
 
 <template>
-    <!-- clicking the dimmed backdrop lands on the <dialog> itself, which closes it -->
-    <dialog ref="dialog" class="project-dialog" aria-labelledby="project-dialog-title" @close="$emit('close')"
-        @click.self="dialog.close()">
-        <div class="card p-4 rounded-3 shadow">
+    <dialog ref="dialog" class="project-dialog border-0 bg-transparent p-0 text-reset"
+        aria-labelledby="project-dialog-title" @close="$emit('close')" @click.self="dialog.close()">
+        <div class="card p-4 rounded-3 shadow overflow-auto">
             <div class="d-flex justify-content-between align-items-start mb-3">
                 <div>
-                    <p class="small mb-1 category-name">{{ project.categoryName }}</p>
+                    <p class="small mb-1 text-primary">{{ project.categoryName }}</p>
                     <h2 id="project-dialog-title" class="h5 fw-bold font-monospace section-title mb-0 text-break">
                         <span class="text-muted-github">{{ project.owner }}/</span>{{ project.name }}
                     </h2>
@@ -50,7 +50,15 @@ onBeforeUnmount(() => document.body.classList.remove('overflow-hidden'))
             </div>
 
             <div class="d-flex justify-content-end flex-wrap gap-2">
-                <button type="button" class="btn btn-outline-secondary" @click="$emit('save', project)">🔖 Save</button>
+                <button type="button" class="save-btn btn d-inline-flex align-items-center gap-2"
+                    :class="saved ? 'btn-outline-primary active' : 'btn-outline-secondary'" :aria-pressed="saved"
+                    :disabled="saving" @click="$emit('save', project)">
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"
+                        stroke-linejoin="round" aria-hidden="true">
+                        <path d="M3.5 2.5h9v11.2L8 10.6l-4.5 3.1z" />
+                    </svg>
+                    {{ saved ? 'Saved' : 'Save' }}
+                </button>
                 <a :href="project.ghUrl" target="_blank" rel="noopener noreferrer" class="btn btn-primary">
                     View on GitHub
                 </a>
@@ -63,28 +71,28 @@ onBeforeUnmount(() => document.body.classList.remove('overflow-hidden'))
 .project-dialog {
     width: min(640px, 92vw);
     max-width: none;
-    padding: 0;
-    border: 0;
-    background: transparent;
-    color: inherit;
 }
 
 .project-dialog .card {
     max-height: 90vh;
-    overflow-y: auto;
 }
 
 .section-title {
     color: var(--app-text);
 }
 
-.category-name {
-    color: var(--bs-primary);
-}
-
 .meta {
     background-color: var(--badge-bg);
     border: 1px solid var(--card-border);
+}
+
+.save-btn svg path {
+    fill: transparent;
+    transition: fill 0.25s ease;
+}
+
+.save-btn.active svg path {
+    fill: currentColor;
 }
 
 .project-dialog[open] {

@@ -1,0 +1,70 @@
+<script setup>
+import { getLangColor } from '@/utils/langColors'
+
+// Language dot + label. Used for the filter row and each card row so both look identical.
+defineProps({
+    lang: { type: String, required: true },
+    active: { type: Boolean, default: false },
+    // Draw a resting border (filter row). Card rows stay borderless until hover.
+    outlined: { type: Boolean, default: false },
+    dot: { type: Boolean, default: true }
+})
+</script>
+
+<template>
+    <button type="button" class="lang-pill d-inline-flex align-items-center gap-1 rounded-pill small"
+        :class="{ 'is-active': active, 'is-outlined': outlined }" :style="{ '--lang': getLangColor(lang) }"
+        :aria-pressed="active">
+        <span v-if="dot" class="lang-dot rounded-circle d-inline-block flex-shrink-0"></span>
+        <span class="text-truncate">{{ lang }}</span>
+    </button>
+</template>
+
+<style scoped>
+.lang-pill {
+    max-width: 100%;
+    color: var(--text-muted-github);
+    background: transparent;
+    border: 1px solid transparent;
+    padding: 0.15rem 0.55rem;
+    cursor: pointer;
+    transition:
+        background-color 0.2s ease,
+        border-color 0.2s ease,
+        color 0.2s ease;
+}
+
+.lang-pill.is-outlined {
+    border-color: var(--card-border);
+}
+
+.lang-pill:hover {
+    color: var(--app-text);
+    background-color: color-mix(in srgb, var(--lang) 14%, transparent);
+    border-color: color-mix(in srgb, var(--lang) 50%, transparent);
+}
+
+.lang-pill.is-active {
+    color: var(--app-text);
+    font-weight: 600;
+    background-color: color-mix(in srgb, var(--lang) 18%, transparent);
+    border-color: color-mix(in srgb, var(--lang) 65%, transparent);
+}
+
+.lang-pill:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(56, 139, 253, 0.4);
+}
+
+.lang-dot {
+    width: 8px;
+    height: 8px;
+    background-color: var(--lang);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .lang-pill {
+        transition: none !important;
+    }
+}
+</style>

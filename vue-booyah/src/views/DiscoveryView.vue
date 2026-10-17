@@ -1,10 +1,13 @@
 <script setup>
 import { onMounted, ref } from 'vue'
 import { fetchDiscoveryData } from '@/utils/hackernewsDiscovery'
-import { MIN_STARS } from '@/utils/top5Categories'
+import { useSavedProjects } from '@/utils/savedProjects'
 
 import DiscoveryPageHeader from '@/components/discovery/discoveryPageHeader.vue'
-import DiscoveryCategoryCard from '@/components/discovery/discoveryCategoryCard.vue'
+import DiscoveryBanners from '@/components/discovery/discoveryBanners.vue'
+import DiscoveryStats from '@/components/discovery/discoveryStats.vue'
+import DiscoveryLanguageFilter from '@/components/discovery/discoveryLanguageFilter.vue'
+import DiscoveryCategoryGrid from '@/components/discovery/discoveryCategoryGrid.vue'
 import DiscoveryProjectDetail from '@/components/discovery/discoveryProjectDetail.vue'
 import JobsLoadingSatellite from '@/components/jobs/jobsLoadingSatellite.vue'
 
@@ -16,67 +19,96 @@ const progress = ref({ done: 0, total: 0 })
 const categories = ref([])
 const selectedProject = ref(null)
 
+// Shared language selection for filters, statistics, and project labels.
+const selectedLang = ref(null)
+
+// Saved projects and bookmark state.
+const {
+    saved,
+    pending,
+    error: saveError,
+    loadSaved,
+    toggleSave,
+} = useSavedProjects()
+
 async function load() {
     loading.value = true
     error.value = ''
     warning.value = ''
     progress.value = { done: 0, total: 0 }
     selectedProject.value = null
+    selectedLang.value = null
+
     try {
-        const { data, warning: warnMsg } = await fetchDiscoveryData((done, total) => {
-            progress.value = { done, total }
-        })
+        const { data, warning: warnMsg } = await fetchDiscoveryData(
+            (done, total) => {
+                progress.value = { done, total }
+            },
+        )
+
         categories.value = data
         warning.value = warnMsg
     } catch (e) {
         console.error('DiscoveryView: could not load discovery data', e)
-        error.value = 'Could not load projects from Hacker News and GitHub. Check your connection and try again.'
+
+        error.value =
+            'Could not load projects from Hacker News and GitHub. Check your connection and try again.'
     } finally {
         loading.value = false
     }
 }
 
 function openProject(category, project) {
-    selectedProject.value = { ...project, categoryName: category.name }
+    selectedProject.value = {
+        ...project,
+        categoryName: category.name,
+    }
 }
 
-function saveProject() {
-    // TODO: save to the backend (POST /createSave with userID, projectlink, category)
+// Toggle a project's saved state from a category card.
+function saveFromCard(category, project) {
+    toggleSave(project, category.name)
 }
 
-onMounted(load)
+// Toggle a project's saved state from the detail dialog.
+function saveFromDetail(project) {
+    toggleSave(project, project.categoryName)
+}
+
+onMounted(() => {
+    load()
+    loadSaved()
+})
 </script>
 
 <template>
-    <div class="container my-4">
-        <DiscoveryPageHeader />
+    <main class="container my-4">
+        <DiscoveryPageHeader :categories="categories" :loading="loading" :error="!!error" />
 
         <JobsLoadingSatellite v-if="loading" :done="progress.done" :total="progress.total" />
 
         <template v-else>
-            <div v-if="warning" class="alert alert-warning py-2 px-3 small mb-3" role="status">
-                {{ warning }}
+            <DiscoveryBanners :warning="warning" :error="error" @retry="load" />
+
+            <!-- Saved-project error message -->
+            <div v-if="saveError" class="alert alert-danger alert-dismissible py-2 px-3 small mb-3" role="alert">
+                {{ saveError }}
+
+                <button type="button" class="btn-close" aria-label="Dismiss" @click="saveError = ''"></button>
             </div>
 
-            <div v-if="error" class="alert alert-danger d-flex align-items-center justify-content-between mb-3"
-                role="alert">
-                <span>{{ error }}</span>
-                <button type="button" class="btn btn-sm btn-outline-danger" @click="load">Try again</button>
-            </div>
+            <template v-if="!error">
+                <DiscoveryStats v-if="categories.length" :categories="categories" :selected-lang="selectedLang" />
 
-            <div v-else class="alert badge-github text-muted-github border mb-3 small py-2 px-3" role="note">
-                💡 Categories are ranked by number of builders. Projects within a category are ranked by Show HN
-                points, not GitHub stars. Only repositories with at least {{ MIN_STARS }} stars are shown.
-            </div>
+                <DiscoveryLanguageFilter v-model:selected-lang="selectedLang" :categories="categories" />
 
-            <div v-if="!error" class="row row-cols-1 row-cols-lg-2 g-3">
-                <div v-for="c in categories" :key="c.id" class="col">
-                    <DiscoveryCategoryCard :category="c" @open="openProject(c, $event)" @save="saveProject" />
-                </div>
-            </div>
+                <DiscoveryCategoryGrid v-model:selected-lang="selectedLang" :categories="categories" :saved-map="saved"
+                    :pending-links="pending" @open="openProject" @save="saveFromCard" />
 
-            <DiscoveryProjectDetail v-if="selectedProject" :project="selectedProject" @close="selectedProject = null"
-                @save="saveProject" />
+                <DiscoveryProjectDetail v-if="selectedProject" :project="selectedProject"
+                    :saved="!!saved[selectedProject.ghUrl]" :saving="pending.has(selectedProject.ghUrl)"
+                    @close="selectedProject = null" @save="saveFromDetail" />
+            </template>
         </template>
-    </div>
+    </main>
 </template>

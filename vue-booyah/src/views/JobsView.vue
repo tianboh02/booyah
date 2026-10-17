@@ -50,7 +50,7 @@ onMounted(load)
 <template>
   <div class="container my-4">
     <!-- Clean Header Component -->
-    <JobsPageHeader />
+    <JobsPageHeader :roles-detail="rolesDetail" :loading="loading" :error="!!error" />
 
     <!-- Satellite Loading Indicator (plan for sharing it across screens: see jobsLoadingSatellite.vue) -->
     <JobsLoadingSatellite v-if="loading" :done="progress.done" :total="progress.total" />

@@ -134,3 +134,11 @@ export function passesHardChecks(repo) {
         && !isNotSoftware(repo)
         && (repo.stargazers_count ?? 0) >= MIN_STARS
 }
+
+
+// ---------- Display helpers (shared by the Discovery components) ----------
+export const langOf = (project) => project.language || 'No language'
+
+// what a category card shows: its projects in the chosen language (or all), capped at REPOS_PER_CATEGORY
+export const visibleProjects = (category, lang) =>
+    category.projects.filter((p) => !lang || langOf(p) === lang).slice(0, REPOS_PER_CATEGORY)
