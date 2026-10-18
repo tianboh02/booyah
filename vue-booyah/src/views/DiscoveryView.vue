@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { fetchDiscoveryData } from '@/utils/hackernewsDiscovery'
 import { useSavedProjects } from '@/utils/savedProjects'
 
@@ -9,12 +9,23 @@ import DiscoveryStats from '@/components/discovery/discoveryStats.vue'
 import DiscoveryLanguageFilter from '@/components/discovery/discoveryLanguageFilter.vue'
 import DiscoveryCategoryGrid from '@/components/discovery/discoveryCategoryGrid.vue'
 import DiscoveryProjectDetail from '@/components/discovery/discoveryProjectDetail.vue'
-import JobsLoadingSatellite from '@/components/jobs/jobsLoadingSatellite.vue'
+import SignalLoader from '@/components/shared/SignalLoader.vue'
 
 const loading = ref(true)
 const error = ref('')
 const warning = ref('')
 const progress = ref({ done: 0, total: 0 })
+
+const LOADER_LEGEND = [
+    { label: 'GitHub repos', colour: [63, 185, 80] },
+    { label: 'Hacker News', colour: [255, 138, 61] }
+]
+const loaderStatus = computed(() => {
+    const { done, total } = progress.value
+    if (!total) return 'Scanning Hacker News for projects'
+    if (done < total) return `Pulling repo details from GitHub ${done} / ${total}`
+    return 'Sorting projects into categories'
+})
 
 const categories = ref([])
 const selectedProject = ref(null)
@@ -85,7 +96,8 @@ onMounted(() => {
     <div class="container my-4">
         <DiscoveryPageHeader :categories="categories" :loading="loading" :error="!!error" />
 
-        <JobsLoadingSatellite v-if="loading" :done="progress.done" :total="progress.total" />
+        <SignalLoader v-if="loading" :done="progress.done" :total="progress.total" :status="loaderStatus"
+            :legend="LOADER_LEGEND" />
 
         <template v-else>
             <DiscoveryBanners :warning="warning" :error="error" @retry="load" />

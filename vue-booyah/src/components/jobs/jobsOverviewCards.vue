@@ -6,7 +6,7 @@ const props = defineProps({
     warning: { type: String, default: '' },
     error: { type: String, default: '' },
     postsAnalysed: { type: Number, default: 0 },
-    salaries: { type: Array, default: () => [] },
+    salaryBands: { type: Number, default: 0 },
     roles: { type: Array, default: () => [] },
     postsPerMonth: { type: Array, default: () => [] }
 })
@@ -15,7 +15,7 @@ defineEmits(['retry'])
 
 const stats = computed(() => [
     { label: 'Job posts analysed', value: props.postsAnalysed, accent: '#58a6ff' },
-    { label: 'Salary bands used', value: props.salaries.reduce((sum, s) => sum + (s.n || 0), 0), accent: '#3fb950' },
+    { label: 'Salary bands used', value: props.salaryBands, accent: '#3fb950' },
     { label: 'Role families tracked', value: props.roles.length, accent: '#a371f7' },
     { label: 'Months covered', value: props.postsPerMonth.length, accent: '#e3b341' },
 ])

@@ -1,12 +1,12 @@
 <script setup>
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { fetchHNJobsData } from '@/utils/hackernewsJobs'
 
 import JobsPageHeader from '@/components/jobs/jobsPageHeader.vue'
 import JobsOverviewCards from '@/components/jobs/jobsOverviewCards.vue'
 import JobsRoleDemandCards from '@/components/jobs/jobsRoleDemandCards.vue'
 import JobsRoleDetail from '@/components/jobs/jobsRoleDetail.vue'
-import JobsLoadingSatellite from '@/components/jobs/jobsLoadingSatellite.vue'
+import SignalLoader from '@/components/shared/SignalLoader.vue'
 
 const loading = ref(true)
 const error = ref('')
@@ -15,10 +15,21 @@ const progress = ref({ done: 0, total: 0 })
 
 const postsAnalysed = ref(0)
 const roles = ref([])
-const salaries = ref([])
+const salaryBands = ref(0)
 const postsPerMonth = ref([])
 const rolesDetail = ref({})
 const selectedRole = ref('')
+
+const LOADER_LEGEND = [
+  { label: 'Hacker News threads', colour: [255, 138, 61] },
+  { label: 'Salary bands', colour: [227, 179, 65] }
+]
+const loaderStatus = computed(() => {
+  const { done, total } = progress.value
+  if (!total) return 'Contacting Hacker News'
+  if (done < total) return `Receiving 'Who is hiring?' threads ${done} / ${total}`
+  return 'Parsing roles & salaries'
+})
 
 async function load() {
   loading.value = true
@@ -32,7 +43,7 @@ async function load() {
     })
     postsAnalysed.value = data.postsAnalysed
     roles.value = data.roles
-    salaries.value = data.salaries
+    salaryBands.value = data.salaryBands
     postsPerMonth.value = data.postsPerMonth
     rolesDetail.value = data.rolesDetail
     warning.value = warnMsg
@@ -52,12 +63,13 @@ onMounted(load)
     <!-- Clean Header Component -->
     <JobsPageHeader :roles-detail="rolesDetail" :loading="loading" :error="!!error" />
 
-    <!-- Satellite Loading Indicator (plan for sharing it across screens: see jobsLoadingSatellite.vue) -->
-    <JobsLoadingSatellite v-if="loading" :done="progress.done" :total="progress.total" />
+    <!-- Particle globe loader, shared with the auth screen: one arc per thread that comes back -->
+    <SignalLoader v-if="loading" :done="progress.done" :total="progress.total" :status="loaderStatus"
+      :legend="LOADER_LEGEND" />
 
     <!-- Loaded Content & Banners -->
     <template v-else>
-      <JobsOverviewCards :warning="warning" :error="error" :posts-analysed="postsAnalysed" :salaries="salaries"
+      <JobsOverviewCards :warning="warning" :error="error" :posts-analysed="postsAnalysed" :salary-bands="salaryBands"
         :roles="roles" :posts-per-month="postsPerMonth" @retry="load" />
 
       <template v-if="!error">

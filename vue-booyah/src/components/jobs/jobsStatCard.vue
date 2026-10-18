@@ -7,7 +7,6 @@ import { vSpotlight, vTilt, useCountUp } from '@/utils/motion'
 const props = defineProps({
     value: { type: Number, required: true },
     label: { type: String, required: true },
-    hint: { type: String, default: '' },
     accent: { type: String, default: '#58a6ff' },
     index: { type: Number, default: 0 } // position in the row, staggers the entrance
 })
@@ -24,7 +23,6 @@ onMounted(() => requestAnimationFrame(() => (ready.value = true)))
         :style="{ '--i': index, '--accent': accent }">
         <span class="h3 fw-bold stat-value mb-1 font-monospace">{{ count }}</span>
         <span class="stat-label fw-semibold small">{{ label }}</span>
-        <span v-if="hint" class="text-muted-github small">{{ hint }}</span>
     </div>
 </template>
 
