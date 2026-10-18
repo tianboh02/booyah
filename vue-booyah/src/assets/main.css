@@ -14,19 +14,48 @@
     --badge-border: #454c53;
     --github-control-bg: #0d1117;
     --github-control-border: #30363d;
+
+    /* Page header cards (the colorful aurora banners) */
+    --hero-muted: #c9d1d9;
+    /* subtitle text, brighter than --text-muted-github */
+    --hero-scrim-a: 70%;
+    /* how strongly the card color dims the aurora behind the text */
+    --hero-scrim-b: 45%;
+    --hero-pill-border: #3a4148;
+    --aurora-opacity: 0.55;
+    --aurora-saturate: 1.2;
+
+    /* Links and highlights */
+    --brand-blue: #58a6ff;
 }
 
 [data-bs-theme="light"] {
-    --app-bg: #ffffff;
+    /* A soft cool-gray canvas with white cards, so every card reads as a surface */
+    --app-bg: #eef1f5;
     --app-text: #1f2328;
-    --card-bg: #f6f8fa;
+    --card-bg: #ffffff;
     --card-border: #d0d7de;
-    --text-muted-github: #656d76;
-    --badge-bg: #eff1f3;
+    --text-muted-github: #59636e;
+    /* 6.1:1 on white (was 4.9:1) */
+    --badge-bg: #eef1f5;
     --badge-text: #24292f;
-    --badge-border: #d0d7de;
+    --badge-border: #c3ccd6;
     --github-control-bg: #ffffff;
-    --github-control-border: #d0d7de;
+    --github-control-border: #c3ccd6;
+
+    --hero-muted: #3b434c;
+    --hero-scrim-a: 80%;
+    --hero-scrim-b: 50%;
+    --hero-pill-border: #c3ccd6;
+    --aurora-opacity: 0.7;
+    /* richer color instead of a washed-out pastel */
+    --aurora-saturate: 1.6;
+
+    /* GitHub's light-mode blue: 5.2:1 on white (#58a6ff is only 2.5:1) */
+    --brand-blue: #0969da;
+
+    /* Soft layered shadows. Bootstrap's .shadow-sm picks this up everywhere. */
+    --bs-box-shadow-sm: 0 1px 2px rgba(31, 35, 40, 0.05), 0 8px 20px -12px rgba(31, 35, 40, 0.18);
 }
 
 /* ==========================================================================
@@ -68,4 +97,71 @@ body,
     background-color: var(--github-control-bg) !important;
     border-color: var(--github-control-border) !important;
     color: var(--app-text) !important;
+}
+
+/* ==========================================================================
+   4. PAGE HEADER CARDS (My Projects, Saved, Settings, Discovery)
+   These rules target the shared header markup: .hero, .hero-sub, .aurora,
+   .status-pill. They keep the muted text readable on top of the colorful aurora
+   in both themes.
+   ========================================================================== */
+
+/* A soft veil behind the text side of the banner. It uses the card color, so it
+   dims the aurora in dark mode and lightens it in light mode. */
+.hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: linear-gradient(90deg,
+            color-mix(in srgb, var(--card-bg) var(--hero-scrim-a), transparent) 0%,
+            color-mix(in srgb, var(--card-bg) var(--hero-scrim-b), transparent) 45%,
+            transparent 85%);
+}
+
+/* Subtitle: brighter than ordinary muted text so it holds up over color */
+.hero .hero-sub,
+.hero .hero-sub.text-muted-github {
+    color: var(--hero-muted) !important;
+}
+
+.hero .aurora {
+    opacity: var(--aurora-opacity) !important;
+    filter: blur(60px) saturate(var(--aurora-saturate)) !important;
+}
+
+.hero .status-pill {
+    border-color: var(--hero-pill-border) !important;
+}
+
+/* ==========================================================================
+   5. LIGHT MODE POLISH
+   ========================================================================== */
+
+/* Crisp white navbar on the tinted canvas */
+html[data-bs-theme="light"] .app-header {
+    background-color: #ffffff !important;
+}
+
+/* Blue text and icons need the darker blue on white to stay readable */
+html[data-bs-theme="light"] .manage-link,
+html[data-bs-theme="light"] .undo-btn,
+html[data-bs-theme="light"] .undo-btn:hover {
+    color: var(--brand-blue) !important;
+}
+
+html[data-bs-theme="light"] .bookmark-btn.is-saved,
+html[data-bs-theme="light"] .saved-card .bookmark-btn:not(:hover) {
+    color: var(--brand-blue) !important;
+}
+
+html[data-bs-theme="light"] .search-wrap:focus-within .search-icon {
+    color: var(--brand-blue) !important;
+}
+
+/* The green "Saved" / "Connected" text is too pale on white, so darken it */
+html[data-bs-theme="light"] .text-saved,
+html[data-bs-theme="light"] .connected {
+    color: #1a7f37 !important;
 }
