@@ -178,7 +178,7 @@ onBeforeUnmount(() => clearTimeout(messageTimer))
     aria-labelledby="languages-heading"
   >
     <!-- Section title and intro -->
-    <h4 id="languages-heading" class="fw-bold mb-1">Languages</h4>
+    <h4 id="languages-heading" class="fw-bold mb-1">Packages</h4>
     <p class="text-muted-github small mb-3">
       The 20 most downloaded packages in each language over the last 90 days, straight from npm,
       Packagist and crates.io. Pick two to compare them.

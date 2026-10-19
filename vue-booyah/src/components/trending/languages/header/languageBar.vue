@@ -3,7 +3,7 @@
 
   What it does:  the bar at the top of the Languages section.
                    left  → JavaScript / PHP / Rust tabs (a glowing line slides under the open one)
-                   right → the data status ("Loading…", "data up to 12 Oct") + the Daily / Weekly /
+                   right → the data status ("Loading…", "Latest Update: 12 Oct 2026") + the Daily / Weekly /
                            Monthly toggle
   Receives:      props  languages (the LANGUAGES list), languageId, period,
                         status ('loading' | 'ready' | 'error'), dataUpTo ('YYYY-MM-DD')
@@ -13,7 +13,7 @@
 <script setup>
 // ---------- Imports ----------
 import { ref, reactive, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
-import { PERIODS, PERIOD_INFO, shortDate } from '@/utils/trending/helpers/format'
+import { PERIODS, PERIOD_INFO, longDate } from '@/utils/trending/helpers/format'
 import PeriodToggle from '@/components/trending/languages/header/periodToggle.vue'
 
 // ---------- Props & emits ----------
@@ -111,7 +111,7 @@ onBeforeUnmount(() => observer && observer.disconnect())
         <template v-if="status === 'loading'">Loading from {{ current.registry }}…</template>
         <template v-else-if="status === 'error'">Couldn't reach {{ current.registry }}</template>
         <template v-else-if="dataUpTo">
-          <span class="live-dot"></span>data up to {{ shortDate(dataUpTo) }}
+          <span class="live-dot"></span>Latest Update: {{ longDate(dataUpTo) }}
         </template>
       </p>
       <PeriodToggle
