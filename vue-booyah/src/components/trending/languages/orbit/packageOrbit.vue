@@ -12,7 +12,8 @@
                    - The lines from the orb are worked out by D3 (d3.linkHorizontal) and follow the
                      scroll live.
                    - Each row has a "+" button that adds the package to Compare.
-                   - Phones: a swipeable row of ranked chips instead of the orb and arc.
+                   - Phones (under 576px): a small orb on the left with lines branching out to a
+                     list of the packages beside it (top 5 first, "Show all 20" for the rest).
   Receives:      props  language (the open language's settings), packages (ranked, with displayRank),
                         selectedName, period, status ('loading' | 'ready' | 'error'),
                         errorMessage, trayIds (ids of packages already in the compare tray)
@@ -24,6 +25,7 @@
 // ---------- Imports ----------
 import { ref, reactive, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import * as d3 from 'd3'
+import { useMediaQuery } from '@vueuse/core'
 import { compact, pct, trendClass, PERIOD_INFO } from '@/utils/trending/helpers/format'
 import { prefersReducedMotion } from '@/utils/trending/helpers/motion'
 import { useCountUp } from '@/composables/trending/useCountUp'
@@ -51,11 +53,21 @@ const mainButtons = reactive({}) // each package's main button, by name (for key
 let observer = null
 let frame = 0 // the pending requestAnimationFrame for scrolling
 let settleTimer = 0 // waits for the wheel to stop before selecting the middle package
+// Phones: the tree (orb + list) and the parts its lines are measured from
+const tree = ref(null)
+const treeOrb = ref(null)
+const treeDots = reactive({}) // each package's dot, by name
+const treeGeo = ref(null) // { w, h, sx, orbY, ends: { name: [x, y] } }, see measureTree()
+const showAll = ref(false) // phones: "Show all 20" pressed
 
 // How long the arc must sit still (ms) before the package in the middle becomes the selection.
 // Short enough to feel live, long enough that the chart doesn't redraw for every package flicked past
 // (and that a smooth programmatic scroll, e.g. after a click, only selects where it lands).
 const SETTLE_MS = 140
+
+// Phones: how many packages show before "Show all", and the radius of the small orb
+const PHONE_TOP = 5
+const PHONE_ORB_R = 22
 
 // D3's curve maker: given a start and end point it returns an SVG path with a smooth S-bend
 const link = d3.linkHorizontal()
@@ -65,7 +77,17 @@ const link = d3.linkHorizontal()
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v))
 
 // ---------- Computed values ----------
-const isCompact = computed(() => width.value > 0 && width.value < 440) // phones only
+// Phones get the tree. Same breakpoint as the page's phone CSS (languagesSection.vue), so the
+// orbit card never shrinks to phone size while the orb is still drawn (that collapsed the card)
+const isCompact = useMediaQuery('(max-width: 575.98px)')
+
+// Phones: the packages the tree shows: the top 5 (or all 20 after "Show all"), always reaching
+// down to the selected one so it's never hidden
+const treePackages = computed(() => {
+  if (showAll.value) return props.packages
+  const i = props.packages.findIndex((p) => p.name === props.selectedName)
+  return props.packages.slice(0, Math.max(PHONE_TOP, i + 1))
+})
 
 // A new key replays the draw-in animation (new language or new period)
 const drawKey = computed(() => `${props.language.id}-${props.period}`)
@@ -132,6 +154,26 @@ watch(
   { immediate: true },
 )
 
+// Phones: a new language starts with the short list again
+watch(
+  () => props.language.id,
+  () => (showAll.value = false),
+)
+
+// Phones: re-measure the tree's lines whenever its rows move
+watch(
+  () => [
+    isCompact.value,
+    width.value,
+    height.value,
+    treePackages.value.length,
+    drawKey.value,
+    props.status,
+  ],
+  measureTree,
+  { flush: 'post' },
+)
+
 // ---------- Functions ----------
 
 /** true if this package is already in the compare tray. */
@@ -177,7 +219,59 @@ function scrollToIndex(index, smooth = true) {
   })
 }
 
-/** ↑ ↓ (and ← → on the phone chips) move the selection and keep keyboard focus on it. */
+/**
+ * An element's position inside `ancestor`, from offsetLeft/offsetTop (these ignore CSS
+ * transforms, so the rows' slide-in animation doesn't skew the lines).
+ */
+function offsetIn(el, ancestor) {
+  let x = 0
+  let y = 0
+  while (el && el !== ancestor) {
+    x += el.offsetLeft
+    y += el.offsetTop
+    el = el.offsetParent
+  }
+  return { x, y }
+}
+
+/** Phones: measures where the tree's lines start (the orb) and end (each package's dot). */
+function measureTree() {
+  if (!isCompact.value || !tree.value || !treeOrb.value) {
+    treeGeo.value = null
+    return
+  }
+  const orb = offsetIn(treeOrb.value, tree.value)
+  const ends = {}
+  for (const pkg of treePackages.value) {
+    const dot = treeDots[pkg.name]
+    if (!dot) continue
+    const at = offsetIn(dot, tree.value)
+    ends[pkg.name] = [at.x, at.y + dot.offsetHeight / 2]
+  }
+  // the orb sits level with the middle of the first 5 rows (and stays there on "Show all")
+  const firstFew = treePackages.value
+    .slice(0, PHONE_TOP)
+    .map((p) => ends[p.name])
+    .filter(Boolean)
+  const orbY = firstFew.length ? (firstFew[0][1] + firstFew[firstFew.length - 1][1]) / 2 : 0
+  treeGeo.value = {
+    w: tree.value.offsetWidth,
+    h: tree.value.offsetHeight,
+    sx: orb.x + treeOrb.value.offsetWidth / 2, // the middle of the orb
+    orbY,
+    ends,
+  }
+}
+
+/** Phones: the line from the orb's right edge to one package's dot (D3's S-curve, like the arc). */
+function treePath(name) {
+  const geo = treeGeo.value
+  const end = geo && geo.ends[name]
+  if (!end) return ''
+  return link({ source: [geo.sx + PHONE_ORB_R * 0.85, geo.orbY], target: end })
+}
+
+/** ↑ ↓ (and ← → on phones) move the selection and keep keyboard focus on it. */
 function onKeydown(event) {
   const back = event.key === 'ArrowUp' || (isCompact.value && event.key === 'ArrowLeft')
   const forward = event.key === 'ArrowDown' || (isCompact.value && event.key === 'ArrowRight')
@@ -361,11 +455,57 @@ onBeforeUnmount(() => clearTimeout(settleTimer))
       </div>
     </template>
 
-    <!-- ===================== Phone: a swipeable row of chips ===================== -->
-    <template v-if="isCompact">
+    <!-- ===================== Phone: a small orb branching out to a list ===================== -->
+    <div v-if="isCompact" ref="tree" class="tree">
+      <!-- Lines from the orb down to each package (behind everything) -->
+      <svg
+        v-if="status === 'ready' && treeGeo"
+        class="links"
+        :width="treeGeo.w"
+        :height="treeGeo.h"
+        aria-hidden="true"
+      >
+        <g :key="drawKey">
+          <path
+            v-for="(pkg, i) in treePackages"
+            :key="pkg.name"
+            :d="treePath(pkg.name)"
+            pathLength="1"
+            class="link"
+            :class="{ active: pkg.name === selectedName, hot: pkg.name === hoveredName }"
+            :style="{ '--delay': i * 40 + 'ms' }"
+          />
+          <path v-if="selectedName" :d="treePath(selectedName)" pathLength="1" class="flow" />
+        </g>
+      </svg>
+
+      <!-- The language's name and total, above everything -->
+      <p class="tree-label">
+        <strong>{{ language.name }}</strong>
+        <template v-if="status === 'ready'">
+          <span class="orb-total">{{ compact(shownTotal) }}</span>
+          <span>downloads by the top {{ packages.length }}, {{ PERIOD_INFO[period].latest }}</span>
+        </template>
+        <span v-else-if="status === 'loading'"
+          >Fetching the top 20 from {{ language.registry }}…</span
+        >
+      </p>
+
+      <!-- The language orb (small, on the left, level with the middle of the top 5 rows) -->
+      <div
+        ref="treeOrb"
+        class="tree-orb"
+        :style="treeGeo && treeGeo.orbY ? { top: treeGeo.orbY + 'px' } : null"
+      >
+        <div class="orb" :class="{ loading: status === 'loading' }">
+          <span class="orb-ring"></span>
+          <span class="orb-core"></span>
+        </div>
+      </div>
+
       <!-- Loading placeholders -->
-      <div v-if="status === 'loading'" class="chips placeholder-glow" aria-busy="true">
-        <span v-for="n in 4" :key="n" class="placeholder chip-bone"></span>
+      <div v-if="status === 'loading'" class="tree-list placeholder-glow" aria-busy="true">
+        <span v-for="n in PHONE_TOP" :key="n" class="placeholder row-bone"></span>
       </div>
       <!-- Error message with "Try again" -->
       <div v-else-if="status === 'error'" class="compact-msg" role="alert">
@@ -374,61 +514,82 @@ onBeforeUnmount(() => clearTimeout(settleTimer))
         </p>
         <button type="button" class="btn-accent" @click="$emit('retry')">Try again</button>
       </div>
-      <!-- The chips -->
-      <div
-        v-else
-        :key="drawKey"
-        class="chips"
-        role="list"
-        :aria-label="`${language.name} packages ranked by downloads, ${PERIOD_INFO[period].latest}`"
-        @keydown="onKeydown"
-      >
+      <!-- The packages (each row: main button + "+" add-to-compare button) -->
+      <template v-else>
         <div
-          v-for="(pkg, i) in packages"
-          :key="pkg.name"
-          class="chip"
-          role="listitem"
-          :class="{ active: pkg.name === selectedName }"
-          :style="{ '--delay': i * 25 + 'ms' }"
+          :key="drawKey"
+          class="tree-list"
+          role="list"
+          :aria-label="`${language.name} packages ranked by downloads, ${PERIOD_INFO[period].latest}`"
+          @keydown="onKeydown"
         >
-          <button
-            :ref="(el) => (mainButtons[pkg.name] = el)"
-            type="button"
-            class="chip-main"
-            :aria-current="pkg.name === selectedName ? 'true' : undefined"
-            :tabindex="pkg.name === selectedName ? 0 : -1"
-            @click="choose(pkg.name)"
+          <div
+            v-for="(pkg, i) in treePackages"
+            :key="pkg.name"
+            class="node tree-node"
+            role="listitem"
+            :class="{ active: pkg.name === selectedName }"
+            :style="{ '--delay': 100 + i * 40 + 'ms' }"
+            @mouseenter="hoveredName = pkg.name"
+            @mouseleave="hoveredName = ''"
           >
-            <span class="node-rank">#{{ pkg.displayRank }}</span>
-            <span class="node-name">{{ pkg.name }}</span>
-            <span class="pill" :class="trendClass(pkg.changePercent[period])">
-              {{ pct(pkg.changePercent[period]) }}
-            </span>
-          </button>
-          <button
-            type="button"
-            class="add"
-            :class="{ added: isAdded(pkg.name) }"
-            :tabindex="pkg.name === selectedName ? 0 : -1"
-            :aria-label="
-              isAdded(pkg.name) ? `${pkg.name} added to compare` : `Add ${pkg.name} to compare`
-            "
-            :aria-pressed="isAdded(pkg.name)"
-            @click="$emit('add', pkg.name)"
-          >
-            <span aria-hidden="true">{{ isAdded(pkg.name) ? '✓' : '+' }}</span>
-          </button>
+            <button
+              :ref="(el) => (mainButtons[pkg.name] = el)"
+              type="button"
+              class="node-main"
+              :aria-current="pkg.name === selectedName ? 'true' : undefined"
+              :tabindex="pkg.name === selectedName ? 0 : -1"
+              :title="pkg.name"
+              @click="choose(pkg.name)"
+            >
+              <span :ref="(el) => (treeDots[pkg.name] = el)" class="node-dot"></span>
+              <span class="node-rank">#{{ pkg.displayRank }}</span>
+              <span class="node-body">
+                <span class="node-name">{{ pkg.name }}</span>
+                <span class="node-meta">
+                  <strong>{{ compact(pkg.latest[period]) }}</strong>
+                  <span class="pill" :class="trendClass(pkg.changePercent[period])">
+                    {{ pct(pkg.changePercent[period]) }}
+                  </span>
+                </span>
+              </span>
+            </button>
+            <button
+              type="button"
+              class="add"
+              :class="{ added: isAdded(pkg.name) }"
+              :tabindex="pkg.name === selectedName ? 0 : -1"
+              :aria-label="
+                isAdded(pkg.name) ? `${pkg.name} added to compare` : `Add ${pkg.name} to compare`
+              "
+              :title="isAdded(pkg.name) ? 'Added to compare' : 'Add to compare'"
+              :aria-pressed="isAdded(pkg.name)"
+              @click="$emit('add', pkg.name)"
+            >
+              <span aria-hidden="true">{{ isAdded(pkg.name) ? '✓' : '+' }}</span>
+            </button>
+          </div>
         </div>
-      </div>
-    </template>
+        <!-- Show the rest of the 20 (or go back to the short list) -->
+        <button
+          v-if="packages.length > PHONE_TOP"
+          type="button"
+          class="tree-more"
+          :aria-expanded="showAll"
+          @click="showAll = !showAll"
+        >
+          {{ showAll ? 'Show fewer' : `Show all ${packages.length}` }}
+        </button>
+      </template>
+    </div>
   </div>
 </template>
 
 <style scoped>
 /*
   Sections, in order: layout → lines → orb → scrollable arc → "+" button → rail → messages
-  → % pills → phone chips → animations → keyboard focus → reduced motion.
-  (There's no separate "responsive" block: on phones the template shows the chips instead,
+  → % pills → phone tree → animations → light theme → keyboard focus → reduced motion.
+  (There's no separate "responsive" block: on phones the template shows the tree instead,
    decided in the script by isCompact.)
   (Rules are kept in their original order on purpose: in CSS, a later rule can override an
    earlier one, so reordering could change how things look.)
@@ -656,8 +817,7 @@ onBeforeUnmount(() => clearTimeout(settleTimer))
   font-variant-numeric: tabular-nums;
 }
 
-.node.active .node-rank,
-.chip.active .node-rank {
+.node.active .node-rank {
   background: var(--accent);
   color: var(--on-accent);
 }
@@ -728,7 +888,7 @@ onBeforeUnmount(() => clearTimeout(settleTimer))
 .node.active .add,
 .add:focus-visible,
 .add.added,
-.chip .add {
+.tree-node .add {
   opacity: 1;
   transform: none;
 }
@@ -834,82 +994,132 @@ onBeforeUnmount(() => clearTimeout(settleTimer))
   background: color-mix(in srgb, var(--ink) 6%, transparent);
 }
 
-/* ---------- Components: phone chips (shown instead of the orb and arc on phones) ---------- */
+/* ---------- Components: phone tree (shown instead of the orb and arc on phones) ----------
+   A small orb in a column on the left; the lines (measured in the script, see treePath()) branch
+   out from it to each row's dot. The rows reuse the arc's .node styles. */
 .compact-msg {
   padding: 4px 2px;
   color: var(--ink-2);
 }
 
-.chips {
-  display: flex;
-  gap: 8px;
-  overflow-x: auto;
-  padding: 2px 2px 8px;
-  scroll-snap-type: x proximity;
-  scrollbar-width: thin;
-  scrollbar-color: var(--edge) transparent;
+.tree {
+  position: relative; /* the lines and offsetIn() measure from here */
+  padding-bottom: 4px;
 }
 
-.chip {
-  flex: none;
-  display: flex;
-  align-items: center;
+.tree-label {
+  position: relative;
+  z-index: 2;
+  display: grid;
   gap: 2px;
-  padding-right: 4px;
+  margin: 4px 0 12px;
+  text-align: center;
+  color: var(--ink-2);
+  font-size: 0.8rem;
+  line-height: 1.35;
+}
+
+.tree-label strong {
+  color: var(--ink);
+  font-size: 1.15rem;
+}
+
+/* the small orb (44px) and its ring (12px each side). Its top is set from the script, level
+   with the middle of the top 5 rows. */
+.tree-orb {
+  position: absolute;
+  left: 0;
+  top: 180px; /* until the rows are measured */
+  z-index: 2;
+  width: 68px;
+  height: 68px;
+  transform: translateY(-50%);
+}
+
+.tree-orb .orb {
+  left: 50%;
+  top: 50%;
+  --size: 44px;
+}
+
+.tree-list {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 4px;
+  padding-left: 80px; /* the orb's column */
+}
+
+.tree-node {
+  position: relative;
+  transform: none;
+  min-width: 0;
+  animation-name: fade-in;
+}
+
+/* tighter than the arc so a row fits a 320px phone without running under the "+" */
+.tree-node .node-main {
+  flex: 1;
+  gap: 8px;
+  min-width: 0;
+  padding: 6px 4px 6px 0;
+  overflow: hidden;
+}
+
+.tree-node .node-rank {
+  min-width: 2.2em;
+  padding: 3px 5px;
+}
+
+.tree-node .node-name {
+  font-size: 0.9rem;
+}
+
+/* on the narrowest phones the % pill drops under the download count instead of being cut off */
+.tree-node .node-meta {
+  flex-wrap: wrap;
+  row-gap: 3px;
+}
+
+.tree-node .add {
+  margin-right: 4px;
+}
+
+.row-bone {
+  height: 48px;
+  border-radius: 14px;
+}
+
+.tree-more {
+  display: block;
+  margin: 10px 0 0 80px;
+  padding: 6px 14px;
   border: 1px solid var(--edge);
   border-radius: 999px;
-  background: color-mix(in srgb, var(--ink) 3%, transparent);
-  scroll-snap-align: start;
-  animation: fade-in 350ms var(--ease) var(--delay) backwards;
-  transition:
-    border-color 250ms var(--ease),
-    box-shadow 250ms var(--ease);
-}
-
-.chip-main {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 6px 8px 8px;
-  border: 0;
-  border-radius: 999px;
-  background: none;
-  color: var(--ink);
+  background: transparent;
+  color: var(--ink-2);
+  font-size: 0.85rem;
+  font-weight: 600;
   cursor: pointer;
 }
 
-.chip .node-name {
-  font-size: 0.85rem;
+.tree-more:hover {
   color: var(--ink);
-}
-
-.chip .node-rank {
-  min-width: 0;
-  font-size: 0.72rem;
-}
-
-.chip .add {
-  width: 26px;
-  height: 26px;
-  margin-right: 0;
-}
-
-.chip.active {
   border-color: var(--accent-line);
-  box-shadow: 0 0 18px -6px var(--accent);
 }
 
-.chip-bone {
-  width: 130px;
-  height: 40px;
-  border-radius: 999px;
+/* phones up to 400px: the rank badge gives its room to the name (the panel shows the rank) */
+@media (max-width: 399.98px) {
+  .tree-node .node-rank {
+    display: none;
+  }
 }
 
 /* ---------- Animations ----------
    draw      the lines grow out of the orb      flow     the light running along the selected line
    spin      the orb's ring turns               breathe  the orb's glow swells and fades
    slide-in  rows slide in from the left        pop      the "+" button bounces when pressed
-   fade-in   phone chips slide in */
+   fade-in   phone rows slide in */
 @keyframes draw {
   to {
     stroke-dashoffset: 0;
@@ -985,10 +1195,6 @@ onBeforeUnmount(() => clearTimeout(settleTimer))
   background: color-mix(in srgb, var(--accent) 36%, transparent);
 }
 
-:root[data-bs-theme='light'] .chip.active {
-  box-shadow: 0 2px 10px -2px var(--shadow);
-}
-
 :root[data-bs-theme='light'] .orb-core {
   background:
     radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.6), transparent 45%),
@@ -1029,7 +1235,6 @@ button:focus-visible {
   .orb-core,
   :root[data-bs-theme='light'] .orb-core,
   .node,
-  .chip,
   .add.added {
     animation: none;
   }
@@ -1038,8 +1243,7 @@ button:focus-visible {
   .node,
   .node-dot,
   .add,
-  .tick,
-  .chip {
+  .tick {
     transition: none;
   }
 }
