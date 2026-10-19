@@ -7,6 +7,8 @@
                    selectedName  which package fills the detail panel
                    datasets      each language's data (fetched the first time its tab opens, then kept)
                    tray          up to 2 packages picked for Compare (kept when you switch tabs)
+                   suggestion    once 1 package is in the tray, the package the wheel is on is
+                                 offered as the 2nd pick, so scrolling fills the other slot
                  It hands that state down to its children as props and listens for their events.
   Receives:      nothing (no props).
   Gives back:    nothing (no emits).
@@ -70,6 +72,23 @@ const comparePair = computed(() => {
   return pair.every(Boolean) ? pair : null
 })
 
+// The 2nd compare pick, filled in automatically: once one package is in the tray, whatever
+// package the wheel is on (in any language tab) is offered as the other side. It follows the
+// wheel as you scroll; pressing Compare (or its "+") locks it in. null when there's nothing to offer.
+const suggestion = computed(() => {
+  if (tray.value.length !== 1 || !selectedPackage.value) return null
+  const lang = language.value
+  const id = itemId(lang.id, selectedPackage.value.name)
+  if (id === tray.value[0].id) return null // the wheel is on the package already picked
+  return {
+    id,
+    name: selectedPackage.value.name,
+    registry: lang.registry,
+    accent: lang.accent,
+    languageId: lang.id,
+  }
+})
+
 // ---------- Watchers ----------
 // Opening a tab loads that language (straight away for the first tab)
 watch(languageId, (id) => load(id), { immediate: true })
@@ -126,6 +145,12 @@ function addToCompare(name) {
   }
   tray.value.push({ id, name, registry: lang.registry, accent: lang.accent, languageId: lang.id })
   trayMessage.value = ''
+}
+
+/** "Compare" in the tray: locks in the suggested 2nd package if needed, then opens the compare view. */
+function openCompare() {
+  if (tray.value.length < TRAY_LIMIT && suggestion.value) tray.value.push({ ...suggestion.value })
+  if (tray.value.length === TRAY_LIMIT) compareOpen.value = true
 }
 
 /** Removes one package from the tray (and closes the compare view, which needs two). */
@@ -212,8 +237,10 @@ onBeforeUnmount(() => clearTimeout(messageTimer))
       :limit="TRAY_LIMIT"
       :message="trayMessage"
       :languages="LANGUAGES"
+      :suggestion="suggestion"
       @remove="removeFromCompare"
-      @compare="compareOpen = true"
+      @pin="addToCompare"
+      @compare="openCompare"
       @clear="clearCompare"
     />
 

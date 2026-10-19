@@ -104,7 +104,14 @@ export const PERIODS = ['daily', 'weekly', 'monthly']
  *   days      how many days one block covers
  */
 export const PERIOD_INFO = {
-  daily: { label: 'Daily', latest: 'latest day', previous: 'the day before', unit: 'day', days: 1 },
+  // daily compares with the same weekday a week earlier (see DAILY_COMPARE_BACK in math/trendMath.js)
+  daily: {
+    label: 'Daily',
+    latest: 'latest day',
+    previous: 'the same day last week',
+    unit: 'day',
+    days: 1,
+  },
   weekly: {
     label: 'Weekly',
     latest: 'last 7 days',

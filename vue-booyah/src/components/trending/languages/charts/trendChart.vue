@@ -5,7 +5,8 @@
                    kind="line" → line + soft gradient area (Daily and Weekly)
                    kind="bar"  → rounded bars with values on top (Monthly)
                  What the user can do:
-                   - Hover (or touch) anywhere to see the exact date, downloads and change vs the point before
+                   - Hover (or touch) anywhere to see the exact date, downloads and % change
+                     (daily: vs the same day last week; weekly/monthly: vs the point before)
                    - Daily view: drag across the chart to zoom into those days; "Show all" or a
                      double-click zooms back out
                  Animations: the line draws itself in, the area fades up, bars grow from the baseline,
@@ -179,12 +180,15 @@ function measure() {
 
 /**
  * Turns the props into chart-ready points: a real Date for the x position, the value,
- * the label for the hover box, the % change from the point before, and how many days are estimates.
+ * the label for the hover box, the % change, and how many days are estimates.
+ * Daily points compare with the same weekday a week earlier (7 points back), like the headline
+ * number, so weekends don't show up as huge drops; weekly/monthly points compare with the one before.
  */
 function prepare() {
   const pts = props.points
   data = pts.map((p, i) => {
-    const prev = i > 0 ? pts[i - 1].downloads : null
+    const back = p.date ? 7 : 1 // daily items have `date`; weekly/monthly blocks have start/end
+    const prev = i >= back ? pts[i - back].downloads : null
     return {
       date: new Date((p.date || p.end) + 'T00:00:00Z'), // daily uses date, weekly/monthly use the end date
       value: p.downloads,
@@ -485,7 +489,8 @@ function onHover(event) {
   if (d.change === null) {
     tip.change = ''
   } else {
-    tip.change = `${trendArrow(d.change)} ${Math.abs(d.change).toFixed(1)}% vs previous ${props.unit}`
+    const versus = d.isDay ? 'same day last week' : `previous ${props.unit}`
+    tip.change = `${trendArrow(d.change)} ${Math.abs(d.change).toFixed(1)}% vs ${versus}`
     tip.trend = d.change > 0 ? 'up' : d.change < 0 ? 'down' : ''
   }
   tip.note = !d.estimated

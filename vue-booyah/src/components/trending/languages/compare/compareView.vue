@@ -217,7 +217,10 @@ onBeforeUnmount(() => {
         <!-- ===================== The six rows (a small table; ✓ marks the better side) ===================== -->
         <div class="rows" role="table" :aria-label="`${a.name} compared with ${b.name}`">
           <div class="row-line head-line" role="row">
-            <span role="columnheader" class="visually-hidden">Measure</span>
+            <!-- An empty slot over the row labels. The "Measure" text inside is for screen readers only.
+                 (Putting .visually-hidden on the slot itself made it position:absolute, so it left
+                 the grid and both names slid one column left, out of line with their values.) -->
+            <span role="columnheader" class="col-blank"><span class="visually-hidden">Measure</span></span>
             <span role="columnheader" class="col-name" :style="{ '--side': colors[0] }">{{
               a.name
             }}</span>
@@ -500,7 +503,8 @@ onBeforeUnmount(() => {
   padding-top: 0;
   padding-bottom: 2px;
   background: none;
-  border: 0;
+  /* transparent (not 0) border, so the header columns sit exactly over the bordered rows below */
+  border-color: transparent;
   animation: none;
 }
 

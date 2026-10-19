@@ -4,11 +4,15 @@
   What it does:  the bar that slides up from the bottom once a package is picked:
                    debug (JavaScript)  vs  serde (Rust)   [Clear] [Compare]
                  Each item has an × to remove it, and "Clear" empties the tray.
-                 "Compare" only works when the tray is full (2 packages).
+                 With 1 package picked, the 2nd slot shows the package the wheel is on (dashed,
+                 "scroll to change") and follows the wheel as you scroll. Compare uses it straight
+                 away; its "+" locks it in. "Compare" works once there are 2 (picked or suggested).
   Receives:      props  items (the picked packages: { id, name, registry, accent, languageId }),
                         limit (2), message (a short warning to show above the bar),
-                        languages (the LANGUAGES list, to show each item's language name)
-  Gives back:    emits  remove (an item's id), compare (open the compare view), clear (empty the tray)
+                        languages (the LANGUAGES list, to show each item's language name),
+                        suggestion (the wheel's package offered as the 2nd pick, or null)
+  Gives back:    emits  remove (an item's id), compare (open the compare view), clear (empty the tray),
+                        pin (the suggested package's name, to lock it into the tray)
   Used by:       languagesSection.vue.
 -->
 <script setup>
@@ -21,11 +25,16 @@ const props = defineProps({
   limit: { type: Number, default: 2 },
   message: { type: String, default: '' },
   languages: { type: Array, required: true },
+  suggestion: { type: Object, default: null }, // the wheel's package, offered as the 2nd pick
 })
-defineEmits(['remove', 'compare', 'clear'])
+defineEmits(['remove', 'compare', 'clear', 'pin'])
 
 // ---------- Computed values ----------
 const ready = computed(() => props.items.length === props.limit) // true once 2 are picked
+// the suggested 2nd package is shown only while one slot is still empty
+const showSuggestion = computed(() => !ready.value && props.suggestion !== null)
+// Compare works with 2 picked, or 1 picked + the suggestion
+const canCompare = computed(() => ready.value || showSuggestion.value)
 
 // ---------- Functions ----------
 /** A language's display name from its id, e.g. 'php' → 'PHP'. */
@@ -59,7 +68,32 @@ const languageName = (id) => (props.languages.find((l) => l.id === id) || {}).na
               </button>
             </span>
           </li>
-          <li v-if="!ready" key="hint" class="hint">Pick one more to compare</li>
+          <!-- The 2nd slot, filled from the wheel: changes as you scroll, "+" locks it in -->
+          <li v-if="showSuggestion" key="suggestion" class="entry">
+            <span class="vs">vs</span>
+            <span
+              class="item suggested"
+              :style="{ '--item-accent': suggestion.accent }"
+              title="Follows the package selected in the wheel"
+            >
+              <span class="item-dot"></span>
+              <span class="item-name" aria-live="polite">{{ suggestion.name }}</span>
+              <span class="item-lang">({{ languageName(suggestion.languageId) }})</span>
+              <span class="item-hint" aria-hidden="true">↕ scroll to change</span>
+              <button
+                type="button"
+                class="remove pin"
+                :aria-label="`Keep ${suggestion.name} as the second package`"
+                title="Keep this one"
+                @click="$emit('pin', suggestion.name)"
+              >
+                +
+              </button>
+            </span>
+          </li>
+          <li v-else-if="!ready" key="hint" class="hint">
+            Scroll the wheel to pick a second package
+          </li>
         </TransitionGroup>
 
         <!-- Clear + Compare buttons -->
@@ -72,7 +106,7 @@ const languageName = (id) => (props.languages.find((l) => l.id === id) || {}).na
           >
             Clear
           </button>
-          <button type="button" class="go" :disabled="!ready" @click="$emit('compare')">
+          <button type="button" class="go" :disabled="!canCompare" @click="$emit('compare')">
             Compare
           </button>
         </div>
@@ -191,6 +225,22 @@ const languageName = (id) => (props.languages.find((l) => l.id === id) || {}).na
 .remove:hover {
   background: color-mix(in srgb, var(--ink) 14%, transparent);
   color: var(--ink);
+}
+
+/* the suggested 2nd package: dashed outline so it reads as "not locked in yet" */
+.item.suggested {
+  border-style: dashed;
+  background: color-mix(in srgb, var(--item-accent) 5%, transparent);
+}
+
+.item-hint {
+  color: var(--ink-3);
+  font-size: 0.72rem;
+  white-space: nowrap;
+}
+
+.pin {
+  font-weight: 700;
 }
 
 .vs {
@@ -334,6 +384,10 @@ button:focus-visible {
 
   .item-name {
     max-width: 14ch;
+  }
+
+  .item-hint {
+    display: none;
   }
 
   .tray-actions {

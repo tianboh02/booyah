@@ -134,13 +134,22 @@ export function groupIntoBlocks(days, size) {
 }
 
 /**
- * % change between the latest entry in a list and the one before it.
+ * How far back the DAILY % change looks: 7 days, i.e. the same weekday last week.
+ * Downloads swing hard between weekdays and weekends (CI servers and developers mostly work
+ * Mon–Fri), so "Saturday vs Friday" always looked like a 30–50% crash for every package.
+ * Comparing Saturday with last Saturday removes that weekly rhythm and shows the real trend.
+ */
+export const DAILY_COMPARE_BACK = 7
+
+/**
+ * % change between the latest entry in a list and the one `back` entries before it
+ * (back = 1: the entry just before; back = 7 on a daily list: the same weekday last week).
  * Returns e.g. 4.2 (= +4.2%), rounded to 1 decimal place, or null if it can't be worked out.
  */
-export function percentChange(list) {
-  if (list.length < 2) return null
+export function percentChange(list, back = 1) {
+  if (list.length < back + 1) return null
   const latest = list[list.length - 1].downloads
-  const previous = list[list.length - 2].downloads
+  const previous = list[list.length - 1 - back].downloads
   if (previous === 0) return null
   return Math.round(((latest - previous) / previous) * 1000) / 10
 }
@@ -164,7 +173,7 @@ export function buildStats(info, days) {
       monthly: lastOf(monthly) ? lastOf(monthly).downloads : null,
     },
     changePercent: {
-      daily: percentChange(days),
+      daily: percentChange(days, DAILY_COMPARE_BACK), // vs the same weekday last week
       weekly: percentChange(weekly),
       monthly: percentChange(monthly),
     },

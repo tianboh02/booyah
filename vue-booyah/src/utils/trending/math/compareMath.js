@@ -12,7 +12,7 @@
  * Used by:       compare/compareView.vue and tests/trending/testCompare.js.
  */
 
-import { groupIntoBlocks, percentChange } from './trendMath.js'
+import { groupIntoBlocks, percentChange, DAILY_COMPARE_BACK } from './trendMath.js'
 import { pct, PERIOD_INFO } from '../helpers/format.js'
 
 // ---------------------------------------------------------------------------
@@ -91,7 +91,8 @@ function sideStats(pkg, days, period) {
     name: pkg.name,
     language: pkg.language,
     size: latest,
-    change: percentChange(blocks),
+    // daily: vs the same weekday last week (see DAILY_COMPARE_BACK); weekly/monthly: vs the block before
+    change: percentChange(blocks, period === 'daily' ? DAILY_COMPARE_BACK : 1),
     averagePerDay: latest === null ? null : latest / PERIOD_INFO[period].days,
     trend,
     trendLabel: trendLabel(trend),
@@ -209,7 +210,7 @@ export function buildComparison(a, b, period) {
     },
     {
       key: 'change',
-      label: `Change vs previous ${words.unit}`,
+      label: period === 'daily' ? 'Change vs same day last week' : `Change vs previous ${words.unit}`,
       a: A.change,
       b: B.change,
       win: winner(A.change, B.change),
