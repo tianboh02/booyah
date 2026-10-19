@@ -738,24 +738,37 @@ button:focus-visible {
   outline-offset: 2px;
 }
 
-/* ---------- Responsive (tablet): one column, controls on the top row ---------- */
+/* ---------- Responsive (tablet): one column, controls under the names ---------- */
 @media (max-width: 899.98px) {
-  /* narrower screens: the names get the full width (room left for the ×), and the toggle and
-     Clear sit on their own row below them, on the right */
+  /* narrower screens: the names get the full width (room left for the ×), then the toggle and
+     Clear on their own row, then the date range. The title block is flattened (display: contents)
+     so the names and the range can sit either side of the controls. */
   .compare-head {
     flex-wrap: wrap;
+    gap: 10px 20px;
     padding-right: 24px;
   }
 
   .title-block {
+    display: contents;
+  }
+
+  .names {
     flex-basis: 100%;
+    margin: 0;
     padding-right: 48px;
   }
 
   .head-actions {
+    order: 1;
     width: 100%;
     gap: 8px;
-    justify-content: flex-end;
+    justify-content: flex-start;
+  }
+
+  .range {
+    order: 2;
+    flex-basis: 100%;
   }
 
   .compare-body {
@@ -785,7 +798,7 @@ button:focus-visible {
     padding: 12px 14px 12px;
   }
 
-  .title-block {
+  .names {
     padding-right: 44px;
   }
 
