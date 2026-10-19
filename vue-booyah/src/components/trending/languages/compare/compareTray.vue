@@ -18,6 +18,8 @@
 <script setup>
 // ---------- Imports ----------
 import { computed } from 'vue'
+import { useTheme } from '@/composables/useTheme'
+import { lineAccent } from '@/utils/trending/languages'
 
 // ---------- Props & emits ----------
 const props = defineProps({
@@ -29,6 +31,8 @@ const props = defineProps({
 })
 defineEmits(['remove', 'compare', 'clear', 'pin'])
 
+const { theme } = useTheme() // 'dark' | 'light', from the navbar toggle
+
 // ---------- Computed values ----------
 const ready = computed(() => props.items.length === props.limit) // true once 2 are picked
 // the suggested 2nd package is shown only while one slot is still empty
@@ -39,6 +43,12 @@ const canCompare = computed(() => ready.value || showSuggestion.value)
 // ---------- Functions ----------
 /** A language's display name from its id, e.g. 'php' → 'PHP'. */
 const languageName = (id) => (props.languages.find((l) => l.id === id) || {}).name
+
+/** An item's dot/outline colour: its accent, darker on the light theme (see lineAccent()). */
+const itemAccent = (item) => {
+  const lang = props.languages.find((l) => l.id === item.languageId)
+  return lang ? lineAccent(lang, theme.value) : item.accent
+}
 </script>
 
 <template>
@@ -54,7 +64,10 @@ const languageName = (id) => (props.languages.find((l) => l.id === id) || {}).na
         <TransitionGroup name="item" tag="ul" class="tray-items">
           <li v-for="(item, i) in items" :key="item.id" class="entry">
             <span v-if="i > 0" class="vs">vs</span>
-            <span class="item" :style="{ '--item-accent': item.accent }">
+            <span
+              class="item"
+              :style="{ '--item-accent': itemAccent(item), '--item-fill': item.accent }"
+            >
               <span class="item-dot"></span>
               <span class="item-name">{{ item.name }}</span>
               <span class="item-lang">({{ languageName(item.languageId) }})</span>
@@ -73,7 +86,7 @@ const languageName = (id) => (props.languages.find((l) => l.id === id) || {}).na
             <span class="vs">vs</span>
             <span
               class="item suggested"
-              :style="{ '--item-accent': suggestion.accent }"
+              :style="{ '--item-accent': itemAccent(suggestion), '--item-fill': suggestion.accent }"
               title="Follows the package selected in the wheel"
             >
               <span class="item-dot"></span>
@@ -188,6 +201,11 @@ const languageName = (id) => (props.languages.find((l) => l.id === id) || {}).na
   box-shadow: 0 0 8px var(--item-accent);
 }
 
+/* light theme: no coloured glow (it smudges on white) */
+:root[data-bs-theme='light'] .item-dot {
+  box-shadow: none;
+}
+
 .item-name {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -225,6 +243,16 @@ const languageName = (id) => (props.languages.find((l) => l.id === id) || {}).na
 .remove:hover {
   background: color-mix(in srgb, var(--ink) 14%, transparent);
   color: var(--ink);
+}
+
+/* light theme: a stronger tint of the bright accent (--item-fill), so the picked packages
+   stand out from the white tray; the outline and dot keep the darker --item-accent */
+:root[data-bs-theme='light'] .item {
+  background: color-mix(in srgb, var(--item-fill) 26%, transparent);
+}
+
+:root[data-bs-theme='light'] .item.suggested {
+  background: color-mix(in srgb, var(--item-fill) 10%, transparent);
 }
 
 /* the suggested 2nd package: dashed outline so it reads as "not locked in yet" */

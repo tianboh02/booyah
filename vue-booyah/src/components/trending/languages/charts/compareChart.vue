@@ -9,7 +9,7 @@
                  changes. Hovering shows both values for that date.
   Receives:      props  series (buildComparison(...).series), mode ('downloads' | 'growth'),
                         names ([nameA, nameB]), colors ([colourA, colourB]),
-                        dashedB (true for two packages from the same language), period
+                        dashedB (true when B's line should be dashed), period
   Gives back:    nothing (no emits).
   Used by:       compare/compareView.vue.
 
@@ -29,7 +29,7 @@ const props = defineProps({
   mode: { type: String, default: 'downloads' }, // 'downloads' | 'growth'
   names: { type: Array, required: true }, // [nameA, nameB]
   colors: { type: Array, required: true }, // [colourA, colourB]
-  dashedB: { type: Boolean, default: false }, // same language → B's line is dashed so the two stay apart
+  dashedB: { type: Boolean, default: false }, // B's line is dashed so the two stay apart
   period: { type: String, default: 'weekly' },
 })
 

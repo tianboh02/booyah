@@ -174,7 +174,11 @@ onBeforeUnmount(() => clearTimeout(messageTimer))
 <template>
   <section
     class="languages"
-    :style="{ '--accent': language.accent, '--on-accent': language.onAccent }"
+    :style="{
+      '--accent': language.accent,
+      '--accent-ink': language.accentInk,
+      '--on-accent': language.onAccent,
+    }"
     aria-labelledby="languages-heading"
   >
     <!-- Section title and intro -->
@@ -265,8 +269,9 @@ onBeforeUnmount(() => clearTimeout(messageTimer))
    <html data-bs-theme="light|dark"> changes (themeToggle.vue / useTheme.js). Every child
    component reads these variables, so the whole Trending page follows the theme toggle.
    Faint washes/lines are mixed from --ink, so they are light-on-dark in dark mode and
-   dark-on-light in light mode automatically. --accent is set in the template from the open
-   language's colour. */
+   dark-on-light in light mode automatically. --accent and --accent-ink are set in the template
+   from the open language's colours. --accent-line is what lines, dots and borders use: the accent
+   itself on dark, the darker --accent-ink on light (bright accents vanish on white). */
 .languages {
   /* from main.css */
   --bg: var(--app-bg);
@@ -289,6 +294,7 @@ onBeforeUnmount(() => clearTimeout(messageTimer))
   --error-ink: #ffb3ad;
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
   --font-code: var(--bs-font-monospace);
+  --accent-line: var(--accent);
   /* room for the compare tray so it never covers the last content */
   padding-bottom: 96px;
 }
@@ -304,6 +310,7 @@ onBeforeUnmount(() => clearTimeout(messageTimer))
   --overlay: rgba(31, 35, 40, 0.45);
   --error-bg: #ffebe9;
   --error-ink: #82071e;
+  --accent-line: var(--accent-ink);
 }
 
 .failed-note {

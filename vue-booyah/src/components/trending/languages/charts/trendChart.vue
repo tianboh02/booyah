@@ -12,7 +12,8 @@
                  Animations: the line draws itself in, the area fades up, bars grow from the baseline,
                  and zooming slides smoothly to the new range.
   Receives:      props  points (a daily / weekly / monthly list from the package card), kind,
-                        color (the language's accent), unit (for "vs previous day"), zoomable
+                        color (the line's colour), fill (the area's colour; defaults to color),
+                        unit (for "vs previous day"), zoomable
   Gives back:    nothing (no emits).
   Used by:       detail/packageDashboard.vue.
 
@@ -31,6 +32,7 @@ const props = defineProps({
   points: { type: Array, required: true }, // [{ date, downloads }] or [{ start, end, downloads }]
   kind: { type: String, default: 'line' }, // 'line' or 'bar'
   color: { type: String, default: '#58a6ff' },
+  fill: { type: String, default: '' }, // the gradient under the line; '' → same as color
   unit: { type: String, default: 'day' }, // used in the hover text: "vs previous day"
   zoomable: { type: Boolean, default: false },
 })
@@ -102,7 +104,7 @@ watch(
 )
 
 // New language colour → recolour the gradient under the line
-watch(() => props.color, colourGradient)
+watch(() => [props.color, props.fill], colourGradient)
 
 // ---------- Functions: building the chart ----------
 
@@ -154,10 +156,11 @@ function setup() {
   colourGradient()
 }
 
-/** Sets the gradient under the line to the language colour (35% at the top, fading to 0). */
+/** Sets the gradient under the line to the fill colour (35% at the top, fading to 0). */
 function colourGradient() {
-  svg.select('.stop-top').attr('stop-color', props.color).attr('stop-opacity', 0.35)
-  svg.select('.stop-bottom').attr('stop-color', props.color).attr('stop-opacity', 0)
+  const fill = props.fill || props.color
+  svg.select('.stop-top').attr('stop-color', fill).attr('stop-opacity', 0.35)
+  svg.select('.stop-bottom').attr('stop-color', fill).attr('stop-opacity', 0)
 }
 
 /** Measures the box and fits the SVG, the plot area and the zoom clip to it. */
@@ -601,6 +604,11 @@ onBeforeUnmount(() => observer && observer.disconnect())
 .trend :deep(.bars path) {
   fill: var(--c);
   filter: drop-shadow(0 0 10px color-mix(in srgb, var(--c) 40%, transparent));
+}
+/* light theme: no coloured glow (it smudges on white) */
+:root[data-bs-theme='light'] .trend :deep(.line),
+:root[data-bs-theme='light'] .trend :deep(.bars path) {
+  filter: none;
 }
 .trend :deep(.bar-labels text) {
   fill: var(--ink);

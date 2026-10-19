@@ -15,6 +15,8 @@
 import { ref, reactive, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { PERIODS, PERIOD_INFO, longDate } from '@/utils/trending/helpers/format'
 import PeriodToggle from '@/components/trending/languages/header/periodToggle.vue'
+import { useTheme } from '@/composables/useTheme'
+import { lineAccent } from '@/utils/trending/languages'
 
 // ---------- Props & emits ----------
 const props = defineProps({
@@ -25,6 +27,8 @@ const props = defineProps({
   dataUpTo: { type: String, default: '' },
 })
 const emit = defineEmits(['update:languageId', 'update:period'])
+
+const { theme } = useTheme() // 'dark' | 'light', from the navbar toggle
 
 // ---------- State ----------
 const tabsEl = ref(null) // the tab row, watched for size changes
@@ -94,7 +98,7 @@ onBeforeUnmount(() => observer && observer.disconnect())
         :class="{ active: lang.id === languageId }"
         :aria-selected="lang.id === languageId"
         :tabindex="lang.id === languageId ? 0 : -1"
-        :style="{ '--tab-accent': lang.accent }"
+        :style="{ '--tab-accent': lineAccent(lang, theme) }"
         @click="$emit('update:languageId', lang.id)"
       >
         <span class="tab-dot"></span>
@@ -180,6 +184,12 @@ onBeforeUnmount(() => observer && observer.disconnect())
   box-shadow: 0 0 12px 1px var(--tab-accent);
 }
 
+/* light theme: no coloured glows (they smudge on white) */
+:root[data-bs-theme='light'] .tab.active .tab-dot,
+:root[data-bs-theme='light'] .indicator {
+  box-shadow: none;
+}
+
 .tab-name {
   font-weight: 600;
 }
@@ -196,8 +206,8 @@ onBeforeUnmount(() => observer && observer.disconnect())
   bottom: 2px;
   height: 2px;
   border-radius: 2px;
-  background: var(--accent);
-  box-shadow: 0 0 12px var(--accent);
+  background: var(--accent-line);
+  box-shadow: 0 0 12px var(--accent-line);
   transition:
     transform 450ms var(--ease),
     width 450ms var(--ease),

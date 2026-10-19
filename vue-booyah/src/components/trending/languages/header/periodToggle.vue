@@ -90,11 +90,16 @@ function onKey(event) {
   width: calc((100% - 6px) / var(--count));
   border-radius: 999px;
   background: color-mix(in srgb, var(--accent) 22%, color-mix(in srgb, var(--ink) 4%, transparent));
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 55%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent-line) 55%, transparent);
   transform: translateX(calc(var(--index) * 100%));
   transition:
     transform 350ms var(--ease),
     background-color 400ms var(--ease);
+}
+
+/* light theme: a stronger tint of the accent (the faint one barely shows on white) */
+:root[data-bs-theme='light'] .thumb {
+  background: color-mix(in srgb, var(--accent) 32%, color-mix(in srgb, var(--ink) 4%, transparent));
 }
 
 button {

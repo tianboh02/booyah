@@ -24,6 +24,7 @@ import { compact, pct, dateRange, PERIODS, PERIOD_INFO } from '@/utils/trending/
 import PeriodToggle from '@/components/trending/languages/header/periodToggle.vue'
 import CompareChart from '@/components/trending/languages/charts/compareChart.vue'
 import { useTheme } from '@/composables/useTheme'
+import { lineAccent } from '@/utils/trending/languages'
 
 // ---------- Props & emits ----------
 const props = defineProps({
@@ -54,11 +55,16 @@ let previousOverflow = '' // the page's scroll setting before opening, to restor
 const comparison = computed(() => buildComparison(props.pair[0], props.pair[1], props.period))
 const [a, b] = [computed(() => props.pair[0]), computed(() => props.pair[1])]
 const sameLanguage = computed(() => a.value.language.id === b.value.language.id)
+// B's line is dashed when it shares A's colour, and always on the light theme, where two
+// darkened accents can still look alike, so the lines differ by shape as well as colour
+const dashedB = computed(() => sameLanguage.value || theme.value === 'light')
 
-// The two lines' colours
+// The two lines' colours (each language's accent, darker on the light theme; see lineAccent())
 const colors = computed(() => [
-  a.value.language.accent,
-  sameLanguage.value ? SAME_LANGUAGE_B[theme.value] || SAME_LANGUAGE_B.dark : b.value.language.accent,
+  lineAccent(a.value.language, theme.value),
+  sameLanguage.value
+    ? SAME_LANGUAGE_B[theme.value] || SAME_LANGUAGE_B.dark
+    : lineAccent(b.value.language, theme.value),
 ])
 
 // ---------- Functions ----------
@@ -153,7 +159,11 @@ onBeforeUnmount(() => {
       role="dialog"
       aria-modal="true"
       aria-labelledby="compare-title"
-      :style="{ '--accent': a.language.accent, '--on-accent': a.language.onAccent }"
+      :style="{
+        '--accent': a.language.accent,
+        '--accent-line': lineAccent(a.language, theme),
+        '--on-accent': a.language.onAccent,
+      }"
     >
       <!-- ===================== Header: names, date range, period toggle, Clear, × ===================== -->
       <header class="compare-head">
@@ -165,7 +175,7 @@ onBeforeUnmount(() => {
                   ><wbr v-if="i" />{{ part }}</template
                 ></span
               >
-              <span class="badge-lang" :style="{ '--lang': a.language.accent }">{{
+              <span class="badge-lang" :style="{ '--lang': lineAccent(a.language, theme) }">{{
                 a.language.name
               }}</span>
             </span>
@@ -176,7 +186,7 @@ onBeforeUnmount(() => {
                   ><wbr v-if="i" />{{ part }}</template
                 ></span
               >
-              <span class="badge-lang" :style="{ '--lang': b.language.accent }">{{
+              <span class="badge-lang" :style="{ '--lang': lineAccent(b.language, theme) }">{{
                 b.language.name
               }}</span>
             </span>
@@ -269,7 +279,7 @@ onBeforeUnmount(() => {
                 >
               </li>
               <li :style="{ '--side': colors[1] }">
-                <span class="swatch" :class="{ dashed: sameLanguage }"></span>
+                <span class="swatch" :class="{ dashed: dashedB }"></span>
                 <span
                   ><template v-for="(part, i) in nameParts(b.name)" :key="i"
                     ><wbr v-if="i" />{{ part }}</template
@@ -299,7 +309,7 @@ onBeforeUnmount(() => {
             :period="period"
             :names="[a.name, b.name]"
             :colors="colors"
-            :dashed-b="sameLanguage"
+            :dashed-b="dashedB"
           />
         </section>
 
@@ -638,7 +648,7 @@ onBeforeUnmount(() => {
 .verdict {
   margin: 0 0 6px;
   padding: 14px 18px;
-  border-left: 3px solid var(--accent);
+  border-left: 3px solid var(--accent-line);
   border-radius: 0 12px 12px 0;
   background: color-mix(in srgb, var(--accent) 7%, transparent);
   color: var(--ink);

@@ -20,6 +20,7 @@
 import { computed } from 'vue'
 import TrendChart from '@/components/trending/languages/charts/trendChart.vue'
 import { useCountUp } from '@/composables/trending/useCountUp'
+import { useTheme } from '@/composables/useTheme'
 import {
   num,
   compact,
@@ -31,6 +32,7 @@ import {
   PERIOD_INFO,
 } from '@/utils/trending/helpers/format'
 import { packagePageUrl } from '@/utils/trending/helpers/packageLinks'
+import { lineAccent } from '@/utils/trending/languages'
 
 // ---------- Props & emits ----------
 const props = defineProps({
@@ -43,9 +45,13 @@ const props = defineProps({
 })
 defineEmits(['add'])
 
+const { theme } = useTheme() // 'dark' | 'light', from the navbar toggle
+
 // ---------- Computed values ----------
 // The wording and day count for the selected period (see PERIOD_INFO in helpers/format.js)
 const info = computed(() => PERIOD_INFO[props.period])
+// The chart's line colour (darker on the light theme so a bright accent stays visible)
+const chartColor = computed(() => lineAccent(props.language, theme.value))
 
 // The package's page on its registry website (null hides the Explore button)
 const exploreUrl = computed(() =>
@@ -186,7 +192,8 @@ const insight = computed(() => {
           class="chart"
           :points="pkg[period]"
           :kind="period === 'monthly' ? 'bar' : 'line'"
-          :color="language.accent"
+          :color="chartColor"
+          :fill="language.accent"
           :unit="info.unit"
           :zoomable="period === 'daily'"
         />
@@ -253,11 +260,16 @@ const insight = computed(() => {
   padding: 4px 10px;
   border-radius: 10px;
   background: color-mix(in srgb, var(--accent) 16%, transparent);
-  border: 1px solid color-mix(in srgb, var(--accent) 50%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent-line) 50%, transparent);
   color: var(--ink);
   font-size: 1.05rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
+}
+
+/* light theme: a stronger tint of the accent, so the badge stands out from white */
+:root[data-bs-theme='light'] .rank-badge {
+  background: color-mix(in srgb, var(--accent) 28%, transparent);
 }
 
 .rank-badge small {
@@ -288,7 +300,7 @@ const insight = computed(() => {
 .compare-btn {
   flex: none;
   padding: 7px 14px;
-  border: 1px solid color-mix(in srgb, var(--accent) 60%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent-line) 60%, transparent);
   border-radius: 999px;
   background: color-mix(in srgb, var(--accent) 12%, transparent);
   color: var(--ink);
@@ -303,6 +315,19 @@ const insight = computed(() => {
 
 .compare-btn:hover {
   background: color-mix(in srgb, var(--accent) 24%, transparent);
+}
+
+/* light theme: stronger tints of the accent (the faint ones barely show on white) */
+:root[data-bs-theme='light'] .compare-btn {
+  background: color-mix(in srgb, var(--accent) 28%, transparent);
+}
+
+:root[data-bs-theme='light'] .compare-btn:hover {
+  background: color-mix(in srgb, var(--accent) 42%, transparent);
+}
+
+:root[data-bs-theme='light'] .compare-btn.added {
+  background: var(--accent);
 }
 
 .compare-btn:active {
@@ -329,7 +354,7 @@ const insight = computed(() => {
   align-items: center;
   gap: 5px;
   padding: 7px 14px;
-  border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent-line) 45%, transparent);
   border-radius: 999px;
   background: transparent;
   color: var(--ink-2);
@@ -349,7 +374,7 @@ const insight = computed(() => {
 }
 
 .explore-btn:hover {
-  border-color: color-mix(in srgb, var(--accent) 80%, transparent);
+  border-color: color-mix(in srgb, var(--accent-line) 80%, transparent);
   color: var(--ink);
   transform: translateY(-1px);
 }
@@ -447,7 +472,7 @@ const insight = computed(() => {
 .insight {
   margin: 0;
   padding: 12px 16px;
-  border-left: 3px solid var(--accent);
+  border-left: 3px solid var(--accent-line);
   border-radius: 0 10px 10px 0;
   background: color-mix(in srgb, var(--accent) 7%, transparent);
   color: var(--ink);

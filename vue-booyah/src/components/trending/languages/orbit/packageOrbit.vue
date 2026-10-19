@@ -467,18 +467,18 @@ onBeforeUnmount(() => clearTimeout(settleTimer))
 }
 
 .link.hot {
-  stroke: color-mix(in srgb, var(--accent) 70%, transparent);
+  stroke: color-mix(in srgb, var(--accent-line) 70%, transparent);
   stroke-width: 1.75;
 }
 
 .link.active {
-  stroke: var(--accent);
+  stroke: var(--accent-line);
   stroke-width: 2.25;
 }
 
 .flow {
   fill: none;
-  stroke: var(--accent);
+  stroke: var(--accent-line);
   stroke-width: 3.5;
   stroke-linecap: round;
   stroke-dasharray: 0.07 0.93;
@@ -501,11 +501,11 @@ onBeforeUnmount(() => clearTimeout(settleTimer))
   border-radius: 50%;
   background: conic-gradient(
     from 0deg,
-    var(--accent),
+    var(--accent-line),
     transparent 35%,
-    var(--accent) 50%,
+    var(--accent-line) 50%,
     transparent 85%,
-    var(--accent)
+    var(--accent-line)
   );
   -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px));
   mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px));
@@ -624,7 +624,7 @@ onBeforeUnmount(() => clearTimeout(settleTimer))
   height: 16px;
   border-radius: 50%;
   background: var(--bg);
-  border: 2px solid var(--accent);
+  border: 2px solid var(--accent-line);
   transition:
     background-color 250ms var(--ease),
     box-shadow 250ms var(--ease),
@@ -637,9 +637,9 @@ onBeforeUnmount(() => clearTimeout(settleTimer))
 }
 
 .node.active .node-dot {
-  background: var(--accent);
+  background: var(--accent-line);
   box-shadow:
-    0 0 0 5px color-mix(in srgb, var(--accent) 25%, transparent),
+    0 0 0 5px color-mix(in srgb, var(--accent-line) 25%, transparent),
     0 0 20px var(--accent);
 }
 
@@ -735,7 +735,7 @@ onBeforeUnmount(() => clearTimeout(settleTimer))
 
 .add:hover {
   color: var(--ink);
-  border-color: var(--accent);
+  border-color: var(--accent-line);
   background: color-mix(in srgb, var(--accent) 18%, transparent);
 }
 
@@ -776,7 +776,7 @@ onBeforeUnmount(() => clearTimeout(settleTimer))
 }
 
 .tick.active {
-  background: var(--accent);
+  background: var(--accent-line);
 }
 
 /* ---------- Components: messages ---------- */
@@ -895,7 +895,7 @@ onBeforeUnmount(() => clearTimeout(settleTimer))
 }
 
 .chip.active {
-  border-color: var(--accent);
+  border-color: var(--accent-line);
   box-shadow: 0 0 18px -6px var(--accent);
 }
 
@@ -960,6 +960,57 @@ onBeforeUnmount(() => clearTimeout(settleTimer))
   }
 }
 
+/* ---------- Light theme ----------
+   Coloured glows read as light on the dark theme but as smudges on white, so the light theme
+   swaps them for soft shadows. The orb fills with shades of its own colour instead of fading
+   into the grey page, so it looks solid. */
+:root[data-bs-theme='light'] .flow {
+  filter: none;
+}
+
+:root[data-bs-theme='light'] .node:hover .node-dot {
+  box-shadow: 0 1px 4px var(--shadow);
+}
+
+:root[data-bs-theme='light'] .node.active .node-dot {
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent-line) 22%, transparent);
+}
+
+/* selected states: a stronger tint of the accent, so they stand out from white */
+:root[data-bs-theme='light'] .node.active {
+  background: color-mix(in srgb, var(--accent) 26%, transparent);
+}
+
+:root[data-bs-theme='light'] .add:not(.added):hover {
+  background: color-mix(in srgb, var(--accent) 36%, transparent);
+}
+
+:root[data-bs-theme='light'] .chip.active {
+  box-shadow: 0 2px 10px -2px var(--shadow);
+}
+
+:root[data-bs-theme='light'] .orb-core {
+  background:
+    radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.6), transparent 45%),
+    radial-gradient(
+      circle at 50% 45%,
+      var(--accent) 35%,
+      color-mix(in srgb, var(--accent-line) 80%, #000) 100%
+    );
+  box-shadow:
+    0 14px 30px -12px color-mix(in srgb, var(--accent-line) 70%, transparent),
+    inset 0 -8px 16px rgba(0, 0, 0, 0.12);
+  animation-name: breathe-light;
+}
+
+@keyframes breathe-light {
+  50% {
+    box-shadow:
+      0 18px 36px -10px color-mix(in srgb, var(--accent-line) 80%, transparent),
+      inset 0 -8px 16px rgba(0, 0, 0, 0.12);
+  }
+}
+
 /* ---------- Keyboard focus ---------- */
 button:focus-visible {
   outline: 2px solid var(--focus);
@@ -976,6 +1027,7 @@ button:focus-visible {
   .flow,
   .orb-ring,
   .orb-core,
+  :root[data-bs-theme='light'] .orb-core,
   .node,
   .chip,
   .add.added {
