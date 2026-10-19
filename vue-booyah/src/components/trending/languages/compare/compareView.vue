@@ -160,9 +160,10 @@ onBeforeUnmount(() => {
       aria-modal="true"
       aria-labelledby="compare-title"
       :style="{
-        '--accent': a.language.accent,
-        '--accent-line': lineAccent(a.language, theme),
-        '--on-accent': a.language.onAccent,
+        '--accent': 'var(--brand-blue)',
+        '--accent-line': 'var(--brand-blue)',
+        '--glow-a': a.language.accent,
+        '--glow-b': b.language.accent,
       }"
     >
       <!-- ===================== Header: names, date range, period toggle, Clear, × ===================== -->
@@ -352,10 +353,18 @@ onBeforeUnmount(() => {
   max-height: calc(100vh - 48px);
   border: 1px solid var(--edge);
   border-radius: 22px;
+  /* a faint glow in each top corner: the first package's colour on the left, the second's on
+     the right. Everything else in the frame (toggles, description) uses the fixed --accent, the
+     site's blue, set in the template. */
   background:
     radial-gradient(
-      80% 40% at 0% 0%,
-      color-mix(in srgb, var(--accent) 8%, transparent),
+      60% 40% at 0% 0%,
+      color-mix(in srgb, var(--glow-a) 8%, transparent),
+      transparent 60%
+    ),
+    radial-gradient(
+      60% 40% at 100% 0%,
+      color-mix(in srgb, var(--glow-b) 8%, transparent),
       transparent 60%
     ),
     var(--card);
@@ -731,16 +740,22 @@ button:focus-visible {
 
 /* ---------- Responsive (tablet): one column, controls on the top row ---------- */
 @media (max-width: 899.98px) {
-  /* narrower screens: the toggle and Clear take the top row beside the ×, the names get the full width below */
+  /* narrower screens: the names get the full width (room left for the ×), and the toggle and
+     Clear sit on their own row below them, on the right */
   .compare-head {
     flex-wrap: wrap;
+    padding-right: 24px;
+  }
+
+  .title-block {
+    flex-basis: 100%;
+    padding-right: 48px;
   }
 
   .head-actions {
     width: 100%;
     gap: 8px;
-    order: -1;
-    padding-right: 44px;
+    justify-content: flex-end;
   }
 
   .compare-body {
@@ -770,6 +785,11 @@ button:focus-visible {
     padding: 12px 14px 12px;
   }
 
+  .title-block {
+    padding-right: 44px;
+  }
+
+  /* phones: the toggle stretches across the row, Clear at its end */
   .head-actions > :first-child {
     flex: 1;
     min-width: 0;
