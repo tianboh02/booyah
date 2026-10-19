@@ -76,7 +76,7 @@ function onKey(event) {
   grid-template-columns: repeat(var(--count), 1fr);
   padding: 3px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.04);
+  background: color-mix(in srgb, var(--ink) 4%, transparent);
   border: 1px solid var(--edge);
 }
 
@@ -89,7 +89,7 @@ function onKey(event) {
   left: 3px;
   width: calc((100% - 6px) / var(--count));
   border-radius: 999px;
-  background: color-mix(in srgb, var(--accent) 22%, rgba(255, 255, 255, 0.04));
+  background: color-mix(in srgb, var(--accent) 22%, color-mix(in srgb, var(--ink) 4%, transparent));
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 55%, transparent);
   transform: translateX(calc(var(--index) * 100%));
   transition:

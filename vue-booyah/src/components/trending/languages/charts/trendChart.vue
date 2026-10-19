@@ -575,10 +575,10 @@ onBeforeUnmount(() => observer && observer.disconnect())
   display: none;
 }
 .trend :deep(.grid line) {
-  stroke: rgba(255, 255, 255, 0.06);
+  stroke: color-mix(in srgb, var(--ink) 6%, transparent);
 }
 .trend :deep(.grid .tick:first-of-type line) {
-  stroke: rgba(255, 255, 255, 0.16);
+  stroke: color-mix(in srgb, var(--ink) 16%, transparent);
 }
 .trend :deep(.line) {
   fill: none;
@@ -606,7 +606,7 @@ onBeforeUnmount(() => observer && observer.disconnect())
   pointer-events: all;
 }
 .trend :deep(.guide) {
-  stroke: rgba(255, 255, 255, 0.28);
+  stroke: color-mix(in srgb, var(--ink) 28%, transparent);
   stroke-dasharray: 3 3;
 }
 .trend :deep(.focus-dot) {
@@ -629,9 +629,9 @@ onBeforeUnmount(() => observer && observer.disconnect())
   gap: 2px;
   padding: 8px 12px;
   border-radius: 10px;
-  background: rgba(14, 16, 20, 0.95);
+  background: var(--float-bg);
   border: 1px solid var(--edge);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 10px 30px color-mix(in srgb, var(--shadow) 40%, transparent);
   white-space: nowrap;
   pointer-events: none;
   z-index: 2;
@@ -680,13 +680,13 @@ onBeforeUnmount(() => observer && observer.disconnect())
   padding: 4px 10px;
   border: 1px solid var(--edge);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.05);
+  background: color-mix(in srgb, var(--ink) 5%, transparent);
   color: var(--ink);
   font-size: 0.75rem;
   cursor: pointer;
 }
 .reset:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: color-mix(in srgb, var(--ink) 10%, transparent);
 }
 /* ---------- Keyboard focus ---------- */
 .reset:focus-visible {

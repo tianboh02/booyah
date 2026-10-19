@@ -159,7 +159,7 @@ onBeforeUnmount(() => observer && observer.disconnect())
 
 .tab:hover {
   color: var(--ink);
-  background: rgba(255, 255, 255, 0.04);
+  background: color-mix(in srgb, var(--ink) 4%, transparent);
 }
 
 .tab.active {

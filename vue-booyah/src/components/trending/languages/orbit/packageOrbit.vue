@@ -6,6 +6,8 @@
                    - Packages are ranked by downloads for the selected period (#1 = most downloaded).
                    - Scroll (wheel, trackpad, touch) to move along the arc. The package in the middle
                      sits furthest out, like a wheel turning; packages near the edges fade away.
+                   - When scrolling stops, the package in the middle is selected automatically,
+                     so the detail panel and graph follow the wheel (no click needed).
                    - ↑ ↓ on a package move the selection.
                    - The lines from the orb are worked out by D3 (d3.linkHorizontal) and follow the
                      scroll live.
@@ -48,6 +50,12 @@ const hoveredName = ref('') // the package under the mouse (its line lights up)
 const mainButtons = reactive({}) // each package's main button, by name (for keyboard focus)
 let observer = null
 let frame = 0 // the pending requestAnimationFrame for scrolling
+let settleTimer = 0 // waits for the wheel to stop before selecting the middle package
+
+// How long the arc must sit still (ms) before the package in the middle becomes the selection.
+// Short enough to feel live, long enough that the chart doesn't redraw for every package flicked past
+// (and that a smooth programmatic scroll, e.g. after a click, only selects where it lands).
+const SETTLE_MS = 140
 
 // D3's curve maker: given a start and end point it returns an SVG path with a smooth S-bend
 const link = d3.linkHorizontal()
@@ -138,12 +146,26 @@ function linkPath(node) {
   return link({ source: [orb.x + orb.r * 0.85, centre], target: [node.x - 8, node.viewY] })
 }
 
-/** Records the scroll position, at most once per frame, so the arc and lines follow smoothly. */
+/**
+ * Records the scroll position, at most once per frame, so the arc and lines follow smoothly.
+ * Once the scrolling settles, the package sitting in the middle of the wheel is selected,
+ * so the detail panel and its graph follow the wheel without needing a click.
+ */
 function onScroll() {
   cancelAnimationFrame(frame)
   frame = requestAnimationFrame(() => {
     if (scroller.value) scrollTop.value = scroller.value.scrollTop
   })
+  clearTimeout(settleTimer)
+  settleTimer = setTimeout(selectCentre, SETTLE_MS)
+}
+
+/** Selects the package currently in the middle of the wheel (if it isn't already selected). */
+function selectCentre() {
+  if (!scroller.value || props.status !== 'ready') return
+  scrollTop.value = scroller.value.scrollTop // use the final resting position
+  const pkg = props.packages[centreIndex.value]
+  if (pkg && pkg.name !== props.selectedName) choose(pkg.name)
 }
 
 /** Scrolls so that package number `index` sits in the middle. */
@@ -182,6 +204,7 @@ onMounted(() => {
 })
 onBeforeUnmount(() => observer && observer.disconnect())
 onBeforeUnmount(() => cancelAnimationFrame(frame))
+onBeforeUnmount(() => clearTimeout(settleTimer))
 </script>
 
 <template>
@@ -573,7 +596,7 @@ onBeforeUnmount(() => cancelAnimationFrame(frame))
 }
 
 .node:hover {
-  background: rgba(255, 255, 255, 0.04);
+  background: color-mix(in srgb, var(--ink) 4%, transparent);
 }
 
 .node.active {
@@ -625,7 +648,7 @@ onBeforeUnmount(() => cancelAnimationFrame(frame))
   min-width: 2.6em;
   padding: 3px 7px;
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.06);
+  background: color-mix(in srgb, var(--ink) 6%, transparent);
   color: var(--ink-2);
   font-size: 0.8rem;
   font-weight: 700;
@@ -684,7 +707,7 @@ onBeforeUnmount(() => cancelAnimationFrame(frame))
   padding: 0;
   border: 1px solid var(--edge);
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.04);
+  background: color-mix(in srgb, var(--ink) 4%, transparent);
   color: var(--ink-2);
   font-size: 1rem;
   font-weight: 700;
@@ -740,7 +763,7 @@ onBeforeUnmount(() => cancelAnimationFrame(frame))
   padding: 0;
   border: 0;
   border-radius: 3px;
-  background: rgba(255, 255, 255, 0.18);
+  background: color-mix(in srgb, var(--ink) 18%, transparent);
   cursor: pointer;
   transition:
     height 250ms var(--ease),
@@ -749,7 +772,7 @@ onBeforeUnmount(() => cancelAnimationFrame(frame))
 
 .tick.current {
   height: 16px;
-  background: rgba(255, 255, 255, 0.5);
+  background: color-mix(in srgb, var(--ink) 50%, transparent);
 }
 
 .tick.active {
@@ -808,7 +831,7 @@ onBeforeUnmount(() => cancelAnimationFrame(frame))
 
 .pill.flat {
   color: var(--ink-2);
-  background: rgba(255, 255, 255, 0.06);
+  background: color-mix(in srgb, var(--ink) 6%, transparent);
 }
 
 /* ---------- Components: phone chips (shown instead of the orb and arc on phones) ---------- */
@@ -835,7 +858,7 @@ onBeforeUnmount(() => cancelAnimationFrame(frame))
   padding-right: 4px;
   border: 1px solid var(--edge);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.03);
+  background: color-mix(in srgb, var(--ink) 3%, transparent);
   scroll-snap-align: start;
   animation: fade-in 350ms var(--ease) var(--delay) backwards;
   transition:

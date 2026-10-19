@@ -17,7 +17,7 @@ import LanguagesSection from '@/components/trending/languages/languagesSection.v
   <div class="container my-4">
     <!-- Page header -->
     <header class="mb-4">
-      <h3 class="fw-bold text-white mb-1">Trending</h3>
+      <h3 class="fw-bold mb-1">Trending</h3>
       <p class="text-muted-github small mb-0">
         What developers are installing right now, across the biggest package registries.
       </p>

@@ -153,7 +153,7 @@ onBeforeUnmount(() => clearTimeout(messageTimer))
     aria-labelledby="languages-heading"
   >
     <!-- Section title and intro -->
-    <h4 id="languages-heading" class="fw-bold text-white mb-1">Languages</h4>
+    <h4 id="languages-heading" class="fw-bold mb-1">Languages</h4>
     <p class="text-muted-github small mb-3">
       The 20 most downloaded packages in each language over the last 90 days, straight from npm,
       Packagist and crates.io. Pick two to compare them.
@@ -233,24 +233,50 @@ onBeforeUnmount(() => clearTimeout(messageTimer))
 
 <style scoped>
 /* ---------- Colours & theme ----------
-   The section's palette, taken from main.css and the GitHub-style colours used elsewhere in
-   Booyah. Every child component reads these variables. --accent is set in the template from
-   the open language's colour. */
+   The section's palette. The base colours come straight from main.css's light/dark tokens
+   (--app-bg, --card-bg, --card-border, --app-text, --text-muted-github), which switch when
+   <html data-bs-theme="light|dark"> changes (themeToggle.vue / useTheme.js). Every child
+   component reads these variables, so the whole Trending page follows the theme toggle.
+   Faint washes/lines are mixed from --ink, so they are light-on-dark in dark mode and
+   dark-on-light in light mode automatically. --accent is set in the template from the open
+   language's colour. */
 .languages {
-  --bg: #0b0c0e;
-  --card: #0e1014;
-  --edge: #202428;
-  --line: rgba(139, 148, 158, 0.22);
-  --ink: #e6edf3;
-  --ink-2: #8b949e;
+  /* from main.css */
+  --bg: var(--app-bg);
+  --card: var(--card-bg);
+  --edge: var(--card-border);
+  --ink: var(--app-text);
+  --ink-2: var(--text-muted-github);
+  /* derived from main.css */
+  --line: color-mix(in srgb, var(--text-muted-github) 22%, transparent);
+  --dot-grid: color-mix(in srgb, var(--text-muted-github) 8%, transparent);
+  --float-bg: color-mix(in srgb, var(--card-bg) 96%, transparent); /* chart hover boxes */
+  /* page-only colours main.css doesn't define (dark values; light values below) */
   --ink-3: #6e7681;
   --up: #3fb950;
   --down: #f85149;
   --focus: #58a6ff;
+  --shadow: #000;
+  --overlay: rgba(5, 6, 8, 0.72);
+  --error-bg: rgba(40, 14, 14, 0.95);
+  --error-ink: #ffb3ad;
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
   --font-code: var(--bs-font-monospace);
   /* room for the compare tray so it never covers the last content */
   padding-bottom: 96px;
+}
+
+/* light mode: darker greens/reds/blues that stay readable on white, and softer shadows */
+:root[data-bs-theme='light'] .languages {
+  --dot-grid: color-mix(in srgb, var(--text-muted-github) 14%, transparent);
+  --ink-3: #6e7781;
+  --up: #1a7f37;
+  --down: #cf222e;
+  --focus: #0969da;
+  --shadow: rgba(31, 35, 40, 0.35);
+  --overlay: rgba(31, 35, 40, 0.45);
+  --error-bg: #ffebe9;
+  --error-ink: #82071e;
 }
 
 .failed-note {
@@ -280,7 +306,7 @@ onBeforeUnmount(() => clearTimeout(messageTimer))
       color-mix(in srgb, var(--accent) 9%, transparent),
       transparent 70%
     ),
-    radial-gradient(rgba(139, 148, 158, 0.08) 1px, transparent 1px) 0 0 / 22px 22px,
+    radial-gradient(var(--dot-grid) 1px, transparent 1px) 0 0 / 22px 22px,
     var(--card) !important;
   transition: background 600ms var(--ease);
 }

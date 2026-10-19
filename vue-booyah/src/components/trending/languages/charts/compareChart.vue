@@ -398,11 +398,11 @@ svg {
 }
 
 .compare-chart :deep(.grid line) {
-  stroke: rgba(255, 255, 255, 0.06);
+  stroke: color-mix(in srgb, var(--ink) 6%, transparent);
 }
 
 .compare-chart :deep(.base) {
-  stroke: rgba(255, 255, 255, 0.3);
+  stroke: color-mix(in srgb, var(--ink) 30%, transparent);
   stroke-dasharray: 2 4;
 }
 
@@ -424,7 +424,7 @@ svg {
 }
 
 .compare-chart :deep(.guide) {
-  stroke: rgba(255, 255, 255, 0.28);
+  stroke: color-mix(in srgb, var(--ink) 28%, transparent);
   stroke-dasharray: 3 3;
 }
 
@@ -441,9 +441,9 @@ svg {
   gap: 3px;
   padding: 8px 12px;
   border-radius: 10px;
-  background: rgba(14, 16, 20, 0.96);
+  background: var(--float-bg);
   border: 1px solid var(--edge);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 10px 30px color-mix(in srgb, var(--shadow) 45%, transparent);
   white-space: nowrap;
   pointer-events: none;
   z-index: 2;

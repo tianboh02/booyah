@@ -108,10 +108,10 @@ const languageName = (id) => (props.languages.find((l) => l.id === id) || {}).na
   padding: 10px 10px 10px 16px;
   border: 1px solid var(--edge);
   border-radius: 18px;
-  background: rgba(14, 16, 20, 0.92);
+  background: color-mix(in srgb, var(--card) 92%, transparent);
   box-shadow:
-    0 18px 50px rgba(0, 0, 0, 0.55),
-    0 0 0 1px rgba(255, 255, 255, 0.02) inset;
+    0 18px 50px color-mix(in srgb, var(--shadow) 55%, transparent),
+    0 0 0 1px color-mix(in srgb, var(--ink) 2%, transparent) inset;
   backdrop-filter: blur(14px);
 }
 
@@ -178,7 +178,7 @@ const languageName = (id) => (props.languages.find((l) => l.id === id) || {}).na
   padding: 0;
   border: 0;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.06);
+  background: color-mix(in srgb, var(--ink) 6%, transparent);
   color: var(--ink-2);
   font-size: 1rem;
   line-height: 1;
@@ -189,7 +189,7 @@ const languageName = (id) => (props.languages.find((l) => l.id === id) || {}).na
 }
 
 .remove:hover {
-  background: rgba(255, 255, 255, 0.14);
+  background: color-mix(in srgb, var(--ink) 14%, transparent);
   color: var(--ink);
 }
 
@@ -224,7 +224,7 @@ const languageName = (id) => (props.languages.find((l) => l.id === id) || {}).na
 }
 
 .clear:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: color-mix(in srgb, var(--ink) 8%, transparent);
   color: var(--ink);
 }
 
@@ -258,8 +258,8 @@ const languageName = (id) => (props.languages.find((l) => l.id === id) || {}).na
   padding: 6px 12px;
   border: 1px solid color-mix(in srgb, var(--down) 45%, transparent);
   border-radius: 10px;
-  background: rgba(40, 14, 14, 0.95);
-  color: #ffb3ad;
+  background: var(--error-bg);
+  color: var(--error-ink);
   font-size: 0.82rem;
   text-align: center;
 }

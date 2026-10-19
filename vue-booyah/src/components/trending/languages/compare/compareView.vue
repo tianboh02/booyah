@@ -23,6 +23,7 @@ import { buildComparison } from '@/utils/trending/math/compareMath'
 import { compact, pct, dateRange, PERIODS, PERIOD_INFO } from '@/utils/trending/helpers/format'
 import PeriodToggle from '@/components/trending/languages/header/periodToggle.vue'
 import CompareChart from '@/components/trending/languages/charts/compareChart.vue'
+import { useTheme } from '@/composables/useTheme'
 
 // ---------- Props & emits ----------
 const props = defineProps({
@@ -32,8 +33,11 @@ const props = defineProps({
 const emit = defineEmits(['update:period', 'close', 'clear'])
 
 // ---------- Settings ----------
-// Same language → both lines would share one colour, so B's line is light grey and dashed
-const SAME_LANGUAGE_B = '#c9d1d9'
+// Same language → both lines would share one colour, so B's line is grey and dashed.
+// D3 sets it as an SVG attribute (CSS variables don't work there), so pick the grey per theme:
+// light grey on the dark theme, dark grey on the light theme.
+const SAME_LANGUAGE_B = { dark: '#c9d1d9', light: '#57606a' }
+const { theme } = useTheme() // 'dark' | 'light', from the navbar toggle
 // The chart's Downloads / Growth toggle
 const MODES = ['downloads', 'growth']
 const MODE_LABELS = { downloads: { label: 'Downloads' }, growth: { label: 'Growth' } }
@@ -54,7 +58,7 @@ const sameLanguage = computed(() => a.value.language.id === b.value.language.id)
 // The two lines' colours
 const colors = computed(() => [
   a.value.language.accent,
-  sameLanguage.value ? SAME_LANGUAGE_B : b.value.language.accent,
+  sameLanguage.value ? SAME_LANGUAGE_B[theme.value] || SAME_LANGUAGE_B.dark : b.value.language.accent,
 ])
 
 // ---------- Functions ----------
@@ -323,7 +327,7 @@ onBeforeUnmount(() => {
   display: grid;
   place-items: center;
   padding: 24px;
-  background: rgba(5, 6, 8, 0.72);
+  background: var(--overlay);
   backdrop-filter: blur(6px);
 }
 
@@ -342,7 +346,7 @@ onBeforeUnmount(() => {
       transparent 60%
     ),
     var(--card);
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 30px 80px color-mix(in srgb, var(--shadow) 60%, transparent);
   overflow: hidden;
 }
 
@@ -427,7 +431,7 @@ onBeforeUnmount(() => {
   padding: 0;
   border: 1px solid var(--edge);
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.04);
+  background: color-mix(in srgb, var(--ink) 4%, transparent);
   color: var(--ink);
   font-size: 1.3rem;
   line-height: 1;
@@ -436,7 +440,7 @@ onBeforeUnmount(() => {
 }
 
 .close:hover {
-  background: rgba(255, 255, 255, 0.12);
+  background: color-mix(in srgb, var(--ink) 12%, transparent);
 }
 
 .clear {
@@ -456,7 +460,7 @@ onBeforeUnmount(() => {
 }
 
 .clear:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: color-mix(in srgb, var(--ink) 8%, transparent);
   color: var(--ink);
 }
 
@@ -487,7 +491,7 @@ onBeforeUnmount(() => {
   gap: 8px;
   padding: 10px 12px;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.025);
+  background: color-mix(in srgb, var(--ink) 2.5%, transparent);
   border: 1px solid var(--edge);
   animation: row-in 400ms var(--ease) calc(var(--i) * 60ms + 120ms) backwards;
 }
@@ -562,7 +566,7 @@ onBeforeUnmount(() => {
   min-width: 0;
   padding: 14px 14px 10px;
   border-radius: 16px;
-  background: rgba(255, 255, 255, 0.02);
+  background: color-mix(in srgb, var(--ink) 2%, transparent);
   border: 1px solid var(--edge);
 }
 

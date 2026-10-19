@@ -130,7 +130,7 @@ const insight = computed(() => {
 
       <!-- ===================== Error / nothing yet ===================== -->
       <section v-else-if="status === 'error' || !pkg" key="empty" class="empty">
-        <h5 class="fw-bold text-white mb-0">No package to show yet</h5>
+        <h5 class="fw-bold mb-0">No package to show yet</h5>
         <p class="description">
           Once {{ language.name }} packages load, pick one to see its downloads here.
         </p>
@@ -413,7 +413,7 @@ const insight = computed(() => {
 .fact {
   padding: 12px 14px;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.03);
+  background: color-mix(in srgb, var(--ink) 3%, transparent);
   border: 1px solid var(--edge);
 }
 
@@ -468,9 +468,9 @@ const insight = computed(() => {
   border-radius: 8px;
   background: linear-gradient(
     90deg,
-    rgba(255, 255, 255, 0.04),
-    rgba(255, 255, 255, 0.1),
-    rgba(255, 255, 255, 0.04)
+    color-mix(in srgb, var(--ink) 4%, transparent),
+    color-mix(in srgb, var(--ink) 10%, transparent),
+    color-mix(in srgb, var(--ink) 4%, transparent)
   );
   background-size: 200% 100%;
   animation: shimmer 1.4s linear infinite;
