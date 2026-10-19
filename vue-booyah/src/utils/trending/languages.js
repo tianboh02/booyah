@@ -2,13 +2,17 @@
  * src/utils/trending/languages.js
  *
  * What it does:  the settings for the three languages on Trending → Languages
- *                (name, registry, accent colour, and which loader fetches its data),
- *                plus the helper that ranks a language's packages for a period.
- * Receives:      nothing to set up; rankPackages() receives a package list and a period.
+ *                (name, registry, accent colour + its darker light-theme version, and which
+ *                loader fetches its data), plus the helpers that pick a language's line colour
+ *                for the theme and rank its packages for a period.
+ * Receives:      nothing to set up; lineAccent() receives a language and the theme,
+ *                rankPackages() a package list and a period.
  * Gives back:    LANGUAGES, languageById(), lineAccent(), rankPackages().
  *                Every language's `load()` returns the same shape:
  *                { ecosystem, fetchedAt, dataUpTo, packages, failed }
- * Used by:       languages/languagesSection.vue.
+ * Used by:       languages/languagesSection.vue (the languages, ranking), and for lineAccent():
+ *                header/languageBar.vue, detail/packageDashboard.vue, compare/compareTray.vue,
+ *                compare/compareView.vue.
  */
 
 import { getLangColor } from '@/utils/langColors'
