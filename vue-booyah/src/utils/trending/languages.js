@@ -16,14 +16,6 @@ import { loadNpmTrending } from './api/npmDownloads.js'
 import { loadPhpTrending } from './api/phpDownloads.js'
 import { loadRustTrending } from './api/rustDownloads.js'
 
-// ---------------------------------------------------------------------------
-// Colours
-// ---------------------------------------------------------------------------
-
-// langColors.js (shared with other pages) has Rust as #484f58, which almost disappears on our
-// dark background, so this page uses its own brighter Rust accent. langColors.js stays unchanged.
-const RUST_ACCENT = '#ff8a4c'
-
 /**
  * Picks readable text for a coloured background: dark text on bright accents
  * (e.g. JavaScript's yellow), white text on dark ones (e.g. PHP's #4F5D95).
@@ -48,7 +40,7 @@ function language(id, name, registry, accent, load) {
 export const LANGUAGES = [
   language('javascript', 'JavaScript', 'npm', getLangColor('JavaScript'), loadNpmTrending),
   language('php', 'PHP', 'Packagist', getLangColor('PHP'), loadPhpTrending),
-  language('rust', 'Rust', 'crates.io', RUST_ACCENT, loadRustTrending),
+  language('rust', 'Rust', 'crates.io', getLangColor('Rust'), loadRustTrending),
 ]
 
 /** Finds a language's settings by its id, e.g. 'php'. */

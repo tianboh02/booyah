@@ -16,7 +16,7 @@ export const langColors = {
     Ruby: '#701516',
     PHP: '#4F5D95',
     Swift: '#F05138',
-    Rust: '#484f58',
+    Rust: '#ff8a4c', //#484f58 (to revert back to grey)
     Shell: '#21262d',
     'No language': '#6e7681',
 
