@@ -1,14 +1,14 @@
-// src/utils/hnJobs.js
+// src/utils/hackernewsJobs.js
 
-export const MIN_SALARY_BANDS = 10 // a role needs this many bands before its range is shown
-export const DEMAND_MONTHS = 3 // role demand + posts per month use the latest 3 complete months
-export const SALARY_MONTHS = 6 // salary bands use the latest 6
-export const MIN_PLOT_BANDS = 5 // below this a role's bands are not shown at all (1-4 bands is one or two companies)
-export const MIN_ROLE_POSTS = 20 // below this work mode / tech are flagged as a low sample
-export const MIN_TREND_MONTHS = 3 // months that must load before a trend is shown
-export const TOP_N = 5 // rows shown before "Show all"; also how many technologies are listed
-export const CACHE_KEY = 'jobs-view-v2' // bump when the regex/parsing logic changes
-export const CACHE_TTL_MS = 6 * 60 * 60 * 1000 // 6 hours
+const MIN_SALARY_BANDS = 10 // a role needs this many bands before its range is shown
+const DEMAND_MONTHS = 3 // role demand + posts per month use the latest 3 complete months
+const SALARY_MONTHS = 6 // salary bands use the latest 6
+const MIN_PLOT_BANDS = 5 // below this a role's bands are not shown at all (1-4 bands is one or two companies)
+const MIN_ROLE_POSTS = 20 // below this work mode / tech are flagged as a low sample
+const MIN_TREND_MONTHS = 3 // months that must load before a trend is shown
+const TOP_N = 5 // how many technologies are listed per role
+const CACHE_KEY = 'jobs-view-v4' // bump when the regex/parsing logic changes
+const CACHE_TTL_MS = 6 * 60 * 60 * 1000 // 6 hours
 
 
 // ---------- HN fetching + text cleaning ----------
@@ -155,9 +155,8 @@ function analyseThread(item) {
         // header line (before the first paragraph) is the most reliable place for work mode
         const mode = modeIn(toText(c.text.split(/<p>/i)[0])) ?? modeIn(full) ?? 'unspecified'
         const techs = techIn(full)
-        const salaried = new Set()
         for (const r of postRoles) {
-            const d = (detail[r] ??= { withSalary: 0, techPosts: 0, modes: {}, tech: {} })
+            const d = (detail[r] ??= { techPosts: 0, modes: {}, tech: {} })
             d.modes[mode] = (d.modes[mode] ?? 0) + 1
             if (techs.length) d.techPosts++
             for (const t of techs) d.tech[t] = (d.tech[t] ?? 0) + 1
@@ -177,11 +176,9 @@ function analyseThread(item) {
                 if (s.currency !== 'USD') continue
                 for (const role of targets) {
                     bands.push({ author: c.author, role, lo: s.lo, hi: s.hi })
-                    salaried.add(role)
                 }
             }
         }
-        for (const r of salaried) if (detail[r]) detail[r].withSalary++
     }
     return { posts, roleCounts, detail, bands }
 }
@@ -253,7 +250,6 @@ function roleDetail(role, summaries, months, bands) {
     const valid = summaries.filter(Boolean)
     const parts = valid.map((s) => s.detail[role] ?? {})
     const posts = valid.reduce((t, s) => t + (s.roleCounts[role] ?? 0), 0)
-    const withSalary = parts.reduce((t, p) => t + (p.withSalary ?? 0), 0)
     const techPosts = parts.reduce((t, p) => t + (p.techPosts ?? 0), 0)
 
     // a failed month stays in place as a gap, never a 0
@@ -270,7 +266,6 @@ function roleDetail(role, summaries, months, bands) {
     return {
         posts,
         salary: salaryDetail(bands),
-        usableSalaryRate: { status: volume(posts), withSalary, posts, rate: pct(withSalary, posts) },
         trend:
             valid.length < MIN_TREND_MONTHS
                 ? { status: 'none', reason: 'no-history' }
@@ -296,7 +291,7 @@ function buildResults(summaries, months) {
     const roleRows = Object.keys(ROLES)
         .map((r) => {
             const count = demand.reduce((sum, s) => sum + (s.roleCounts[r] ?? 0), 0)
-            return { name: roleLabel(r), share: total ? Math.round((100 * count) / total) : 0 }
+            return { name: roleLabel(r), count, share: total ? Math.round((100 * count) / total) : 0 }
         })
         .filter((r) => r.share > 0)
         .sort((a, b) => b.share - a.share)
@@ -311,18 +306,10 @@ function buildResults(summaries, months) {
                 ; (byRole[b.role] ??= []).push(b)
         }
     }
-    const salaryList = Object.entries(byRole)
+    // deduped USD bands that could be tied to a role
+    const salaryBands = Object.entries(byRole)
         .filter(([role]) => role !== '(Role unclear)')
-        .map(([role, b]) => {
-            const enough = b.length >= MIN_SALARY_BANDS
-            return {
-                role: roleLabel(role),
-                low: enough ? Math.round(median(b.map((x) => x.lo)) / 1000) : null,
-                high: enough ? Math.round(median(b.map((x) => x.hi)) / 1000) : null,
-                n: b.length,
-            }
-        })
-        .sort((a, b) => (b.high ?? -1) - (a.high ?? -1) || b.n - a.n)
+        .reduce((sum, [, b]) => sum + b.length, 0)
 
     const rolesDetail = Object.fromEntries(
         Object.keys(ROLES)
@@ -333,7 +320,7 @@ function buildResults(summaries, months) {
     return {
         postsAnalysed: total,
         roles: roleRows,
-        salaries: salaryList,
+        salaryBands,
         rolesDetail,
         postsPerMonth: demand.map((s) => ({ month: shortMonth(s.month), count: s.posts })).reverse(),
     }
@@ -351,7 +338,9 @@ function readCache() {
 function writeCache(data) {
     try {
         localStorage.setItem(CACHE_KEY, JSON.stringify({ savedAt: Date.now(), data }))
-    } catch { }
+    } catch {
+        // storage full or blocked: skip caching, the data still renders
+    }
 }
 
 // onProgress(done, total) fires once for the thread list and once per thread, for the loader

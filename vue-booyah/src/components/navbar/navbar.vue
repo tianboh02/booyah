@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useRoute, useRouter, RouterLink } from 'vue-router'
 import defaultAvatar from '@/assets/login.png'
 import logoSvg from '@/assets/booyah-logo1.png'
@@ -40,6 +40,12 @@ const showLogin = computed(() => route.path == '/')
 onMounted(() => {
     initTheme()
     checkAuth()
+    // refresh when settings saves a new name or experience level
+    window.addEventListener('booyah:user-updated', checkAuth)
+})
+
+onBeforeUnmount(() => {
+    window.removeEventListener('booyah:user-updated', checkAuth)
 })
 
 watch(

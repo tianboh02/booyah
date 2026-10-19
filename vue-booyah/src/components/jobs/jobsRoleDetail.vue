@@ -2,8 +2,10 @@
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 import JobsStatSection from '@/components/jobs/jobsStatSection.vue'
 import JobsShareBar from '@/components/jobs/jobsShareBar.vue'
-import JobsDotPlot from '@/components/jobs/jobsDotPlot.vue'
-import JobsTrendSparkline from '@/components/jobs/jobsTrendSparkline.vue'
+import JobsSalaryStrip from '@/components/jobs/jobsSalaryStrip.vue'
+import JobsTrendChart from '@/components/jobs/jobsTrendChart.vue'
+import JobsWorkModeDonut from '@/components/jobs/jobsWorkModeDonut.vue'
+import SegmentedToggle from '@/components/shared/SegmentedToggle.vue'
 
 defineProps({
     role: { type: String, required: true },
@@ -13,13 +15,12 @@ defineProps({
 defineEmits(['close'])
 
 const usd = (v) => `$${v}k`
-const MODES = ['remote', 'hybrid', 'onsite', 'mixed', 'unspecified']
 const CHANGE = {
-    up: { label: 'Trending up', badge: 'text-bg-success' },
-    down: { label: 'Trending down', badge: 'text-bg-danger' },
-    steady: { label: 'Steady', badge: 'text-bg-secondary' }
+    up: { label: 'Trending up', badge: 'text-bg-success', color: '#3fb950' },
+    down: { label: 'Trending down', badge: 'text-bg-danger', color: '#f85149' },
+    steady: { label: 'Steady', badge: 'text-bg-secondary', color: '#58a6ff' }
 }
-const pct = (n, total) => Math.round((100 * n) / total)
+const trendMetric = ref('share')
 
 // native <dialog>: the browser provides the backdrop mask, Esc-to-close and focus trap
 const dialog = ref(null)
@@ -39,8 +40,8 @@ onBeforeUnmount(() => document.body.classList.remove('overflow-hidden'))
         <div class="card role-dialog-body p-4 rounded-3 shadow">
             <div class="d-flex justify-content-between align-items-start mb-3">
                 <div>
-                    <h2 id="role-dialog-title" class="h5 fw-bold section-title mb-1">{{ role }}</h2>
-                    <p class="text-muted-github small mb-0">{{ detail.posts }} posts over the last 6 months</p>
+                    <h2 id="role-dialog-title" class="h4 fw-bold section-title mb-1">{{ role }}</h2>
+                    <p class="text-muted-github mb-0">{{ detail.posts }} posts over the last 6 months</p>
                 </div>
                 <button type="button" class="btn-close" aria-label="Close" @click="dialog.close()"></button>
             </div>
@@ -50,14 +51,11 @@ onBeforeUnmount(() => document.body.classList.remove('overflow-hidden'))
                 <div class="col">
                     <JobsStatSection title="Salary distribution" :status="detail.salary.status"
                         :reason="detail.salary.reason">
-                        <JobsDotPlot :bands="detail.salary.bands" />
-                        <dl v-if="detail.salary.stats" class="row small font-monospace mt-3 mb-0">
-                            <dt class="col-6 fw-normal text-muted-github">Median range</dt>
-                            <dd class="col-6 mb-1">{{ usd(detail.salary.stats.medianLo) }} to {{
-                                usd(detail.salary.stats.medianHi) }}</dd>
-                            <dt class="col-6 fw-normal text-muted-github">Mean midpoint</dt>
+                        <JobsSalaryStrip :bands="detail.salary.bands" :stats="detail.salary.stats" />
+                        <dl v-if="detail.salary.stats" class="stat-list row font-monospace mt-3 mb-0">
+                            <dt class="col-6 fw-normal text-muted-github">Average</dt>
                             <dd class="col-6 mb-1">{{ usd(detail.salary.stats.mean) }}</dd>
-                            <dt class="col-6 fw-normal text-muted-github">Middle 50%</dt>
+                            <dt class="col-6 fw-normal text-muted-github">Typical range</dt>
                             <dd class="col-6 mb-1">{{ usd(detail.salary.stats.p25) }} to {{ usd(detail.salary.stats.p75)
                                 }}</dd>
                             <dt class="col-6 fw-normal text-muted-github">Lowest / highest</dt>
@@ -67,46 +65,40 @@ onBeforeUnmount(() => document.body.classList.remove('overflow-hidden'))
                             <dd class="col-6 mb-1">{{ usd(detail.salary.stats.mode) }} to {{
                                 usd(detail.salary.stats.mode + 10) }}</dd>
                         </dl>
-                        <p class="text-muted-github small font-monospace mt-2 mb-0">n = {{ detail.salary.n }}</p>
-                    </JobsStatSection>
-                </div>
-
-                <!-- Usable salary rate -->
-                <div class="col">
-                    <JobsStatSection title="Usable salary rate" :status="detail.usableSalaryRate.status">
-                        <JobsShareBar label="Posts with a usable USD salary" :value="detail.usableSalaryRate.rate" />
-                        <p class="text-muted-github small mb-0">
-                            {{ detail.usableSalaryRate.withSalary }} of {{ detail.usableSalaryRate.posts }} posts for this
-                            role.
-                        </p>
+                        <p class="text-muted-github font-monospace mt-2 mb-0">n = {{ detail.salary.n }}</p>
                     </JobsStatSection>
                 </div>
 
                 <!-- Demand trend -->
                 <div class="col">
                     <JobsStatSection title="Demand trend" :status="detail.trend.status" :reason="detail.trend.reason">
-                        <span class="badge mb-2" :class="CHANGE[detail.trend.change].badge">
-                            {{ CHANGE[detail.trend.change].label }}
-                        </span>
-                        <JobsTrendSparkline :points="detail.trend.points" />
+                        <div class="d-flex align-items-center justify-content-between gap-2 mb-1">
+                            <span class="badge" :class="CHANGE[detail.trend.change].badge">
+                                {{ CHANGE[detail.trend.change].label }}
+                            </span>
+                            <SegmentedToggle v-model="trendMetric" label="Trend metric"
+                                :options="[{ value: 'share', label: 'Share %' }, { value: 'count', label: 'Posts' }]" />
+                        </div>
+                        <JobsTrendChart class="flex-grow-1" :points="detail.trend.points" :metric="trendMetric"
+                            :color="CHANGE[detail.trend.change].color" />
                     </JobsStatSection>
                 </div>
 
                 <!-- Work mode -->
                 <div class="col">
                     <JobsStatSection title="Work mode" :status="detail.workMode.status">
-                        <JobsShareBar v-for="m in MODES" :key="m" class="text-capitalize" :label="m"
-                            :value="pct(detail.workMode.counts[m] ?? 0, detail.workMode.posts)" />
+                        <JobsWorkModeDonut :counts="detail.workMode.counts" :posts="detail.workMode.posts" />
                     </JobsStatSection>
                 </div>
 
                 <!-- Tech stack -->
                 <div class="col">
                     <JobsStatSection title="Tech stack" :status="detail.tech.status" :reason="detail.tech.reason">
-                        <p class="text-muted-github small">
+                        <p class="text-muted-github">
                             {{ detail.tech.coverage }}% of posts name a tracked technology
                         </p>
-                        <JobsShareBar v-for="t in detail.tech.top" :key="t.name" :label="t.name" :value="t.share" />
+                        <JobsShareBar v-for="t in detail.tech.top" :key="t.name" :label="t.name" :value="t.share"
+                            :count="t.count" />
                     </JobsStatSection>
                 </div>
             </div>
@@ -120,8 +112,12 @@ onBeforeUnmount(() => document.body.classList.remove('overflow-hidden'))
     transition: color 0.2s ease;
 }
 
+.stat-list {
+    font-size: 0.9rem;
+}
+
 .role-dialog {
-    width: min(960px, 92vw);
+    width: min(1120px, 94vw);
     max-width: none;
     padding: 0;
     border: 0;
@@ -129,7 +125,10 @@ onBeforeUnmount(() => document.body.classList.remove('overflow-hidden'))
     color: inherit;
 }
 
+/* one chart height for every card, so the 2x2 frames line up */
 .role-dialog-body {
+    --jobs-chart-h: 200px;
+    font-size: 0.95rem;
     max-height: 90vh;
     overflow-y: auto;
 }

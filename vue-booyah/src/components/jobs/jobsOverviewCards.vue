@@ -1,11 +1,12 @@
 <script setup>
 import { computed } from 'vue'
+import JobsStatCard from '@/components/jobs/jobsStatCard.vue'
 
 const props = defineProps({
     warning: { type: String, default: '' },
     error: { type: String, default: '' },
     postsAnalysed: { type: Number, default: 0 },
-    salaries: { type: Array, default: () => [] },
+    salaryBands: { type: Number, default: 0 },
     roles: { type: Array, default: () => [] },
     postsPerMonth: { type: Array, default: () => [] }
 })
@@ -13,20 +14,15 @@ const props = defineProps({
 defineEmits(['retry'])
 
 const stats = computed(() => [
-    { label: 'Job posts analysed', value: props.postsAnalysed },
-    { label: 'Salary bands used', value: props.salaries.reduce((sum, s) => sum + (s.n || 0), 0) },
-    { label: 'Role families tracked', value: props.roles.length },
-    { label: 'Months covered', value: props.postsPerMonth.length },
+    { label: 'Job posts analysed', value: props.postsAnalysed, accent: '#58a6ff' },
+    { label: 'Salary bands used', value: props.salaryBands, accent: '#3fb950' },
+    { label: 'Role families tracked', value: props.roles.length, accent: '#a371f7' },
+    { label: 'Months covered', value: props.postsPerMonth.length, accent: '#e3b341' },
 ])
 </script>
 
 <template>
     <div>
-        <!-- Info Banner -->
-        <div class="alert badge-github text-muted-github border mb-3 small py-2 px-3" role="note">
-            💡 Salary figures come from US and global postings
-        </div>
-
         <!-- Warning Alert -->
         <div v-if="warning" class="alert alert-warning py-2 px-3 small mb-3" role="status">
             {{ warning }}
@@ -40,20 +36,13 @@ const stats = computed(() => [
         </div>
 
         <!-- Overview Metric Cards (Hidden if there is an unrecoverable error) -->
-        <div v-if="!error" class="row row-cols-2 row-cols-md-4 g-3 mb-4">
-            <div v-for="s in stats" :key="s.label" class="col">
-                <div class="card p-3 h-100 rounded-3 shadow-sm">
-                    <span class="h3 fw-bold stat-value mb-1 font-monospace">{{ s.value }}</span>
-                    <span class="text-muted-github small">{{ s.label }}</span>
+        <template v-if="!error">
+            <div class="row row-cols-2 row-cols-md-4 g-3 mb-2">
+                <div v-for="(s, i) in stats" :key="s.label" class="col">
+                    <JobsStatCard :value="s.value" :label="s.label" :accent="s.accent" :index="i" />
                 </div>
             </div>
-        </div>
+            <p class="text-muted-github small mb-4" role="note">Salary figures come from US and global postings.</p>
+        </template>
     </div>
 </template>
-
-<style scoped>
-.stat-value {
-    color: var(--app-text);
-    transition: color 0.2s ease;
-}
-</style>

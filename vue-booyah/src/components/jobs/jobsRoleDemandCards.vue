@@ -1,6 +1,8 @@
 <script setup>
 import { computed, ref } from 'vue'
-import { TOP_N } from '@/utils/hackernewsJobs'
+import { vSpotlight } from '@/utils/motion'
+import SegmentedToggle from '@/components/shared/SegmentedToggle.vue'
+import JobsMonthChart from '@/components/jobs/jobsMonthChart.vue'
 
 const props = defineProps({
     roles: { type: Array, default: () => [] },
@@ -9,57 +11,79 @@ const props = defineProps({
 
 defineEmits(['select'])
 
-const showAll = ref(false)
-const visibleRoles = computed(() => (showAll.value ? props.roles : props.roles.slice(0, TOP_N)))
+const TOP_N = 5
+const roleView = ref('top')
+const monthView = ref('bar')
+
+// bars use the true 0-100% scale, so 59% fills 59% of the track
+const visibleRoles = computed(() => (roleView.value === 'top' ? props.roles.slice(0, TOP_N) : props.roles))
+const postsLabel = (r) => (r.count != null ? `${r.count.toLocaleString()} posts` : '')
 </script>
 
 <template>
     <section class="mb-4">
         <div class="mb-3">
-            <h2 class="h5 fw-bold section-title mb-1">Role demand</h2>
+            <h2 class="h3 fw-bold section-title mb-1">Role demand</h2>
             <p class="text-muted-github small mb-0">
-                Share of job posts mentioning each role, last 3 months. Select a role for details.
+                Share of job posts mentioning each role, last 3 months. Click a role to see salaries, trend and
+                tech stack.
             </p>
         </div>
 
         <div class="row g-3">
             <!-- Left Card: Roles -->
             <div class="col-md-6">
-                <div class="card p-4 h-100 rounded-3 shadow-sm">
-                    <div
-                        class="chart-placeholder text-muted-github small p-4 mb-3 text-center border border-dashed rounded-3">
-                        Role demand chart coming soon
+                <div v-spotlight class="panel card p-3 h-100 rounded-3 shadow-sm">
+                    <div class="d-flex align-items-center justify-content-between gap-2 pb-2 mb-2 panel-head">
+                        <h3 class="panel-title fw-bold section-title mb-0">Roles</h3>
+                        <SegmentedToggle v-if="roles.length > TOP_N" v-model="roleView" label="Roles shown"
+                            :options="[{ value: 'top', label: `Top ${TOP_N}` }, { value: 'all', label: 'All' }]" />
                     </div>
-                    <div class="list-group list-group-flush">
-                        <button v-for="r in visibleRoles" :key="r.name" type="button"
-                            class="list-group-item list-group-item-action bg-transparent item-label border-bottom-theme d-flex justify-content-between px-0 py-2 small"
-                            @click="$emit('select', r.name)">
-                            <span>{{ r.name }}</span>
-                            <span class="font-monospace text-muted-github">{{ r.share }}%</span>
-                        </button>
+                    <!-- fixed at five rows tall, so switching to All scrolls instead of resizing the card -->
+                    <ul class="roles-list list-unstyled mb-0" :class="{ 'is-scrolling': roleView === 'all' }">
+                        <li v-for="(r, i) in visibleRoles" :key="r.name" :style="{ '--i': i }" class="role-item">
+                            <button type="button" class="role-row w-100 text-start"
+                                :aria-label="`${r.name}: ${r.share}% of posts. View details`"
+                                @click="$emit('select', r.name)">
+                                <span class="d-flex align-items-center gap-2">
+                                    <span class="role-name flex-grow-1 text-truncate">{{ r.name }}</span>
+                                    <span v-if="postsLabel(r)" class="row-meta font-monospace text-muted-github">
+                                        {{ postsLabel(r) }} ·
+                                    </span>
+                                    <span class="share font-monospace">{{ r.share }}%</span>
+                                    <!-- round chevron at rest, slides open to "Details" on hover/focus -->
+                                    <span class="details-cta d-inline-flex align-items-center rounded-pill"
+                                        aria-hidden="true">
+                                        <span class="cta-label">Details</span>
+                                        <svg class="cta-chevron flex-shrink-0" width="14" height="14" viewBox="0 0 16 16"
+                                            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                            stroke-linejoin="round">
+                                            <path d="M6 3.5L10.5 8 6 12.5" />
+                                        </svg>
+                                    </span>
+                                </span>
+                                <span class="bar-track d-block mt-2">
+                                    <span class="bar-fill d-block" :style="{ width: `${r.share}%` }"></span>
+                                </span>
+                            </button>
+                        </li>
+                    </ul>
+                    <div class="scale d-flex justify-content-between font-monospace text-muted-github mt-1"
+                        aria-hidden="true">
+                        <span>0%</span><span>25%</span><span>50%</span><span>75%</span><span>100%</span>
                     </div>
-                    <button v-if="roles.length > TOP_N" type="button"
-                        class="btn btn-link btn-sm align-self-start px-0 mt-2" @click="showAll = !showAll">
-                        {{ showAll ? `Show top ${TOP_N}` : `Show all ${roles.length}` }}
-                    </button>
                 </div>
             </div>
 
             <!-- Right Card: Posts Per Month -->
             <div class="col-md-6">
-                <div class="card p-4 h-100 rounded-3 shadow-sm">
-                    <h3 class="h6 fw-bold section-title mb-3">Posts per month</h3>
-                    <div
-                        class="chart-placeholder text-muted-github small p-4 mb-3 text-center border border-dashed rounded-3">
-                        Posts per month chart coming soon
+                <div v-spotlight class="panel card p-3 h-100 rounded-3 shadow-sm d-flex flex-column">
+                    <div class="d-flex align-items-center justify-content-between gap-2 pb-2 mb-2 panel-head">
+                        <h3 class="panel-title fw-bold section-title mb-0">Posts per month</h3>
+                        <SegmentedToggle v-model="monthView" label="Chart type"
+                            :options="[{ value: 'bar', label: 'Columns' }, { value: 'line', label: 'Line' }]" />
                     </div>
-                    <ul class="list-group list-group-flush">
-                        <li v-for="p in postsPerMonth" :key="p.month"
-                            class="list-group-item bg-transparent item-label border-bottom-theme d-flex justify-content-between px-0 py-2 small">
-                            <span>{{ p.month }}</span>
-                            <span class="font-monospace text-muted-github">{{ p.count }}</span>
-                        </li>
-                    </ul>
+                    <JobsMonthChart class="flex-grow-1" :points="postsPerMonth" :view="monthView" />
                 </div>
             </div>
         </div>
@@ -68,23 +92,278 @@ const visibleRoles = computed(() => (showAll.value ? props.roles : props.roles.s
 
 <style scoped>
 .section-title,
-.item-label {
+.role-name {
     color: var(--app-text);
     transition: color 0.2s ease;
 }
 
-.chart-placeholder {
-    background-color: var(--github-control-bg);
-    border-color: var(--card-border) !important;
-    transition: background-color 0.2s ease, border-color 0.2s ease;
+.role-name {
+    font-weight: 600;
 }
 
-.border-dashed {
-    border-style: dashed !important;
+/* --- Panels: lift + cursor spotlight (same recipe as the My Project and Discovery cards) -- */
+.panel {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.25s ease, box-shadow 0.25s ease;
 }
 
-.border-bottom-theme {
-    border-bottom: 1px solid var(--card-border) !important;
-    transition: border-color 0.2s ease;
+.panel::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    background: radial-gradient(300px circle at var(--mx, 50%) var(--my, 50%),
+            color-mix(in srgb, #58a6ff 18%, transparent),
+            transparent 70%);
+}
+
+.panel>* {
+    position: relative;
+}
+
+.panel:hover {
+    transform: translateY(-3px);
+    border-color: color-mix(in srgb, #58a6ff 50%, var(--card-border)) !important;
+    box-shadow: 0 14px 30px -16px color-mix(in srgb, #58a6ff 55%, transparent) !important;
+}
+
+.panel:hover::before {
+    opacity: 1;
+}
+
+.panel-head {
+    border-bottom: 1px solid var(--card-border);
+}
+
+.panel-title {
+    font-size: 1.05rem;
+}
+
+/* --- Roles list ------------------------------------------------------------- */
+/* Always five rows tall. Top 5 fills it exactly; All scrolls inside it, so the card never resizes.
+   The scrollbar gutter is reserved in both modes so rows don't shift sideways when toggling. */
+.roles-list {
+    --row-h: 3.75rem;
+    height: calc(5 * var(--row-h));
+    overflow-y: hidden;
+    scrollbar-gutter: stable;
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--text-muted-github) 45%, transparent) transparent;
+}
+
+.roles-list.is-scrolling {
+    overflow-y: auto;
+}
+
+.roles-list:hover {
+    scrollbar-color: #58a6ff transparent;
+}
+
+/* Fallback for browsers without scrollbar-color */
+@supports not (scrollbar-color: auto) {
+    .roles-list::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .roles-list::-webkit-scrollbar-thumb {
+        border-radius: 999px;
+        background: color-mix(in srgb, var(--text-muted-github) 45%, transparent);
+    }
+
+    .roles-list:hover::-webkit-scrollbar-thumb {
+        background: #58a6ff;
+    }
+}
+
+/* --- Rows ------------------------------------------------------------------ */
+.role-item {
+    animation: row-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: calc(var(--i) * 50ms);
+}
+
+.role-row {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: var(--row-h);
+    padding: 0 0.6rem;
+    font-size: 1rem;
+    border: 0;
+    border-radius: 0.4rem;
+    background: transparent;
+    transition: background-color 0.2s ease;
+}
+
+.role-row:hover {
+    background-color: var(--badge-bg);
+}
+
+.role-row:hover .bar-fill {
+    filter: brightness(1.2);
+}
+
+/* Accent edge that grows in on hover */
+.role-row::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 6px;
+    bottom: 6px;
+    width: 3px;
+    border-radius: 2px;
+    background: #58a6ff;
+    transform: scaleY(0);
+    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.role-row:hover::after {
+    transform: scaleY(1);
+}
+
+.role-row:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(56, 139, 253, 0.4);
+}
+
+.share {
+    color: var(--app-text);
+    font-weight: 700;
+    min-width: 3rem;
+    text-align: right;
+}
+
+/* Post count slides in on hover, so the resting list stays uncluttered */
+.row-meta {
+    font-size: 0.85rem;
+    opacity: 0;
+    transform: translateX(6px);
+    transition: opacity 0.2s ease, transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+    white-space: nowrap;
+}
+
+.role-row:hover .row-meta,
+.role-row:focus-visible .row-meta {
+    opacity: 1;
+    transform: none;
+}
+
+/* CTA: a round chevron at rest that slides open to "Details" on hover/focus.
+   It is anchored to the right, so it grows leftward into the hover-only post count's space. */
+.details-cta {
+    height: 26px;
+    max-width: 26px;
+    padding: 0 6px;
+    gap: 2px;
+    overflow: hidden;
+    justify-content: flex-end;
+    font-size: 0.78rem;
+    font-weight: 600;
+    white-space: nowrap;
+    color: #58a6ff;
+    background: color-mix(in srgb, #58a6ff 14%, transparent);
+    border: 1px solid color-mix(in srgb, #58a6ff 35%, transparent);
+    transition: max-width 0.3s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.2s ease, color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.cta-label {
+    opacity: 0;
+    padding-left: 4px;
+    transition: opacity 0.2s ease;
+}
+
+.role-row:hover .details-cta,
+.role-row:focus-visible .details-cta {
+    max-width: 90px;
+    color: #fff;
+    background: #58a6ff;
+    box-shadow: 0 4px 14px -4px rgba(88, 166, 255, 0.8);
+}
+
+.role-row:hover .cta-label,
+.role-row:focus-visible .cta-label {
+    opacity: 1;
+}
+
+/* Share bars: true 0-100% scale, with quarter ticks so the scale is readable */
+.bar-track {
+    position: relative;
+    height: 8px;
+    border-radius: 4px;
+    background-color: var(--badge-bg);
+    background-image: linear-gradient(90deg, transparent calc(25% - 1px), var(--card-border) calc(25% - 1px) 25%,
+            transparent 25% calc(50% - 1px), var(--card-border) calc(50% - 1px) 50%,
+            transparent 50% calc(75% - 1px), var(--card-border) calc(75% - 1px) 75%, transparent 75%);
+    overflow: hidden;
+}
+
+/* same side padding and scrollbar gutter as the rows, so the ticks line up with the bars */
+.scale {
+    padding: 0 0.6rem;
+    overflow: hidden;
+    scrollbar-gutter: stable;
+    scrollbar-width: thin;
+    font-size: 0.72rem;
+    opacity: 0.7;
+}
+
+.bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    box-shadow: 0 0 10px -1px color-mix(in srgb, #58a6ff 70%, transparent);
+    transition: filter 0.2s ease;
+    background: linear-gradient(90deg, color-mix(in srgb, #58a6ff 45%, transparent), #58a6ff);
+    transform-origin: left;
+    animation: bar-grow 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: calc(var(--i) * 50ms + 150ms);
+}
+
+@keyframes row-in {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+@keyframes bar-grow {
+    from {
+        transform: scaleX(0);
+    }
+
+    to {
+        transform: scaleX(1);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .panel,
+    .panel::before,
+    .role-row,
+    .role-row::after,
+    .row-meta,
+    .details-cta,
+    .cta-label {
+        transition: none !important;
+    }
+
+    .role-item,
+    .bar-fill {
+        animation: none !important;
+    }
+
+    .panel:hover {
+        transform: none;
+    }
 }
 </style>
