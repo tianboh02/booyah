@@ -3,6 +3,7 @@ import { getLangColor } from '@/utils/langColors'
 import { categoryColor } from '@/utils/savedLibrary'
 import { useViewMode } from '@/composables/useViewMode'
 import ViewToggle from '@/components/ring/ViewToggle.vue'
+import SortPills from '@/components/shared/SortPills.vue'
 
 defineProps({
     shown: { type: Number, default: 0 },
@@ -15,7 +16,7 @@ const selectedCategory = defineModel('selectedCategory', { type: String, default
 const selectedLang = defineModel('selectedLang', { type: String, default: null })
 
 const sortOptions = [
-    { value: 'newest', label: 'Newest' },
+    { value: 'newest', label: 'Recently saved' },
     { value: 'name', label: 'Name' },
     { value: 'stars', label: 'Stars' }
 ]
@@ -34,8 +35,8 @@ const view = useViewMode('saved')
             <TransitionGroup name="chip">
                 <button v-if="selectedCategory" key="category" type="button"
                     class="filter-chip d-inline-flex align-items-center gap-2 rounded-pill ps-3 pe-2 py-1"
-                    :style="{ '--c': categoryColor(selectedCategory) }" :aria-label="'Clear ' + selectedCategory + ' filter'"
-                    @click="selectedCategory = null">
+                    :style="{ '--c': categoryColor(selectedCategory) }"
+                    :aria-label="'Clear ' + selectedCategory + ' filter'" @click="selectedCategory = null">
                     <span class="chip-dot rounded-circle"></span>
                     <span class="small fw-semibold">{{ selectedCategory }}</span>
                     <span class="chip-x rounded-circle d-inline-flex align-items-center justify-content-center">✕</span>
@@ -67,17 +68,7 @@ const view = useViewMode('saved')
                     aria-label="Search saved projects" />
             </div>
 
-            <!-- Sort: Bootstrap button group -->
-            <div class="d-flex align-items-center gap-2">
-                <span class="text-muted-github small text-nowrap">Sort by</span>
-                <div class="btn-group" role="group" aria-label="Sort saved projects">
-                    <button v-for="opt in sortOptions" :key="opt.value" type="button" class="btn btn-sm sort-btn"
-                        :class="{ active: sortBy === opt.value }" :aria-pressed="sortBy === opt.value"
-                        @click="sortBy = opt.value">
-                        {{ opt.label }}
-                    </button>
-                </div>
-            </div>
+            <SortPills v-model="sortBy" :options="sortOptions" aria-label="Sort saved projects" />
 
             <ViewToggle v-model="view" />
         </div>

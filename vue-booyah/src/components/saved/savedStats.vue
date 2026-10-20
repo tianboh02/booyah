@@ -105,9 +105,10 @@ watch(
                 <div class="col">
                     <div v-tilt="5" v-spotlight class="card stat-card p-3 h-100 rounded-3 shadow-sm"
                         :class="{ 'is-in': ready, 'is-focused': focused }" :style="{ '--i': 0, '--accent': accent }">
-                        <span class="h3 fw-bold stat-value mb-1 font-monospace">{{ countUp }}</span>
-                        <span class="stat-label fw-semibold small">{{ focused ? 'Matching projects' : 'Saved projects'
-                        }}</span>
+                        <span class="stat-top h3 fw-bold stat-value mb-1 font-monospace">{{ countUp }}</span>
+                        <span class="stat-label fw-semibold small">
+                            {{ focused ? 'Matching projects' : 'Saved projects' }}
+                        </span>
                         <span class="text-muted-github small">
                             across {{ categoryCount }} {{ categoryCount === 1 ? 'category' : 'categories' }}
                         </span>
@@ -119,7 +120,7 @@ watch(
                     <div v-tilt="5" v-spotlight class="card stat-card p-3 h-100 rounded-3 shadow-sm"
                         :class="{ 'is-in': ready, 'is-focused': selectedCategory }"
                         :style="{ '--i': 1, '--accent': headlineColor }">
-                        <span class="stat-lang fw-bold mb-1 d-flex align-items-start gap-2">
+                        <span class="stat-lang fw-bold mb-1 d-flex align-items-start gap-2 font-monospace">
                             <span class="accent-dot flex-shrink-0"></span>
                             <span class="stat-name stat-value" :title="headline.name">{{ headline.name }}</span>
                         </span>

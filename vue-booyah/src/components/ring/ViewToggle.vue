@@ -22,8 +22,8 @@ const options = [
             </svg>
 
             <!-- List: stacked rows -->
-            <svg v-else width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor"
-                stroke-width="1.4" stroke-linecap="round" aria-hidden="true">
+            <svg v-else width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"
+                stroke-linecap="round" aria-hidden="true">
                 <path d="M5.5 4h8M5.5 8h8M5.5 12h8" />
                 <circle cx="2.5" cy="4" r="0.6" fill="currentColor" />
                 <circle cx="2.5" cy="8" r="0.6" fill="currentColor" />
