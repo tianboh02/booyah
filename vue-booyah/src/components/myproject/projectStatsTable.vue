@@ -120,19 +120,43 @@ const langShareList = computed(() => {
     }))
 })
 
+// The donut is drawn as one real arc per language (not a dashed circle), so there is no
+// dash pattern that can wrap around and leave a stray sliver where the ring starts and ends.
+const DONUT_R = 16.5
+const DONUT_GAP = 0.9 // visible gap between segments, in % of the ring
+
+// 0% is 12 o'clock and the ring runs clockwise
+function donutPoint(pct) {
+    const angle = (pct / 100) * 2 * Math.PI - Math.PI / 2
+    return [21 + DONUT_R * Math.cos(angle), 21 + DONUT_R * Math.sin(angle)]
+}
+
+function donutArc(from, to) {
+    const [x0, y0] = donutPoint(from)
+    // a full circle cannot be a single arc (start = end), so a lone language is drawn as two halves
+    if (to - from >= 99.99) {
+        const [x1, y1] = donutPoint(from + 50)
+        return `M ${x0} ${y0} A ${DONUT_R} ${DONUT_R} 0 1 1 ${x1} ${y1} A ${DONUT_R} ${DONUT_R} 0 1 1 ${x0} ${y0}`
+    }
+    const [x1, y1] = donutPoint(to)
+    return `M ${x0} ${y0} A ${DONUT_R} ${DONUT_R} 0 ${to - from > 50 ? 1 : 0} 1 ${x1} ${y1}`
+}
+
 const donutSegments = computed(() => {
     if (!hasData.value) return []
     const total = props.repoList.length
+    const langs = stats.value.sortedLangs
     let acc = 0
-    return stats.value.sortedLangs.map(([name, count], idx) => {
+    return langs.map(([name, count], idx) => {
         const len = (count / total) * 100
+        // half a gap on each side, except when one language is the whole ring
+        const half = langs.length > 1 ? Math.min(DONUT_GAP / 2, len / 4) : 0
         const seg = {
             name,
             idx,
             color: getLangColor(name),
             pct: Math.round(len),
-            dash: Math.max(len - 0.9, 0.1),
-            offset: acc + 0.45
+            path: donutArc(acc + half, acc + len - half)
         }
         acc += len
         return seg
@@ -200,8 +224,9 @@ const focusedCount = computed(() => scopedRepos.value.length)
                 <div v-tilt="5" v-spotlight class="card stat-card p-3 h-100 rounded-3 shadow-sm"
                     :class="{ 'is-in': ready, 'is-focused': selectedLang }"
                     :style="{ '--i': 1, '--accent': topLangColor }">
-                    <span class="h3 fw-bold stat-value mb-1 font-monospace text-truncate d-block">
-                        <span class="lang-dot rounded-circle me-2 d-inline-block"></span>{{ stats.mostUsedLang }}
+                    <span class="stat-lang h3 fw-bold stat-value mb-1 font-monospace d-flex align-items-center gap-2">
+                        <span class="lang-dot rounded-circle d-inline-block flex-shrink-0"></span>
+                        <span class="text-truncate">{{ stats.mostUsedLang }}</span>
                     </span>
                     <span class="stat-label fw-semibold small">
                         {{ selectedLang ? 'Selected language' : 'Most-used language' }}
@@ -272,23 +297,20 @@ const focusedCount = computed(() => scopedRepos.value.length)
                             <svg viewBox="-2 -2 46 46" class="donut-svg w-100 h-100" role="group"
                                 aria-label="Language share chart">
                                 <circle class="donut-track" cx="21" cy="21" r="16.5" fill="none" stroke-width="8" />
-                                <g transform="rotate(-90 21 21)">
-                                    <circle v-for="seg in donutSegments" :key="seg.name" class="donut-seg" :class="{
-                                        'is-active': activeLang === seg.name,
-                                        'is-selected': selectedLang === seg.name,
-                                        'is-dim': activeLang && activeLang !== seg.name
-                                    }" cx="21" cy="21" r="16.5" fill="none" pathLength="100" :stroke="seg.color"
-                                        :stroke-width="activeLang === seg.name ? 9.5 : 8"
-                                        :stroke-dasharray="ready ? seg.dash + ' ' + (100 - seg.dash) : '0 100'"
-                                        :stroke-dashoffset="-seg.offset"
-                                        :style="{ transitionDelay: seg.idx * 90 + 'ms, 0ms, 0ms' }" tabindex="0"
-                                        role="button" :aria-label="seg.name + ' ' + seg.pct + '%'"
-                                        :aria-pressed="selectedLang === seg.name" @click="toggleLang(seg.name)"
-                                        @keydown.enter.prevent="toggleLang(seg.name)"
-                                        @keydown.space.prevent="toggleLang(seg.name)"
-                                        @mouseenter="hoveredLang = seg.name" @mouseleave="hoveredLang = null"
-                                        @focus="hoveredLang = seg.name" @blur="hoveredLang = null" />
-                                </g>
+                                <path v-for="seg in donutSegments" :key="seg.name" class="donut-seg" :class="{
+                                    'is-active': activeLang === seg.name,
+                                    'is-selected': selectedLang === seg.name,
+                                    'is-dim': activeLang && activeLang !== seg.name
+                                }" :d="seg.path" fill="none" pathLength="100" :stroke="seg.color"
+                                    :stroke-width="activeLang === seg.name ? 9.5 : 8"
+                                    :stroke-dasharray="ready ? '101 1000' : '0 1000'"
+                                    :style="{ transitionDelay: seg.idx * 90 + 'ms, 0ms, 0ms', visibility: ready ? 'visible' : 'hidden' }"
+                                    tabindex="0" role="button" :aria-label="seg.name + ' ' + seg.pct + '%'"
+                                    :aria-pressed="selectedLang === seg.name" @click="toggleLang(seg.name)"
+                                    @keydown.enter.prevent="toggleLang(seg.name)"
+                                    @keydown.space.prevent="toggleLang(seg.name)" @mouseenter="hoveredLang = seg.name"
+                                    @mouseleave="hoveredLang = null" @focus="hoveredLang = seg.name"
+                                    @blur="hoveredLang = null" />
                             </svg>
 
                             <div class="donut-hole rounded-circle d-flex flex-column align-items-center justify-content-center text-center position-absolute pe-none"
@@ -311,13 +333,13 @@ const focusedCount = computed(() => scopedRepos.value.length)
                                     }" :style="{ '--c': item.color }" :aria-pressed="selectedLang === item.name"
                                     @click="toggleLang(item.name)" @mouseenter="hoveredLang = item.name"
                                     @mouseleave="hoveredLang = null">
-                                    <span class="d-flex align-items-center gap-2 text-truncate">
+                                    <span class="legend-label d-flex align-items-center gap-2">
                                         <span class="legend-dot rounded-circle d-inline-block flex-shrink-0"
                                             :style="{ backgroundColor: item.color, width: '10px', height: '10px' }"></span>
                                         <span class="stat-label small text-truncate">{{ item.name }}</span>
                                     </span>
                                     <span class="text-muted-github small ms-1 font-monospace">{{ item.percentage
-                                    }}%</span>
+                                        }}%</span>
                                 </button>
                             </div>
                         </div>
@@ -451,11 +473,19 @@ const focusedCount = computed(() => scopedRepos.value.length)
     transform: scaleX(1);
 }
 
+/* min-width: 0 lets a long name shrink to "…" (on the name only). The row itself does not hide
+   overflow, so the dot's glow is never cut off. */
+.stat-lang {
+    min-width: 0;
+}
+
 .lang-dot {
     width: 12px;
     height: 12px;
     background-color: var(--accent);
-    box-shadow: 0 0 12px var(--accent);
+    /* two layers: a tight core and a wide soft halo, so the glow fades out smoothly */
+    box-shadow: 0 0 6px color-mix(in srgb, var(--accent) 70%, transparent),
+        0 0 18px 4px color-mix(in srgb, var(--accent) 30%, transparent);
     transition: background-color 0.4s ease, box-shadow 0.4s ease;
 }
 
@@ -590,6 +620,12 @@ const focusedCount = computed(() => scopedRepos.value.length)
 .legend-btn.is-dim:hover,
 .bar-row.is-dim:hover {
     opacity: 0.85;
+}
+
+/* min-width: 0 lets a long language name shrink and show "…" (on the name only),
+   while the wrapper stays unclipped so the enlarged, glowing dot is never cut off */
+.legend-label {
+    min-width: 0;
 }
 
 .legend-dot {
