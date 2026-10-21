@@ -26,14 +26,23 @@ const PERSPECTIVE = 1600
 // How far back the ring reaches, as a multiple of the radius.
 const DEPTH = 1.6
 // Room above the highest card for its hover callout, in px.
-const CALLOUT_ROOM = 96
+const CALLOUT_ROOM = 70
+// The camera looks down on the ring by this many degrees, so the far side rises and shrinks.
+const TILT = 10
+const COS = Math.cos((TILT * Math.PI) / 180)
+const SIN = Math.sin((TILT * Math.PI) / 180)
+// How far the back of the ring is lifted, as a share of the card height (on top of the tilt).
+const LIFT_RATIO = 0.2
+// The highest back cards may poke this far above the stage, where the top fade clips them.
+const TRIM_TOP = 50
+const TOP_FADE = 50
 
 const root = ref(null)
 const platform = ref(null)
 let cardPx = 360
 let cardH = 240
 // The far side of the ring sits higher, as if seen from slightly above.
-let lift = 108
+let lift = 48
 
 const pickKey = (item, key) => (typeof key === 'function' ? key(item) : item?.[key])
 const keyOf = (item) => pickKey(item, props.itemKey)
@@ -69,6 +78,14 @@ const visible = computed(() => {
     return [...list]
 })
 
+// Where a card sits vertically and in depth: lifted and pushed back by how far round the ring it is,
+// then the whole ring is tilted about the front card's centre. Cards themselves stay upright.
+function tilted(depth, R) {
+    const y0 = -lift * depth
+    const z0 = -R * DEPTH * depth
+    return { y: y0 * COS + z0 * SIN, z: -y0 * SIN + z0 * COS }
+}
+
 // Cards slide around the ring, turned slightly toward their angle so they read as 3D.
 function place(el, i) {
     const off = ring.offsetOf(i)
@@ -81,8 +98,9 @@ function place(el, i) {
         ? Math.min(1, Math.max(0, props.slots / 2 - Math.abs(off)))
         : 1
 
+    const { y, z } = tilted(depth, R)
     el.style.transform =
-        `translate3d(${R * Math.sin(a)}px, ${-lift * depth}px, ${-R * DEPTH * depth}px) ` +
+        `translate3d(${R * Math.sin(a)}px, ${y}px, ${z}px) ` +
         `rotateY(${(Math.sin(a) * props.turn).toFixed(2)}deg)`
     // How present a card is: 1 at the front, dropping quickly toward the back. The CSS turns
     // it into opacity, blur, greyscale and dimming, with values tuned per theme.
@@ -108,25 +126,35 @@ function measure() {
 
     cardPx = slot.offsetWidth || cardPx
     cardH = slot.offsetHeight || cardH
-    lift = Math.round(cardH * 0.38)
+    lift = Math.round(cardH * LIFT_RATIO)
 
     const R = radiusPx()
     const cy = cardH / 2
-    const scaleAt = (depth) => PERSPECTIVE / (PERSPECTIVE + R * DEPTH * depth)
-    const back = scaleAt(1)
-    const side = scaleAt(0.5)
+    // Perspective scale and vertical offset of a card at this depth, after the tilt.
+    const at = (depth) => {
+        const { y, z } = tilted(depth, R)
+        return { y, s: PERSPECTIVE / (PERSPECTIVE - z) }
+    }
+    const back = at(1)
+    const side = at(0.5).s
 
-    // Highest point a card reaches (the back one), then add room for its callout.
-    const backTop = cy * (1 - back) - lift * back
-    const padTop = Math.round(Math.max(0, -backTop) + CALLOUT_ROOM)
+    // Highest point any card on the ring reaches. A ring with an odd count has no card dead at the back.
+    let backTop = Infinity
+    for (let k = 0; k < ringSize.value; k++) {
+        const { y, s } = at((1 - Math.cos(k * step.value)) / 2)
+        backTop = Math.min(backTop, cy * (1 - s) + y * s)
+    }
+    // Room for the callout above it, less what the top fade is allowed to clip.
+    const padTop = Math.round(Math.max(0, Math.max(0, -backTop) + CALLOUT_ROOM - TRIM_TOP))
 
     // Disc spans from under the back card's feet to just past the front card's.
-    const backBottom = cy + (cardH - lift - cy) * back
+    const backBottom = cy + (cy + back.y) * back.s
     const halfH = (cardH - backBottom) / 2 + 28
     const halfW = R * side + cardPx * 0.2
 
     const s = root.value.style
     s.setProperty('--pad-top', `${padTop}px`)
+    s.setProperty('--top-fade', `${TOP_FADE}px`)
     s.setProperty('--front-mid', `${padTop + cardH / 2}px`)
     s.setProperty('--floor-top', `${(cardH + backBottom) / 2 - halfH}px`)
     s.setProperty('--floor-w', `${halfW * 2}px`)
@@ -265,9 +293,9 @@ onUpdated(() => {
 /* Dark: back cards dim toward black; the front card gets an accent glow. */
 .card-ring {
     --ring-accent: #58a6ff;
-    --ring-min-op: 0.15;
-    --ring-dim: 0.55;
-    --ring-gray: 0.5;
+    --ring-min-op: 0.5;
+    --ring-dim: 0.2;
+    --ring-gray: 0.35;
     --ring-front-shadow:
         0 0 0 1px color-mix(in srgb, var(--ring-accent) 60%, transparent),
         0 0 56px -12px color-mix(in srgb, var(--ring-accent) 55%, transparent),
@@ -278,9 +306,9 @@ onUpdated(() => {
 /* Light: back cards wash out toward white; the front card lifts on a crisp shadow. */
 [data-bs-theme='light'] .card-ring {
     --ring-accent: #0969da;
-    --ring-min-op: 0.18;
+    --ring-min-op: 0.4;
     --ring-dim: 0;
-    --ring-gray: 0.75;
+    --ring-gray: 0.6;
     --ring-front-shadow:
         0 0 0 1px color-mix(in srgb, var(--ring-accent) 45%, transparent),
         0 30px 56px -20px rgba(31, 35, 40, 0.4),
@@ -298,8 +326,15 @@ onUpdated(() => {
     user-select: none;
     cursor: grab;
     outline: none;
-    -webkit-mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
-    mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+    /* Sides fade out, and so does the top, where the highest back cards are clipped. */
+    -webkit-mask-image:
+        linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent),
+        linear-gradient(180deg, transparent 0, #000 var(--top-fade, 0px));
+    mask-image:
+        linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent),
+        linear-gradient(180deg, transparent 0, #000 var(--top-fade, 0px));
+    -webkit-mask-composite: source-in;
+    mask-composite: intersect;
 }
 
 /* The front card uses normal cursors, so the hand never covers its small icons. */

@@ -120,7 +120,7 @@ watch(
                     <div v-tilt="5" v-spotlight class="card stat-card p-3 h-100 rounded-3 shadow-sm"
                         :class="{ 'is-in': ready, 'is-focused': selectedCategory }"
                         :style="{ '--i': 1, '--accent': headlineColor }">
-                        <span class="stat-lang fw-bold mb-1 d-flex align-items-start gap-2 font-monospace">
+                        <span class="stat-top stat-lang fw-bold mb-1 d-flex align-items-center gap-2 font-monospace">
                             <span class="accent-dot flex-shrink-0"></span>
                             <span class="stat-name stat-value" :title="headline.name">{{ headline.name }}</span>
                         </span>
@@ -138,7 +138,7 @@ watch(
                     <div v-tilt="5" v-spotlight class="card stat-card p-3 h-100 rounded-3 shadow-sm"
                         :class="{ 'is-in': ready, 'is-focused': focused }"
                         :style="{ '--i': 2, '--accent': focused ? accent : '#e3b341' }">
-                        <span class="h3 fw-bold stat-value mb-1 font-monospace">{{ starsUp.toLocaleString('en-US')
+                        <span class="stat-top h3 fw-bold stat-value mb-1 font-monospace">{{ starsUp.toLocaleString('en-US')
                         }}</span>
                         <span class="stat-label fw-semibold small">Combined stars</span>
                         <span class="text-muted-github small">
@@ -251,20 +251,24 @@ watch(
     transition: background-color 0.4s ease, box-shadow 0.4s ease;
 }
 
+/* All three top rows share one height (two lines of the category name), so the labels line up
+   whatever the length of the name. */
+.stat-top {
+    display: flex;
+    align-items: center;
+    min-height: 2.9rem;
+}
+
 .stat-name {
-    font-size: 1.15rem;
+    font-size: 1.05rem;
     line-height: 1.3;
+    text-wrap: balance;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
     overflow-wrap: anywhere;
-}
-
-/* keep the dot aligned with the first line of text */
-.stat-lang .accent-dot {
-    margin-top: 0.4rem;
 }
 
 @media (prefers-reduced-motion: reduce) {
