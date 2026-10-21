@@ -47,23 +47,23 @@ watch(
         </div>
 
         <div v-else-if="bars.length" class="d-flex flex-column gap-2">
-            <button v-for="(b, idx) in bars" :key="b.name" type="button"
-                class="bar-row d-flex align-items-center gap-3 w-100 text-start rounded-2" :class="{
+            <button v-for="(b, idx) in bars" :key="b.name" type="button" :title="b.name"
+                class="bar-row d-flex flex-column w-100 text-start rounded-2" :class="{
                     'is-selected': selected === b.name,
                     'is-dim': selected && selected !== b.name
                 }" :style="{ '--c': b.color }" :aria-pressed="selected === b.name" @click="emit('toggle', b.name)">
-                <span class="stat-label small flex-shrink-0 text-truncate" style="width: 110px;">{{ b.name }}</span>
+                <span class="d-flex align-items-baseline justify-content-between gap-3 mb-1">
+                    <span class="stat-label bar-name small text-truncate">{{ b.name }}</span>
+                    <span class="text-muted-github small flex-shrink-0 font-monospace">{{ b.count }}</span>
+                </span>
 
-                <div class="progress flex-grow-1 rounded-pill progress-track" style="height: 12px;">
+                <div class="progress rounded-pill progress-track" style="height: 12px;">
                     <div class="progress-bar bar-fill rounded-pill" role="progressbar" :style="{
                         width: ready ? b.width + '%' : '0%',
                         backgroundColor: b.color,
                         transitionDelay: idx * 90 + 'ms'
                     }"></div>
                 </div>
-
-                <span class="text-muted-github small flex-shrink-0 text-end font-monospace" style="width: 30px;">{{
-                    b.count }}</span>
             </button>
         </div>
 
@@ -152,6 +152,10 @@ watch(
     background: linear-gradient(100deg, transparent 30%, rgba(255, 255, 255, 0.35) 50%, transparent 70%);
     transform: translateX(-100%);
     animation: sheen 3.6s ease-in-out 1.4s infinite;
+}
+
+.bar-name {
+    min-width: 0;
 }
 
 @keyframes sheen {

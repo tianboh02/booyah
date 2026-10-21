@@ -104,10 +104,11 @@ watch(
                 <!-- Saved count -->
                 <div class="col">
                     <div v-tilt="5" v-spotlight class="card stat-card p-3 h-100 rounded-3 shadow-sm"
-                        :class="{ 'is-in': ready, 'is-focused': focused }"
-                        :style="{ '--i': 0, '--accent': accent }">
-                        <span class="h3 fw-bold stat-value mb-1 font-monospace">{{ countUp }}</span>
-                        <span class="stat-label fw-semibold small">{{ focused ? 'Matching projects' : 'Saved projects' }}</span>
+                        :class="{ 'is-in': ready, 'is-focused': focused }" :style="{ '--i': 0, '--accent': accent }">
+                        <span class="stat-top h3 fw-bold stat-value mb-1 font-monospace">{{ countUp }}</span>
+                        <span class="stat-label fw-semibold small">
+                            {{ focused ? 'Matching projects' : 'Saved projects' }}
+                        </span>
                         <span class="text-muted-github small">
                             across {{ categoryCount }} {{ categoryCount === 1 ? 'category' : 'categories' }}
                         </span>
@@ -119,10 +120,13 @@ watch(
                     <div v-tilt="5" v-spotlight class="card stat-card p-3 h-100 rounded-3 shadow-sm"
                         :class="{ 'is-in': ready, 'is-focused': selectedCategory }"
                         :style="{ '--i': 1, '--accent': headlineColor }">
-                        <span class="h3 fw-bold stat-value mb-1 font-monospace text-truncate d-block">
-                            <span class="accent-dot me-2"></span>{{ headline.name }}
+                        <span class="stat-lang fw-bold mb-1 d-flex align-items-start gap-2 font-monospace">
+                            <span class="accent-dot flex-shrink-0"></span>
+                            <span class="stat-name stat-value" :title="headline.name">{{ headline.name }}</span>
                         </span>
-                        <span class="stat-label fw-semibold small">{{ selectedCategory ? 'Selected category' : 'Top category' }}</span>
+                        <span class="stat-label fw-semibold small">
+                            {{ selectedCategory ? 'Selected category' : 'Top category' }}
+                        </span>
                         <span class="text-muted-github small">
                             <span class="font-monospace">{{ headlineUp }}</span> saved
                         </span>
@@ -134,7 +138,8 @@ watch(
                     <div v-tilt="5" v-spotlight class="card stat-card p-3 h-100 rounded-3 shadow-sm"
                         :class="{ 'is-in': ready, 'is-focused': focused }"
                         :style="{ '--i': 2, '--accent': focused ? accent : '#e3b341' }">
-                        <span class="h3 fw-bold stat-value mb-1 font-monospace">{{ starsUp.toLocaleString('en-US') }}</span>
+                        <span class="h3 fw-bold stat-value mb-1 font-monospace">{{ starsUp.toLocaleString('en-US')
+                        }}</span>
                         <span class="stat-label fw-semibold small">Combined stars</span>
                         <span class="text-muted-github small">
                             {{ starsLoading ? 'Still fetching from GitHub…' : 'Across these repositories' }}
@@ -228,14 +233,38 @@ watch(
     transform: scaleX(1);
 }
 
+/* min-width: 0 lets a long name shrink to "…" (on the name only). The row itself does not hide
+   overflow, so the dot's glow is never cut off. */
+.stat-lang {
+    min-width: 0;
+}
+
 .accent-dot {
     display: inline-block;
     width: 12px;
     height: 12px;
     border-radius: 50%;
     background-color: var(--accent);
-    box-shadow: 0 0 12px var(--accent);
+    /* two layers: a tight core and a wide soft halo, so the glow fades out smoothly */
+    box-shadow: 0 0 6px color-mix(in srgb, var(--accent) 70%, transparent),
+        0 0 18px 4px color-mix(in srgb, var(--accent) 30%, transparent);
     transition: background-color 0.4s ease, box-shadow 0.4s ease;
+}
+
+.stat-name {
+    font-size: 1.15rem;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    overflow-wrap: anywhere;
+}
+
+/* keep the dot aligned with the first line of text */
+.stat-lang .accent-dot {
+    margin-top: 0.4rem;
 }
 
 @media (prefers-reduced-motion: reduce) {

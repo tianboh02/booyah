@@ -7,6 +7,7 @@ import { useViewMode } from '@/composables/useViewMode'
 import CardRing from '@/components/ring/CardRing.vue'
 import RingCaption from '@/components/ring/RingCaption.vue'
 import ViewToggle from '@/components/ring/ViewToggle.vue'
+import SortPills from '@/components/shared/SortPills.vue'
 
 // The repo card is defined once in the template and reused by both views.
 const [DefineRepoCard, ReuseRepoCard] = createReusableTemplate()
@@ -203,16 +204,7 @@ const pad = (n) => String(n).padStart(2, '0')
                 </div>
 
                 <!-- Sort Button Group -->
-                <div class="d-flex align-items-center gap-2">
-                    <span class="text-muted-github small text-nowrap">Sort by</span>
-                    <div class="d-flex flex-wrap gap-1" role="group" aria-label="Sort repositories">
-                        <button v-for="opt in sortOptions" :key="opt.value" type="button" class="sort-btn rounded-pill small"
-                            :class="{ active: sortBy === opt.value }" :aria-pressed="sortBy === opt.value"
-                            @click="sortBy = opt.value">
-                            {{ opt.label }}
-                        </button>
-                    </div>
-                </div>
+                <SortPills v-model="sortBy" :options="sortOptions" aria-label="Sort repositories" />
 
                 <ViewToggle v-model="view" />
             </div>
