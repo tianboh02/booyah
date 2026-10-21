@@ -1,6 +1,7 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { createScene } from '@/utils/signalScene'
+import { useTheme } from '@/composables/useTheme'
 
 // Inline version of the auth screen's particle globe. Each completed request fires one signal arc.
 const props = defineProps({
@@ -12,6 +13,7 @@ const props = defineProps({
     height: { type: String, default: '360px' }
 })
 
+const { theme } = useTheme()
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 const canvasEl = ref(null)
 const hasScene = ref(true)
@@ -24,6 +26,7 @@ onMounted(() => {
     try {
         scene = createScene(canvasEl.value, {
             reduceMotion,
+            light: theme.value === 'light',
             sphereCount: 1200,
             ringCount: 500,
             starCount: 80,
@@ -37,6 +40,9 @@ onMounted(() => {
         hasScene.value = false
     }
 })
+
+// The theme can change while the loader is up
+watch(theme, (now) => scene?.setLight(now === 'light'))
 
 // One arc per request that comes back, in the first legend colour
 watch(
@@ -80,12 +86,35 @@ onBeforeUnmount(() => scene?.destroy())
 </template>
 
 <style scoped>
-/* Always dark, like the auth screen: it reads as a viewport into the data, in either theme */
+/* Dark like the auth screen by default; the light theme swaps in a soft card backdrop */
 .signal-stage {
+    --track: rgba(255, 255, 255, 0.12);
     background: radial-gradient(ellipse at 50% 42%, #0d1220 0%, #07080c 60%, #040507 100%);
     border: 1px solid rgba(255, 255, 255, 0.06);
     box-shadow: 0 20px 50px -25px rgba(0, 0, 0, 0.6);
     color: #e6edf3;
+}
+
+[data-bs-theme='light'] .signal-stage {
+    --track: rgba(0, 0, 0, 0.12);
+    background: radial-gradient(ellipse at 50% 42%, #ffffff 0%, var(--card-bg) 60%, var(--badge-bg) 100%);
+    border-color: var(--card-border);
+    box-shadow: 0 20px 50px -25px rgba(31, 35, 40, 0.25);
+    color: var(--app-text);
+}
+
+[data-bs-theme='light'] .hud-status {
+    color: #0969da;
+}
+
+[data-bs-theme='light'] .legend {
+    color: var(--text-muted-github);
+}
+
+[data-bs-theme='light'] .pip-on,
+[data-bs-theme='light'] .meter-fill,
+[data-bs-theme='light'] .legend-dot {
+    box-shadow: none;
 }
 
 canvas {
@@ -106,7 +135,7 @@ canvas {
     width: 18px;
     height: 4px;
     border-radius: 2px;
-    background: rgba(255, 255, 255, 0.12);
+    background: var(--track);
     transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
@@ -120,7 +149,7 @@ canvas {
     height: 4px;
     border-radius: 2px;
     overflow: hidden;
-    background: rgba(255, 255, 255, 0.12);
+    background: var(--track);
 }
 
 .meter-fill {

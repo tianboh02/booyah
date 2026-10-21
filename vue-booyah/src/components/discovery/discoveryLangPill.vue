@@ -1,7 +1,7 @@
 <script setup>
 import { getLangColor } from '@/utils/langColors'
 
-// Language dot + label. Used for the filter row and each card row so both look identical.
+// Language dot + label, used in the filter row. The weight stays constant when active so the row doesn't reflow.
 defineProps({
     lang: { type: String, required: true },
     active: { type: Boolean, default: false },
@@ -46,7 +46,6 @@ defineProps({
 
 .lang-pill.is-active {
     color: var(--app-text);
-    font-weight: 600;
     background-color: color-mix(in srgb, var(--lang) 18%, transparent);
     border-color: color-mix(in srgb, var(--lang) 65%, transparent);
 }

@@ -19,7 +19,7 @@ defineEmits(['undo', 'dismiss'])
                 <span class="small toast-text text-truncate">
                     Removed <span class="font-monospace">{{ removed.name }}</span>
                 </span>
-                <button type="button" class="btn btn-sm undo-btn fw-semibold" @click="$emit('undo')">Undo</button>
+                <button type="button" class="btn btn-sm undo-btn rounded-pill px-3 fw-semibold" @click="$emit('undo')">Undo</button>
                 <button type="button" class="btn-close btn-close-sm" aria-label="Dismiss"
                     @click="$emit('dismiss')"></button>
             </div>

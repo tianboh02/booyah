@@ -58,11 +58,12 @@ const toggleLang = (lang) => {
             <li v-for="project in rows" :key="project.id" class="project-row"
                 :style="{ '--lang': getLangColor(langOf(project)) }">
                 <span class="d-flex align-items-center gap-2 min-w-0">
-                    <button type="button" class="project-link btn btn-link p-0 text-start font-monospace text-truncate"
-                        :aria-label="`Open details for ${project.id}`" @click="emit('open', project)">
-                        <span class="text-muted-github">
-                            {{ project.owner }}/
-                        </span>{{ project.name }}
+                    <!-- The owner prefix gives way first, so the repo name stays readable; the title has the full name -->
+                    <button type="button" class="project-link btn btn-link d-flex p-0 text-start font-monospace min-w-0"
+                        :title="project.id" :aria-label="`Open details for ${project.id}`"
+                        @click="emit('open', project)">
+                        <span class="repo-owner text-muted-github text-truncate">{{ project.owner }}/</span>
+                        <span class="repo-name text-truncate">{{ project.name }}</span>
                     </button>
 
                     <svg class="row-arrow flex-shrink-0" width="14" height="14" viewBox="0 0 16 16" fill="none"
@@ -187,7 +188,7 @@ const toggleLang = (lang) => {
 .project-row {
     position: relative;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 6rem 3.5rem 3.5rem 1.5rem;
+    grid-template-columns: minmax(0, 1fr) 7rem 3.5rem 3.5rem 1.5rem;
     align-items: center;
     column-gap: 0.75rem;
     height: 44px;
@@ -221,6 +222,16 @@ const toggleLang = (lang) => {
 
 .project-row:hover::after {
     transform: scaleY(1);
+}
+
+.repo-owner {
+    flex: 0 8 auto;
+    min-width: 3ch;
+}
+
+.repo-name {
+    flex: 0 1 auto;
+    min-width: 0;
 }
 
 .project-link {
@@ -270,9 +281,11 @@ const toggleLang = (lang) => {
     border-color: color-mix(in srgb, var(--lang) 55%, transparent);
 }
 
+/* Weight stays constant so the label width doesn't change when selected */
 .lang-link.is-selected {
     color: var(--app-text);
-    font-weight: 600;
+    background-color: color-mix(in srgb, var(--lang) 16%, transparent);
+    border-color: color-mix(in srgb, var(--lang) 55%, transparent);
 }
 
 .lang-link:focus-visible,

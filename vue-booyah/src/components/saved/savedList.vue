@@ -79,7 +79,7 @@ const pad = (n) => String(n).padStart(2, '0')
         <div v-else class="card rounded-3 shadow-sm text-center p-4 text-muted-github">
             <span>No saved projects match your search or filters.</span>
             <div class="mt-3">
-                <button type="button" class="btn btn-sm reset-btn" @click="$emit('reset')">Clear filters</button>
+                <button type="button" class="btn btn-sm reset-btn rounded-pill px-3" @click="$emit('reset')">Clear filters</button>
             </div>
         </div>
     </div>

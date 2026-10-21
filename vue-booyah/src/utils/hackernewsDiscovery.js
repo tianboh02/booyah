@@ -148,8 +148,9 @@ export async function fetchDiscoveryData(onProgress) {
     let done = 1
     onProgress?.(done, total)
 
+    const token = localStorage.getItem('auth_token')
     const headers = {
-        Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
+        ...(token && { Authorization: `Bearer ${token}` }),
         'X-GitHub-Api-Version': '2022-11-28',
         Accept: 'application/vnd.github+json',
     }

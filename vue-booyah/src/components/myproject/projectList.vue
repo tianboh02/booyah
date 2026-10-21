@@ -263,7 +263,7 @@ const pad = (n) => String(n).padStart(2, '0')
                 No repositories found.
             </span>
             <div v-if="selectedLang" class="mt-3">
-                <button type="button" class="btn btn-sm sort-btn" @click="clearLang">Show all languages</button>
+                <button type="button" class="sort-btn rounded-pill small" @click="clearLang">Show all languages</button>
             </div>
         </div>
     </div>

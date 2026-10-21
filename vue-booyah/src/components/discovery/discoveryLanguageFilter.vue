@@ -90,8 +90,9 @@ const note = `Categories are ranked by number of builders. Projects within a cat
                 </div>
             </div>
 
-            <span v-if="selectedLang" class="text-muted-github small font-monospace"
-                :title="`Top ${REPOS_PER_CATEGORY} per category shown`">
+            <!-- Always rendered, so the header doesn't reflow when a language is picked or cleared -->
+            <span class="text-muted-github small font-monospace" :class="{ invisible: !selectedLang }"
+                :aria-hidden="!selectedLang" :title="`Top ${REPOS_PER_CATEGORY} per category shown`">
                 {{ shownTotal }}/{{ matchTotal }}
             </span>
         </div>
@@ -170,10 +171,6 @@ const note = `Categories are ranked by number of builders. Projects within a cat
 .all-pill.is-active {
     color: var(--app-text);
     background-color: var(--badge-bg);
-}
-
-.all-pill.is-active {
-    font-weight: 600;
 }
 
 @media (prefers-reduced-motion: reduce) {

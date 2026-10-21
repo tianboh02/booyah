@@ -1,6 +1,6 @@
 <script setup>
 import { computed, onMounted, onUpdated, ref, watch } from 'vue'
-import { useEventListener } from '@vueuse/core'
+import { useEventListener, useResizeObserver } from '@vueuse/core'
 import { useCardRing } from '@/composables/useCardRing'
 
 const props = defineProps({
@@ -154,6 +154,12 @@ watch(activeModel, (i) => {
 })
 
 useEventListener(window, 'resize', () => {
+    measure()
+    render()
+})
+
+// A card that changes height (a filter, a wrapped line, a late font) re-fits the stage instead of leaving it stale.
+useResizeObserver(platform, () => {
     measure()
     render()
 })

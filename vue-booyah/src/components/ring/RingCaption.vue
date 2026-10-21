@@ -21,6 +21,9 @@ const randomGlyph = () => GLYPHS[Math.floor(Math.random() * GLYPHS.length)]
 // Split text into characters; spaces become non-breaking so inline-block masks keep them.
 const chars = (text) => [...text].map((ch) => (ch === ' ' ? ' ' : ch))
 
+// The title may wrap between words, so its non-breaking spaces render as normal ones.
+const titleChar = (ch) => (ch === ' ' ? ' ' : ch)
+
 // Long text never takes much over half a second to reveal.
 const stagger = (text, max) => Math.min(max, 520 / Math.max(text.length, 1))
 
@@ -67,10 +70,10 @@ const metaStep = computed(() => stagger(props.meta, 18))
             <span v-if="index" class="cap-index font-monospace text-muted-github" aria-hidden="true">{{ index }}</span>
 
             <div class="cap-title-wrap">
-                <p class="cap-title font-monospace fw-bold mb-0">
+                <p class="cap-title font-monospace fw-bold mb-0" :title="title">
                     <span class="visually-hidden">{{ title }}</span>
                     <span aria-hidden="true"><span v-for="(ch, i) in shown" :key="i"
-                            :class="{ 'is-noise': ch !== target[i] }">{{ ch }}</span></span>
+                            :class="{ 'is-noise': ch !== target[i] }">{{ titleChar(ch) }}</span></span>
                 </p>
                 <span class="cap-rule d-block" aria-hidden="true"></span>
             </div>
@@ -106,9 +109,14 @@ const metaStep = computed(() => stagger(props.meta, 18))
     letter-spacing: 0.06em;
     text-transform: uppercase;
     color: var(--app-text);
-    white-space: nowrap;
+    /* Wraps between words, balanced; only a very long name reaches the two-line ellipsis */
+    text-wrap: balance;
+    overflow-wrap: anywhere;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
     overflow: hidden;
-    text-overflow: ellipsis;
 }
 
 /* Characters still decoding take the accent colour. */

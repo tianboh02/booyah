@@ -45,7 +45,8 @@ export function createScene(canvas, {
     ambientArcs = true,
     arcGap = [220, 260], // ambient arc spacing: min ms + random ms
     centerY = 0.45, // globe centre, as a share of canvas height
-    radius = 0.2 // globe radius, as a share of the canvas's shorter side
+    radius = 0.2, // globe radius, as a share of the canvas's shorter side
+    light = false // light backdrop: normal blending and darker particles, since additive blending vanishes on white
 } = {}) {
     const ctx = canvas.getContext('2d')
     const SPHERE_N = sphereCount
@@ -152,6 +153,8 @@ export function createScene(canvas, {
 
     const depthAlpha = (z) => 0.15 + 0.85 * clamp01((1.3 - z) / 2.6)
 
+    const starColour = (a) => (light ? rgba(70, 90, 170, a * 0.7) : rgba(200, 210, 255, a))
+
     function drawStars(t, warp) {
         for (const st of stars) {
             const x = cx + st.x * w * 0.6 - yaw * st.d * 40
@@ -159,14 +162,14 @@ export function createScene(canvas, {
             const a = (0.25 + 0.45 * st.d) * (0.6 + 0.4 * Math.sin(t * 0.002 + st.tw))
             if (warp > 0) {
                 const stretch = 1 + warp * 1.6 * st.d
-                ctx.strokeStyle = rgba(200, 210, 255, Math.min(1, a + warp * 0.5))
+                ctx.strokeStyle = starColour(Math.min(1, a + warp * 0.5))
                 ctx.lineWidth = st.s
                 ctx.beginPath()
                 ctx.moveTo(x, y)
                 ctx.lineTo(cx + (x - cx) * stretch, cy + (y - cy) * stretch)
                 ctx.stroke()
             } else {
-                ctx.fillStyle = rgba(200, 210, 255, a)
+                ctx.fillStyle = starColour(a)
                 ctx.fillRect(x, y, st.s, st.s)
             }
         }
@@ -178,7 +181,7 @@ export function createScene(canvas, {
         const r = BLUE[0] + (tint[0] - BLUE[0]) * instab
         const g = BLUE[1] + (tint[1] - BLUE[1]) * instab
         const b = BLUE[2] + (tint[2] - BLUE[2]) * instab
-        const pulse = 0.85 + 0.15 * Math.sin(t * 0.002)
+        const pulse = (0.85 + 0.15 * Math.sin(t * 0.002)) * (light ? 1.3 : 1)
 
         const core = ctx.createRadialGradient(cx, cy, 0, cx, cy, R * 1.6)
         core.addColorStop(0, rgba(r, g, b, 0.2 * pulse * fade))
@@ -199,6 +202,7 @@ export function createScene(canvas, {
 
     function drawParticles(t, ts, warp) {
         const morphing = ts >= 0
+        const shade = light ? 0.62 : 1 // the pale particles would disappear on a light backdrop
         for (let i = 0; i < N; i++) {
             const o = i * 3
             let x, y, z
@@ -242,7 +246,7 @@ export function createScene(canvas, {
             let py = y * cpit - z1 * spit
             let pz = y * spit + z1 * cpit
 
-            let r = colour[o], g = colour[o + 1], b = colour[o + 2]
+            let r = colour[o] * shade, g = colour[o + 1] * shade, b = colour[o + 2] * shade
             if (instab > 0.001) {
                 r += (tint[0] - r) * instab
                 g += (tint[1] - g) * instab
@@ -373,7 +377,7 @@ export function createScene(canvas, {
                 ctx.beginPath()
                 ctx.arc(P[0], P[1], 7, 0, Math.PI * 2)
                 ctx.fill()
-                ctx.fillStyle = rgba(255, 255, 255, 0.9 * a)
+                ctx.fillStyle = light ? rgba(20, 30, 70, 0.9 * a) : rgba(255, 255, 255, 0.9 * a)
                 ctx.beginPath()
                 ctx.arc(P[0], P[1], 1.8, 0, Math.PI * 2)
                 ctx.fill()
@@ -437,7 +441,7 @@ export function createScene(canvas, {
         }
 
         ctx.clearRect(0, 0, w, h)
-        ctx.globalCompositeOperation = 'lighter'
+        ctx.globalCompositeOperation = light ? 'source-over' : 'lighter'
         drawStars(t, warp)
         drawGlow(t, ts)
         drawParticles(t, ts, warp)
@@ -451,6 +455,9 @@ export function createScene(canvas, {
     raf = requestAnimationFrame(frame)
 
     return {
+        setLight(next) {
+            light = next
+        },
         setMode(next, nextTint) {
             mode = next
             if (nextTint) tint = nextTint

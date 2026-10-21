@@ -67,11 +67,11 @@ const view = useViewMode('saved')
                     aria-label="Search saved projects" />
             </div>
 
-            <!-- Sort: Bootstrap button group -->
+            <!-- Sort pills -->
             <div class="d-flex align-items-center gap-2">
                 <span class="text-muted-github small text-nowrap">Sort by</span>
-                <div class="btn-group" role="group" aria-label="Sort saved projects">
-                    <button v-for="opt in sortOptions" :key="opt.value" type="button" class="btn btn-sm sort-btn"
+                <div class="d-flex flex-wrap gap-1" role="group" aria-label="Sort saved projects">
+                    <button v-for="opt in sortOptions" :key="opt.value" type="button" class="sort-btn rounded-pill small"
                         :class="{ active: sortBy === opt.value }" :aria-pressed="sortBy === opt.value"
                         @click="sortBy = opt.value">
                         {{ opt.label }}
@@ -155,22 +155,22 @@ const view = useViewMode('saved')
     box-shadow: 0 0 0 3px rgba(56, 139, 253, 0.3);
 }
 
+/* Outlined pill; active is a neutral fill (same as the Projects sort pills). */
 .sort-btn {
-    color: var(--app-text);
+    color: var(--text-muted-github);
     background-color: transparent;
     border: 1px solid var(--card-border);
-    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+    padding: 0.15rem 0.7rem;
+    transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-.sort-btn:hover {
-    background-color: color-mix(in srgb, #58a6ff 12%, transparent);
+.sort-btn:hover,
+.sort-btn.active {
     color: var(--app-text);
+    background-color: var(--badge-bg);
 }
 
 .sort-btn.active {
-    background-color: #58a6ff;
-    border-color: #58a6ff;
-    color: #0d1117;
     font-weight: 600;
 }
 

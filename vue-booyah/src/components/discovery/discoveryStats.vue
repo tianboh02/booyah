@@ -41,7 +41,8 @@ onMounted(() => requestAnimationFrame(() => (ready.value = true)))
             <div v-tilt="5" v-spotlight class="card stat-card p-3 h-100 rounded-3 shadow-sm"
                 :class="{ 'is-in': ready, 'is-focused': selectedLang }" :style="{ '--i': 0, '--accent': '#58a6ff' }">
                 <span class="h3 fw-bold stat-value mb-1 font-monospace">{{ projectCount }}</span>
-                <span class="stat-label fw-semibold small text-truncate">
+                <span class="stat-label fw-semibold small text-truncate"
+                    :title="selectedLang ? selectedLang + ' projects' : 'Projects'">
                     {{ selectedLang ? selectedLang + ' projects' : 'Projects' }}
                 </span>
                 <span class="text-muted-github small">across {{ categories.length }} categories</span>
@@ -53,9 +54,9 @@ onMounted(() => requestAnimationFrame(() => (ready.value = true)))
                 :class="{ 'is-in': ready, 'is-focused': selectedLang }" :style="{ '--i': 1, '--accent': langColor }">
                 <span class="h3 fw-bold stat-value mb-1 font-monospace d-flex align-items-center gap-2 min-w-0">
                     <span class="lang-dot d-inline-block rounded-circle flex-shrink-0"></span>
-                    <span class="text-truncate">{{ stats.lang }}</span>
+                    <span class="text-truncate" :title="stats.lang">{{ stats.lang }}</span>
                 </span>
-                <span class="stat-label fw-semibold small">
+                <span class="stat-label fw-semibold small text-truncate">
                     {{ selectedLang ? 'Selected language' : 'Most-used language' }}
                 </span>
                 <span class="text-muted-github small">
@@ -69,7 +70,8 @@ onMounted(() => requestAnimationFrame(() => (ready.value = true)))
                 :class="{ 'is-in': ready, 'is-focused': selectedLang }"
                 :style="{ '--i': 2, '--accent': selectedLang ? langColor : '#e3b341' }">
                 <span class="h3 fw-bold stat-value mb-1 font-monospace">{{ starCount }}</span>
-                <span class="stat-label fw-semibold small">
+                <span class="stat-label fw-semibold small text-truncate"
+                    :title="selectedLang ? 'Stars in ' + selectedLang : 'Total stars'">
                     {{ selectedLang ? 'Stars in ' + selectedLang : 'Total stars' }}
                 </span>
                 <span class="text-muted-github small">GitHub stars on the projects shown</span>
