@@ -78,7 +78,7 @@ watch(timeframe, () => load(), { immediate: true })
     <!-- Heading + timeframe toggle -->
     <div class="d-flex flex-wrap align-items-end justify-content-between gap-3 mb-3">
       <div>
-        <h4 id="repos-heading" class="fw-bold mb-1">Top 20 repositories</h4>
+        <h4 id="repos-heading" class="fw-bold mb-1">Top 20 Repositories</h4>
         <p class="text-muted-github small mb-0">
           The most starred public repositories created {{ frame.words }}, straight from GitHub.
         </p>
