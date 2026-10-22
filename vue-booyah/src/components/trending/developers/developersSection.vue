@@ -65,7 +65,7 @@ onMounted(() => load())
   <section class="developers" aria-labelledby="devs-heading">
     <!-- Heading -->
     <div class="mb-3">
-      <h4 id="devs-heading" class="fw-bold mb-1">Top developers</h4>
+      <h4 id="devs-heading" class="fw-bold mb-1">Top Developers</h4>
       <p class="text-muted-github small mb-0">
         The {{ RULES.limit }} most followed developers on GitHub, with what they mostly build in.
       </p>
