@@ -34,7 +34,9 @@ const model = defineModel({ type: String })
 .sort-btn:hover,
 .sort-btn.active {
     color: var(--app-text);
-    background-color: var(--badge-bg);
+    background-color: color-mix(in srgb,
+            #58a6ff 18%, transparent);
+    transition: transform 0.15s ease, color 0.2s ease;
 }
 
 /* active gets a faint accent outline so it still reads clearly without a loud fill */
