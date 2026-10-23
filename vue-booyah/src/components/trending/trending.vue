@@ -49,7 +49,7 @@ const activeComponent = computed(() => TABS.find((t) => t.id === activeTab.value
 </script>
 
 <template>
-  <div class="container my-4">
+  <div class="trending-page container my-4">
     <!-- Page header -->
     <header class="mb-3">
       <h3 class="fw-bold mb-1">Trending</h3>
@@ -77,6 +77,21 @@ const activeComponent = computed(() => TABS.find((t) => t.id === activeTab.value
 </template>
 
 <style scoped>
+/*
+  The colours the pill toggles (languages/header/periodToggle.vue) read, with GitHub blue as the
+  accent. The Packages tab (languagesSection.vue) sets its own, with the language colour.
+  --brand-blue comes from main.css and is already darker on the light theme.
+*/
+.trending-page {
+  --ink: var(--app-text);
+  --ink-2: var(--text-muted-github);
+  --edge: var(--card-border);
+  --accent: var(--brand-blue, #58a6ff);
+  --accent-line: var(--brand-blue, #58a6ff);
+  --focus: var(--brand-blue, #58a6ff);
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
 /* switching tabs: the old section fades out, the new one fades up */
 .section-enter-active,
 .section-leave-active {

@@ -17,16 +17,17 @@
  *                the same one My Projects and the router use), so the user's own rate limit applies.
  *                No token is written into the code. Without one, requests still work at GitHub's
  *                lower anonymous limits.
- * Gives back:    fetchTopRepos(timeframe, onProgress) → { repos, totalCount, since, fetchedAt }
- *                fetchTopDevelopers(onProgress)        → { developers, totalCount, fetchedAt, failed }
+ * Gives back:    fetchTopRepos(timeframe, onProgress) → { repos, totalCount }
+ *                fetchTopDevelopers(onProgress)        → { developers, totalCount, failed }
  *                Both cache results for CACHE_MINUTES, so switching tabs doesn't call GitHub again.
- *                Errors are thrown as GithubError with a message that can be shown to the user.
+ *                Errors are thrown with a message that can be shown to the user.
  * Used by:       components/trending/repositories/repositoriesSection.vue,
  *                components/trending/developers/developersSection.vue.
  */
 
 import axios from 'axios'
 import { getLangColor } from '@/utils/langColors'
+import { mostCommon } from '@/utils/trending/github/display'
 
 // ===========================================================================
 // 1. SETTINGS
@@ -76,47 +77,36 @@ github.interceptors.request.use((config) => {
   try {
     token = localStorage.getItem('auth_token')
   } catch {
-    token = null
+    // storage blocked: send the request without a token
   }
   if (token) config.headers.Authorization = `Bearer ${token}`
   return config
 })
 
-/** An error whose message is safe and helpful to show on the page. */
-export class GithubError extends Error {
-  constructor(message, { rateLimited = false, resetAt = null } = {}) {
-    super(message)
-    this.name = 'GithubError'
-    this.rateLimited = rateLimited
-    this.resetAt = resetAt // Date when GitHub's limit resets (rate limits only)
-  }
-}
-
-/** Turns an axios error into a GithubError with a plain-English message. */
+/** Turns an axios error into an Error with a plain-English message that's safe to show. */
 function toGithubError(error) {
   const res = error.response
-  if (!res) return new GithubError("Couldn't reach GitHub. Check your connection and try again.")
+  if (!res) return new Error("Couldn't reach GitHub. Check your connection and try again.")
 
   const remaining = res.headers?.['x-ratelimit-remaining']
   const reset = Number(res.headers?.['x-ratelimit-reset'])
   if ((res.status === 403 || res.status === 429) && (remaining === '0' || res.status === 429)) {
     const resetAt = reset ? new Date(reset * 1000) : null
     const minutes = resetAt ? Math.max(1, Math.ceil((resetAt - Date.now()) / 60000)) : null
-    return new GithubError(
+    return new Error(
       `GitHub's request limit has been reached${minutes ? `. Try again in about ${minutes} minute${minutes > 1 ? 's' : ''}` : '. Try again in a few minutes'}.`,
-      { rateLimited: true, resetAt },
     )
   }
   if (res.status === 401) {
-    return new GithubError('Your GitHub sign-in has expired. Sign in again to load this list.')
+    return new Error('Your GitHub sign-in has expired. Sign in again to load this list.')
   }
   if (res.status === 422) {
-    return new GithubError("GitHub didn't accept the search. Check RULES in githubTrending.js.")
+    return new Error("GitHub didn't accept the search. Check RULES in githubTrending.js.")
   }
-  return new GithubError(`GitHub answered with an error (${res.status}). Try again in a moment.`)
+  return new Error(`GitHub answered with an error (${res.status}). Try again in a moment.`)
 }
 
-/** GET a path from the GitHub API and return its JSON, or throw a GithubError. */
+/** GET a path from the GitHub API and return its JSON, or throw a readable Error. */
 async function get(path, params) {
   try {
     const { data } = await github.get(path, { params })
@@ -173,13 +163,7 @@ function toComposition(bytesByLanguage) {
 
 /** The most common language among a user's repos (forks left out), or null. */
 function mainLanguage(repos) {
-  const counts = {}
-  for (const repo of repos || []) {
-    if (repo.fork || !repo.language) continue
-    counts[repo.language] = (counts[repo.language] || 0) + 1
-  }
-  const best = Object.entries(counts).sort((a, b) => b[1] - a[1])[0]
-  return best ? best[0] : null
+  return mostCommon((repos || []).filter((r) => !r.fork), (r) => r.language)?.value ?? null
 }
 
 /**
@@ -223,11 +207,9 @@ function toRepo(item, index) {
     language: item.language || null,
     stars: item.stargazers_count || 0,
     forks: item.forks_count || 0,
-    openIssues: item.open_issues_count || 0,
     topics: item.topics || [],
     license: item.license?.spdx_id && item.license.spdx_id !== 'NOASSERTION' ? item.license.spdx_id : null,
     createdAt: item.created_at,
-    pushedAt: item.pushed_at,
     composition: [], // filled in from /languages below
   }
 }
@@ -262,12 +244,7 @@ export function fetchTopRepos(timeframe = 'weekly', onProgress = () => {}, { for
         if (result.status === 'fulfilled') repos[i].composition = toComposition(result.value)
       })
 
-      return {
-        repos,
-        totalCount: search.total_count || 0,
-        since,
-        fetchedAt: new Date().toISOString(),
-      }
+      return { repos, totalCount: search.total_count || 0 }
     },
     force,
   )
@@ -335,12 +312,7 @@ export function fetchTopDevelopers(onProgress = () => {}, { force = false } = {}
         }
       })
 
-      return {
-        developers,
-        totalCount: search.total_count || 0,
-        fetchedAt: new Date().toISOString(),
-        failed,
-      }
+      return { developers, totalCount: search.total_count || 0, failed }
     },
     force,
   )

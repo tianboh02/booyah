@@ -9,13 +9,14 @@
   Receives:      nothing (no props).
   Gives back:    nothing (no emits).
   Used by:       trending.vue (the "Top Developers" tab).
-  Children:      developersCard.vue, shared/SignalLoader.vue.
+  Children:      developersCard.vue, shared/SignalLoader.vue, shared/RetryCard.vue.
 -->
 <script setup>
 // ---------- Imports ----------
 import { ref, computed, onMounted } from 'vue'
 import { fetchTopDevelopers, RULES } from '@/utils/trending/github/githubTrending'
 import SignalLoader from '@/components/shared/SignalLoader.vue'
+import RetryCard from '@/components/shared/RetryCard.vue'
 import DevelopersCard from '@/components/trending/developers/developersCard.vue'
 
 // ---------- Settings ----------
@@ -80,16 +81,12 @@ onMounted(() => load())
       :legend="LOADER_LEGEND"
     />
 
-    <!-- Error -->
-    <div v-else-if="status === 'error'" class="card p-4 rounded-3 shadow-sm text-center" role="alert">
-      <p class="fw-semibold mb-1">Couldn't load the top developers.</p>
-      <p class="text-muted-github small mb-3">{{ error }}</p>
-      <div>
-        <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3" @click="load(true)">
-          Try again
-        </button>
-      </div>
-    </div>
+    <RetryCard
+      v-else-if="status === 'error'"
+      title="Couldn't load the top developers."
+      :message="error"
+      @retry="load(true)"
+    />
 
     <!-- The one big card -->
     <template v-else>
@@ -101,20 +98,3 @@ onMounted(() => load())
     </template>
   </section>
 </template>
-
-<style scoped>
-/*
-  The colours the pill toggles (languages/header/periodToggle.vue) read, set the same way as on the
-  Packages tab (languagesSection.vue) but with GitHub blue as the accent instead of a language colour.
-  --brand-blue comes from main.css and is already darker on the light theme.
-*/
-.developers {
-  --ink: var(--app-text);
-  --ink-2: var(--text-muted-github);
-  --edge: var(--card-border);
-  --accent: var(--brand-blue, #58a6ff);
-  --accent-line: var(--brand-blue, #58a6ff);
-  --focus: var(--brand-blue, #58a6ff);
-  --ease: cubic-bezier(0.22, 1, 0.36, 1);
-}
-</style>

@@ -6,10 +6,10 @@
                    the big number (counts up) with its % change, the D3 trend chart,
                    fact cards (only the ones this language's API can fill),
                    a one-line insight and the description.
-                 While loading it shows grey "skeleton" shapes; if there's nothing to show,
-                 a short message.
+                 If there's nothing to show, a short message (languagesSection shows the
+                 loader while loading).
   Receives:      props  language, pkg (the selected package, with displayRank), packages (all 20,
-                        ranked), period, status ('loading' | 'ready' | 'error'),
+                        ranked), period, status ('ready' | 'error'),
                         added (true if pkg is already in the compare tray)
   Gives back:    emits  add (the package name, when "+ Compare" is pressed)
   Used by:       languagesSection.vue.
@@ -121,21 +121,10 @@ const insight = computed(() => {
 <template>
   <aside class="panel card rounded-4" :aria-label="pkg ? `${pkg.name} details` : 'Package details'">
     <Transition name="swap" mode="out-in">
-      <!-- Only one of these three sections shows at a time; <Transition> fades between them -->
-
-      <!-- ===================== Loading ===================== -->
-      <section v-if="status === 'loading'" key="loading" class="skeleton" aria-busy="true">
-        <span class="bone w40"></span>
-        <span class="bone w60 tall"></span>
-        <span class="bone w80"></span>
-        <span class="bone chart"></span>
-        <div class="bone-row">
-          <span class="bone"></span><span class="bone"></span><span class="bone"></span>
-        </div>
-      </section>
+      <!-- Only one of these two sections shows at a time; <Transition> fades between them -->
 
       <!-- ===================== Error / nothing yet ===================== -->
-      <section v-else-if="status === 'error' || !pkg" key="empty" class="empty">
+      <section v-if="status === 'error' || !pkg" key="empty" class="empty">
         <h5 class="fw-bold mb-0">No package to show yet</h5>
         <p class="description">
           Once {{ language.name }} packages load, pick one to see its downloads here.
@@ -219,7 +208,7 @@ const insight = computed(() => {
 
 <style scoped>
 /*
-  Sections, in order: layout → header (badge, name, buttons) → headline → facts → loading skeleton
+  Sections, in order: layout → header (badge, name, buttons) → headline → facts
   → animations → keyboard focus → responsive → reduced motion.
   (Rules are kept in their original order on purpose: a later CSS rule can override an earlier one.)
 */
@@ -240,8 +229,7 @@ const insight = computed(() => {
 }
 
 .detail,
-.empty,
-.skeleton {
+.empty {
   display: flex;
   flex-direction: column;
   gap: 14px;
@@ -486,64 +474,11 @@ const insight = computed(() => {
   line-height: 1.5;
 }
 
-/* ---------- Components: loading skeleton (grey shapes that shimmer) ---------- */
-.bone {
-  display: block;
-  height: 14px;
-  border-radius: 8px;
-  background: linear-gradient(
-    90deg,
-    color-mix(in srgb, var(--ink) 4%, transparent),
-    color-mix(in srgb, var(--ink) 10%, transparent),
-    color-mix(in srgb, var(--ink) 4%, transparent)
-  );
-  background-size: 200% 100%;
-  animation: shimmer 1.4s linear infinite;
-}
-
-.bone.tall {
-  height: 40px;
-}
-
-.bone.chart {
-  height: 260px;
-  border-radius: 14px;
-}
-
-.w40 {
-  width: 40%;
-}
-
-.w60 {
-  width: 60%;
-}
-
-.w80 {
-  width: 80%;
-}
-
-.bone-row {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-}
-
-.bone-row .bone {
-  height: 60px;
-}
-
 /* ---------- Animations ----------
-   pop      "+ Compare" bounces when it turns into "✓ Added"
-   shimmer  the light sweeping across the loading skeleton */
+   pop      "+ Compare" bounces when it turns into "✓ Added" */
 @keyframes pop {
   50% {
     transform: scale(1.08);
-  }
-}
-
-@keyframes shimmer {
-  to {
-    background-position: -200% 0;
   }
 }
 
@@ -609,7 +544,6 @@ button:focus-visible,
     transform: none;
   }
 
-  .bone,
   .compare-btn.added {
     animation: none;
   }

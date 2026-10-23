@@ -6,13 +6,18 @@
                    - search box, Sort by (Rank / Stars / Forks / Newest), carousel / list toggle
                    - click a card's language to filter by it (shared with the stat cards)
                  Each card shows: rank, owner avatar + owner/name (opens GitHub), Public badge,
-                 description, up to 4 topics, the language composition bar (from GitHub's
-                 /languages endpoint), language, stars, forks and when it was created.
-  Receives:      props  repos (from githubTrending.fetchTopRepos), loading, v-model:selectedLang
-  Gives back:    update:selectedLang (through v-model) when a language is clicked or cleared
+                 a bookmark (save to Saved Projects), description, up to 4 topics, the language
+                 composition bar (from GitHub's /languages endpoint), language, stars, forks and
+                 when it was created.
+  Receives:      props  repos (from githubTrending.fetchTopRepos),
+                        savedMap ({ [htmlUrl]: saveId }), pendingLinks (Set of htmlUrls in flight),
+                        v-model:selectedLang
+  Gives back:    update:selectedLang (through v-model) when a language is clicked or cleared,
+                 save (repo) when its bookmark is clicked
   Used by:       repositoriesSection.vue.
   Children:      ring/CardRing.vue, ring/RingCaption.vue, ring/ViewToggle.vue (the carousel view),
-                 languages/header/periodToggle.vue (the Sort by pill, same as the Packages tab's).
+                 languages/header/periodToggle.vue (the Sort by pill, same as the Packages tab's),
+                 shared/BookmarkButton.vue.
 -->
 <script setup>
 // ---------- Imports ----------
@@ -21,7 +26,9 @@ import { createReusableTemplate } from '@vueuse/core'
 import { getLangColor } from '@/utils/langColors'
 import { vSpotlight } from '@/utils/motion'
 import { useViewMode } from '@/composables/useViewMode'
-import { timeAgo, shortCount, pad2 } from '@/utils/trending/github/display'
+import { langOf } from '@/utils/top5Categories'
+import { timeAgo, shortCount, pad2, MEDALS, toPillLabels } from '@/utils/trending/github/display'
+import BookmarkButton from '@/components/shared/BookmarkButton.vue'
 import CardRing from '@/components/ring/CardRing.vue'
 import RingCaption from '@/components/ring/RingCaption.vue'
 import ViewToggle from '@/components/ring/ViewToggle.vue'
@@ -33,17 +40,16 @@ const [DefineRepoCard, ReuseRepoCard] = createReusableTemplate()
 // ---------- Props & model ----------
 const props = defineProps({
   repos: { type: Array, default: () => [] },
-  loading: { type: Boolean, default: false },
+  savedMap: { type: Object, default: () => ({}) },
+  pendingLinks: { type: Object, default: () => new Set() },
 })
 const selectedLang = defineModel('selectedLang', { type: String, default: null })
+const emit = defineEmits(['save'])
 
 // ---------- State ----------
 const view = useViewMode('trending-repos') // carousel or list, remembered like My Projects
 const searchQuery = ref('')
 const sortBy = ref('rank')
-
-// Gold, silver and bronze for the top 3 rank badges (readable in both themes)
-const MEDALS = ['#d4a72c', '#8c959f', '#c26c2b']
 
 const SORT_OPTIONS = [
   { value: 'rank', label: 'Rank' },
@@ -52,12 +58,10 @@ const SORT_OPTIONS = [
   { value: 'newest', label: 'Newest' },
 ]
 
-// The Sort by toggle uses the Packages tab's pill (periodToggle.vue): option values + their labels
-const SORT_VALUES = SORT_OPTIONS.map((o) => o.value)
-const SORT_LABELS = Object.fromEntries(SORT_OPTIONS.map((o) => [o.value, { label: o.label }]))
+// The Sort by toggle uses the Packages tab's pill (periodToggle.vue)
+const SORT_PILLS = toPillLabels(SORT_OPTIONS)
 
 // ---------- Computed values ----------
-const langOf = (repo) => repo.language || 'No language'
 const selectedColor = computed(() =>
   selectedLang.value ? getLangColor(selectedLang.value) : '#58a6ff',
 )
@@ -105,7 +109,7 @@ const compositionLabel = (repo) =>
         :class="inRing ? 'h-100' : 'mb-3'"
         :style="{ '--lang': getLangColor(langOf(repo)), '--i': Math.min(index, 10) }"
       >
-        <!-- Rank, owner avatar, owner/name, Public badge, arrow -->
+        <!-- Rank, owner avatar, owner/name, Public badge, arrow, bookmark -->
         <div class="d-flex align-items-center gap-2 mb-2 min-w-0">
           <span
             class="rank-badge badge rounded-2 border font-monospace text-muted-github flex-shrink-0"
@@ -150,6 +154,14 @@ const compositionLabel = (repo) =>
           >
             <path d="M5 11L11 5M6 5h5v5" />
           </svg>
+          <!-- z-2 lifts the bookmark above the card's stretched link, so it saves instead of opening GitHub -->
+          <BookmarkButton
+            class="position-relative z-2 flex-shrink-0"
+            :saved="!!savedMap[repo.htmlUrl]"
+            :pending="pendingLinks.has(repo.htmlUrl)"
+            :label="repo.fullName"
+            @click="emit('save', repo)"
+          />
         </div>
 
         <p class="card-text text-muted-github small mb-2 description">
@@ -237,7 +249,7 @@ const compositionLabel = (repo) =>
     <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
       <div class="d-flex align-items-center gap-2 flex-wrap">
         <h3 class="h3 fw-bold section-title mb-0">Repositories</h3>
-        <span v-if="!loading && repos.length" class="text-muted-github small font-monospace">
+        <span v-if="repos.length" class="text-muted-github small font-monospace">
           {{ shownRepos.length }}/{{ repos.length }}
         </span>
 
@@ -292,8 +304,8 @@ const compositionLabel = (repo) =>
           <span class="text-muted-github small text-nowrap">Sort by</span>
           <PeriodToggle
             v-model="sortBy"
-            :periods="SORT_VALUES"
-            :labels="SORT_LABELS"
+            :periods="SORT_PILLS.values"
+            :labels="SORT_PILLS.labels"
             aria-label="Sort repositories"
           />
         </div>
@@ -302,17 +314,8 @@ const compositionLabel = (repo) =>
       </div>
     </div>
 
-    <!-- ===================== Loading skeleton ===================== -->
-    <div v-if="loading">
-      <div v-for="n in 4" :key="n" class="card mb-3 p-3 rounded-3 shadow-sm placeholder-glow">
-        <span class="placeholder col-3 mb-2"></span>
-        <span class="placeholder col-8 mb-3"></span>
-        <span class="placeholder col-5"></span>
-      </div>
-    </div>
-
     <!-- ===================== The cards: carousel or list ===================== -->
-    <Transition v-else-if="shownRepos.length > 0" name="view-swap" mode="out-in">
+    <Transition v-if="shownRepos.length > 0" name="view-swap" mode="out-in">
       <CardRing
         v-if="view === 'carousel'"
         key="carousel"
@@ -358,7 +361,11 @@ const compositionLabel = (repo) =>
       </span>
       <span v-else>No {{ selectedLang }} repositories in the top {{ repos.length }}.</span>
       <div v-if="selectedLang" class="mt-3">
-        <button type="button" class="btn btn-sm sort-btn" @click="selectedLang = null">
+        <button
+          type="button"
+          class="btn btn-sm btn-outline-secondary rounded-pill"
+          @click="selectedLang = null"
+        >
           Show all languages
         </button>
       </div>
@@ -449,30 +456,6 @@ const compositionLabel = (repo) =>
 .github-control:focus {
   border-color: #58a6ff !important;
   box-shadow: 0 0 0 3px rgba(56, 139, 253, 0.3);
-}
-
-.sort-btn {
-  color: var(--text-muted-github);
-  background-color: transparent;
-  border: 1px solid var(--card-border);
-  padding: 0.15rem 0.7rem;
-  transition:
-    background-color 0.2s ease,
-    color 0.2s ease;
-}
-
-.sort-btn:hover,
-.sort-btn.active {
-  color: var(--app-text);
-  background-color: var(--badge-bg);
-}
-
-.sort-btn.active {
-  font-weight: 600;
-}
-
-.sort-btn:focus-visible {
-  box-shadow: 0 0 0 3px rgba(56, 139, 253, 0.4);
 }
 
 /* ---------- Repo cards ---------- */

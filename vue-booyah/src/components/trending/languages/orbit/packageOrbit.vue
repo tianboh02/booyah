@@ -15,7 +15,8 @@
                    - Phones (under 576px): a small orb on the left with lines branching out to a
                      list of the packages beside it (top 5 first, "Show all 20" for the rest).
   Receives:      props  language (the open language's settings), packages (ranked, with displayRank),
-                        selectedName, period, status ('loading' | 'ready' | 'error'),
+                        selectedName, period, status ('ready' | 'error'; languagesSection shows
+                        the loader while loading),
                         errorMessage, trayIds (ids of packages already in the compare tray)
   Gives back:    emits  select (a package name was chosen), retry ("Try again" was pressed),
                         add (a package name to add to Compare)
@@ -329,7 +330,6 @@ onBeforeUnmount(() => clearTimeout(settleTimer))
       <!-- The language orb -->
       <div
         class="orb"
-        :class="{ loading: status === 'loading' }"
         :style="{
           left: layout.orb.x + 'px',
           top: layout.orb.y + 'px',
@@ -346,9 +346,6 @@ onBeforeUnmount(() => clearTimeout(settleTimer))
               >downloads by the top {{ packages.length }}, {{ PERIOD_INFO[period].latest }}</span
             >
           </template>
-          <span v-else-if="status === 'loading'"
-            >Fetching the top 20 from {{ language.registry }}…</span
-          >
         </span>
       </div>
 
@@ -486,9 +483,6 @@ onBeforeUnmount(() => clearTimeout(settleTimer))
           <span class="orb-total">{{ compact(shownTotal) }}</span>
           <span>downloads by the top {{ packages.length }}, {{ PERIOD_INFO[period].latest }}</span>
         </template>
-        <span v-else-if="status === 'loading'"
-          >Fetching the top 20 from {{ language.registry }}…</span
-        >
       </p>
 
       <!-- The language orb (small, on the left, level with the middle of the top 5 rows) -->
@@ -497,18 +491,14 @@ onBeforeUnmount(() => clearTimeout(settleTimer))
         class="tree-orb"
         :style="treeGeo && treeGeo.orbY ? { top: treeGeo.orbY + 'px' } : null"
       >
-        <div class="orb" :class="{ loading: status === 'loading' }">
+        <div class="orb">
           <span class="orb-ring"></span>
           <span class="orb-core"></span>
         </div>
       </div>
 
-      <!-- Loading placeholders -->
-      <div v-if="status === 'loading'" class="tree-list placeholder-glow" aria-busy="true">
-        <span v-for="n in PHONE_TOP" :key="n" class="placeholder row-bone"></span>
-      </div>
       <!-- Error message with "Try again" -->
-      <div v-else-if="status === 'error'" class="compact-msg" role="alert">
+      <div v-if="status === 'error'" class="compact-msg" role="alert">
         <p>
           <strong>Couldn't load {{ language.name }} packages.</strong> {{ errorMessage }}
         </p>
@@ -671,10 +661,6 @@ onBeforeUnmount(() => clearTimeout(settleTimer))
   -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px));
   mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px));
   animation: spin 12s linear infinite;
-}
-
-.orb.loading .orb-ring {
-  animation-duration: 1.6s;
 }
 
 .orb-core {
@@ -1083,11 +1069,6 @@ onBeforeUnmount(() => clearTimeout(settleTimer))
 
 .tree-node .add {
   margin-right: 4px;
-}
-
-.row-bone {
-  height: 48px;
-  border-radius: 14px;
 }
 
 .tree-more {

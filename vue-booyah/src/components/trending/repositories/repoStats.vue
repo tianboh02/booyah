@@ -8,7 +8,7 @@
                    3. Total stars     stars across the 20 (or the filtered language), plus forks
                  When a language filter is on, the cards describe just that language.
   Receives:      props  repos, totalCount (all matching repos on GitHub), timeframeWords
-                        ("in the last 7 days"), loading, v-model:selectedLang
+                        ("in the last 7 days"), v-model:selectedLang
   Gives back:    update:selectedLang (through v-model) when the language card is clicked
   Used by:       repositoriesSection.vue.
 -->
@@ -18,18 +18,17 @@ import { computed, ref, watch } from 'vue'
 import { getLangColor } from '@/utils/langColors'
 import { vSpotlight, vTilt, useCountUp } from '@/utils/motion'
 import { mostCommon, shortCount } from '@/utils/trending/github/display'
+import { langOf } from '@/utils/top5Categories'
 
 // ---------- Props & model ----------
 const props = defineProps({
   repos: { type: Array, default: () => [] },
   totalCount: { type: Number, default: 0 },
   timeframeWords: { type: String, default: '' },
-  loading: { type: Boolean, default: false },
 })
 const selectedLang = defineModel('selectedLang', { type: String, default: null })
 
 // ---------- Computed values ----------
-const langOf = (repo) => repo.language || 'No language'
 const hasData = computed(() => props.repos.length > 0)
 const scoped = computed(() =>
   selectedLang.value ? props.repos.filter((r) => langOf(r) === selectedLang.value) : props.repos,
@@ -75,18 +74,7 @@ function toggleTopLang() {
 
 <template>
   <div class="mb-4">
-    <!-- Loading skeleton (same as My Projects) -->
-    <div v-if="loading" class="row row-cols-1 row-cols-md-3 g-3">
-      <div v-for="n in 3" :key="n" class="col">
-        <div class="card p-3 h-100 rounded-3 shadow-sm placeholder-glow">
-          <span class="placeholder col-4 mb-2 py-3 rounded"></span>
-          <span class="placeholder col-7 mb-1"></span>
-          <span class="placeholder col-5"></span>
-        </div>
-      </div>
-    </div>
-
-    <div v-else-if="hasData" class="row row-cols-1 row-cols-md-3 g-3">
+    <div v-if="hasData" class="row row-cols-1 row-cols-md-3 g-3">
       <!-- 1. Repositories -->
       <div class="col">
         <div

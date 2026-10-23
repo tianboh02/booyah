@@ -21,7 +21,8 @@
 import { ref, computed } from 'vue'
 import { getLangColor } from '@/utils/langColors'
 import { vSpotlight, useCountUp } from '@/utils/motion'
-import { shortCount, pad2 } from '@/utils/trending/github/display'
+import { langOf } from '@/utils/top5Categories'
+import { shortCount, pad2, MEDALS, toPillLabels } from '@/utils/trending/github/display'
 import DiscoveryLangPill from '@/components/discovery/discoveryLangPill.vue'
 import PeriodToggle from '@/components/trending/languages/header/periodToggle.vue'
 
@@ -38,19 +39,15 @@ const SORT_OPTIONS = [
   { value: 'joined', label: 'Joined' },
 ]
 
-// The Sort by toggle uses the Packages tab's pill (periodToggle.vue): option values + their labels
-const SORT_VALUES = SORT_OPTIONS.map((o) => o.value)
-const SORT_LABELS = Object.fromEntries(SORT_OPTIONS.map((o) => [o.value, { label: o.label }]))
+// The Sort by toggle uses the Packages tab's pill (periodToggle.vue)
+const SORT_PILLS = toPillLabels(SORT_OPTIONS)
 const MAX_LANG_PILLS = 6
-const MEDALS = ['#d4a72c', '#8c959f', '#c26c2b'] // gold, silver, bronze for the top 3
 
 // ---------- State ----------
 const sortBy = ref('followers')
 const selectedLang = ref(null)
 
 // ---------- Computed values ----------
-const langOf = (dev) => dev.language || 'No language'
-
 // The languages to offer as filters: the most common main languages first
 const languages = computed(() => {
   const counts = {}
@@ -97,8 +94,8 @@ const joinedYear = (iso) => (iso ? new Date(iso).getUTCFullYear() : '–')
         <span class="text-muted-github small text-nowrap">Sort by</span>
         <PeriodToggle
           v-model="sortBy"
-          :periods="SORT_VALUES"
-          :labels="SORT_LABELS"
+          :periods="SORT_PILLS.values"
+          :labels="SORT_PILLS.labels"
           aria-label="Sort developers"
         />
       </div>
@@ -118,7 +115,7 @@ const joinedYear = (iso) => (iso ? new Date(iso).getUTCFullYear() : '–')
       <button
         v-if="selectedLang"
         type="button"
-        class="sort-btn small rounded-pill"
+        class="btn btn-sm btn-outline-secondary rounded-pill"
         @click="selectedLang = null"
       >
         Show all
@@ -285,28 +282,6 @@ const joinedYear = (iso) => (iso ? new Date(iso).getUTCFullYear() : '–')
   border-bottom: 1px solid var(--card-border);
 }
 
-/* ---------- Sort + "Show all" pills (same as My Projects / Discovery) ---------- */
-.sort-btn {
-  color: var(--text-muted-github);
-  background-color: transparent;
-  border: 1px solid var(--card-border);
-  padding: 0.15rem 0.7rem;
-  transition:
-    background-color 0.2s ease,
-    color 0.2s ease;
-}
-
-.sort-btn:hover,
-.sort-btn.active {
-  color: var(--app-text);
-  background-color: var(--badge-bg);
-}
-
-.sort-btn.active {
-  font-weight: 600;
-}
-
-.sort-btn:focus-visible,
 .dev-link:focus-visible {
   outline: none;
   box-shadow: 0 0 0 3px rgba(56, 139, 253, 0.4);

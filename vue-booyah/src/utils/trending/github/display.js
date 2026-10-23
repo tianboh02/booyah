@@ -3,7 +3,7 @@
  *
  * What it does:  small helpers that turn GitHub numbers and dates into the text on the
  *                Top Repositories and Top Developers tabs.
- * Gives back:    timeAgo(), shortCount(), pad2(), mostCommon().
+ * Gives back:    timeAgo(), shortCount(), pad2(), mostCommon(), toPillLabels(), MEDALS.
  * Used by:       components/trending/repositories/*, components/trending/developers/*.
  */
 
@@ -47,4 +47,17 @@ export function mostCommon(list, pick) {
   }
   const best = Object.entries(counts).sort((a, b) => b[1] - a[1])[0]
   return best ? { value: best[0], count: best[1] } : null
+}
+
+/** Gold, silver and bronze for the top 3 rank badges (readable in both themes). */
+export const MEDALS = ['#d4a72c', '#8c959f', '#c26c2b']
+
+/**
+ * [{ value, label }] → what periodToggle.vue's pill reads: { values: [...], labels: { value: { label } } }.
+ */
+export function toPillLabels(options) {
+  return {
+    values: options.map((o) => o.value),
+    labels: Object.fromEntries(options.map((o) => [o.value, { label: o.label }])),
+  }
 }

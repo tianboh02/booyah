@@ -4,20 +4,28 @@
   What it does:  the Trending → Top 20 Repositories tab, laid out like the My Projects page:
                    heading + Today / This week / This month toggle + "public repos only" note,
                    three stat cards (repoStats.vue), then the repository cards (repoList.vue).
+                 While loading it shows the same signal globe as Discovery, with live progress.
+                 Each card's bookmark saves the repo to Saved Projects (category 'Trending').
                  It owns the tab's state, so every part agrees:
                    timeframe     'daily' | 'weekly' | 'monthly' (how recently the repos were created)
                    status        'loading' | 'ready' | 'error'
-                   data          { repos, totalCount, since } from githubTrending.fetchTopRepos()
+                   data          { repos, totalCount } from githubTrending.fetchTopRepos()
                    selectedLang  the language filter, shared by the stat cards and the list
+                   saved         which repos are bookmarked (utils/savedProjects.js, as on Discovery)
   Receives:      nothing (no props).
   Gives back:    nothing (no emits).
   Used by:       trending.vue (the "Top 20 Repositories" tab).
-  Children:      repoStats.vue, repoList.vue, languages/header/periodToggle.vue (the timeframe pill).
+  Children:      repoStats.vue, repoList.vue, languages/header/periodToggle.vue (the timeframe pill),
+                 shared/SignalLoader.vue, shared/RetryCard.vue.
 -->
 <script setup>
 // ---------- Imports ----------
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { fetchTopRepos, TIMEFRAMES } from '@/utils/trending/github/githubTrending'
+import { useSavedProjects } from '@/utils/savedProjects'
+import { langOf } from '@/utils/top5Categories'
+import SignalLoader from '@/components/shared/SignalLoader.vue'
+import RetryCard from '@/components/shared/RetryCard.vue'
 import PeriodToggle from '@/components/trending/languages/header/periodToggle.vue'
 import RepoStats from '@/components/trending/repositories/repoStats.vue'
 import RepoList from '@/components/trending/repositories/repoList.vue'
@@ -26,18 +34,35 @@ import RepoList from '@/components/trending/repositories/repoList.vue'
 // The Today / This week / This month pill (the Packages tab's periodToggle.vue; TIMEFRAMES has the labels)
 const TIMEFRAME_VALUES = Object.keys(TIMEFRAMES)
 
+// The loader's colours (the first one is used for each finished request's arc)
+const LOADER_LEGEND = [
+  { label: 'GitHub repos', colour: [88, 166, 255] },
+  { label: 'Languages', colour: [63, 185, 80] },
+]
+
+// Bookmarked repos land in this category on the Saved page
+const SAVE_CATEGORY = 'Trending'
+
 // ---------- State ----------
 const timeframe = ref('weekly')
 const status = ref('loading')
 const error = ref('')
-const data = ref({ repos: [], totalCount: 0, since: '' })
+const data = ref({ repos: [], totalCount: 0 })
 const progress = ref({ done: 0, total: 0 })
 const selectedLang = ref(null)
 let requestId = 0 // ignores an older answer if the timeframe changed while it was loading
 
+// Saved projects and bookmark state (same as Discovery)
+const { saved, pending, error: saveError, loadSaved, toggleSave } = useSavedProjects()
+
 // ---------- Computed values ----------
 const frame = computed(() => TIMEFRAMES[timeframe.value])
 const loading = computed(() => status.value === 'loading')
+const loaderStatus = computed(() =>
+  progress.value.total
+    ? `Reading languages ${progress.value.done} / ${progress.value.total}`
+    : 'Searching GitHub…',
+)
 
 // ---------- Functions ----------
 /** Loads the top repos for the current timeframe (from the cache when it's fresh). */
@@ -57,7 +82,7 @@ async function load(force = false) {
     if (id !== requestId) return
     data.value = result
     // keep the language filter only if that language is still in the new list
-    if (selectedLang.value && !result.repos.some((r) => (r.language || 'No language') === selectedLang.value))
+    if (selectedLang.value && !result.repos.some((r) => langOf(r) === selectedLang.value))
       selectedLang.value = null
     status.value = 'ready'
   } catch (e) {
@@ -68,9 +93,15 @@ async function load(force = false) {
   }
 }
 
-// ---------- Watchers ----------
+/** Saves or unsaves a repo (toggleSave reads the GitHub link from ghUrl). */
+function saveRepo(repo) {
+  toggleSave({ ghUrl: repo.htmlUrl }, SAVE_CATEGORY)
+}
+
+// ---------- Watchers & lifecycle ----------
 // First load, and again whenever the timeframe changes
 watch(timeframe, () => load(), { immediate: true })
+onMounted(loadSaved)
 </script>
 
 <template>
@@ -113,57 +144,52 @@ watch(timeframe, () => load(), { immediate: true })
       </span>
     </p>
 
-    <!-- Error -->
-    <div
-      v-if="status === 'error'"
-      class="card p-4 rounded-3 shadow-sm text-center mb-4"
-      role="alert"
-    >
-      <p class="fw-semibold mb-1">Couldn't load the top repositories.</p>
-      <p class="text-muted-github small mb-3">{{ error }}</p>
-      <div>
-        <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3" @click="load(true)">
-          Try again
-        </button>
-      </div>
-    </div>
+    <!-- Loading: the signal globe, like Discovery -->
+    <SignalLoader
+      v-if="loading"
+      :done="progress.done"
+      :total="progress.total"
+      :status="loaderStatus"
+      :legend="LOADER_LEGEND"
+    />
+
+    <RetryCard
+      v-else-if="status === 'error'"
+      title="Couldn't load the top repositories."
+      :message="error"
+      @retry="load(true)"
+    />
 
     <template v-else>
-      <!-- Loading progress line (languages are fetched per repo) -->
-      <p v-if="loading" class="text-muted-github small font-monospace mb-3" role="status">
-        <template v-if="!progress.total">Searching GitHub…</template>
-        <template v-else>Reading languages {{ progress.done }} / {{ progress.total }}</template>
-      </p>
+      <!-- Saved-project error message (same as Discovery) -->
+      <div
+        v-if="saveError"
+        class="alert alert-danger alert-dismissible py-2 px-3 small mb-3"
+        role="alert"
+      >
+        {{ saveError }}
+        <button type="button" class="btn-close" aria-label="Dismiss" @click="saveError = ''"></button>
+      </div>
 
       <RepoStats
         v-model:selected-lang="selectedLang"
         :repos="data.repos"
         :total-count="data.totalCount"
         :timeframe-words="frame.words"
-        :loading="loading"
       />
 
-      <RepoList v-model:selected-lang="selectedLang" :repos="data.repos" :loading="loading" />
+      <RepoList
+        v-model:selected-lang="selectedLang"
+        :repos="data.repos"
+        :saved-map="saved"
+        :pending-links="pending"
+        @save="saveRepo"
+      />
     </template>
   </section>
 </template>
 
 <style scoped>
-/*
-  The colours the pill toggles (languages/header/periodToggle.vue) read, set the same way as on the
-  Packages tab (languagesSection.vue) but with GitHub blue as the accent instead of a language colour.
-  --brand-blue comes from main.css and is already darker on the light theme.
-*/
-.repositories {
-  --ink: var(--app-text);
-  --ink-2: var(--text-muted-github);
-  --edge: var(--card-border);
-  --accent: var(--brand-blue, #58a6ff);
-  --accent-line: var(--brand-blue, #58a6ff);
-  --focus: var(--brand-blue, #58a6ff);
-  --ease: cubic-bezier(0.22, 1, 0.36, 1);
-}
-
 /* The blue edge on the public-only note (everything else is Bootstrap classes) */
 .public-note {
   border-left: 3px solid var(--brand-blue, #58a6ff) !important;

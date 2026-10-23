@@ -13,8 +13,9 @@
   Receives:      nothing (no props).
   Gives back:    nothing (no emits).
   Used by:       trending.vue.
+                 While a language loads it shows the same signal globe as Discovery.
   Children:      header/languageBar, orbit/packageOrbit, detail/packageDashboard,
-                 compare/compareTray, compare/compareView.
+                 compare/compareTray, compare/compareView, shared/SignalLoader.
 -->
 <script setup>
 // ---------- Imports ----------
@@ -26,9 +27,11 @@ import PackageOrbit from '@/components/trending/languages/orbit/packageOrbit.vue
 import PackageDashboard from '@/components/trending/languages/detail/packageDashboard.vue'
 import CompareTray from '@/components/trending/languages/compare/compareTray.vue'
 import CompareView from '@/components/trending/languages/compare/compareView.vue'
+import SignalLoader from '@/components/shared/SignalLoader.vue'
 
 // ---------- Settings ----------
 const TRAY_LIMIT = 2 // Compare always compares exactly two packages
+const LOADER_LEGEND = [{ label: 'Package registries', colour: [88, 166, 255] }]
 
 // ---------- State ----------
 const languageId = ref(LANGUAGES[0].id)
@@ -205,8 +208,15 @@ onBeforeUnmount(() => clearTimeout(messageTimer))
       {{ language.registry }}.
     </p>
 
+    <!-- Loading: the signal globe, like Discovery -->
+    <SignalLoader
+      v-if="current.status === 'loading'"
+      :status="`Fetching the top 20 from ${language.registry}`"
+      :legend="LOADER_LEGEND"
+    />
+
     <!-- Main area: the orb + package list (left) and the detail panel (right) -->
-    <div class="stage">
+    <div v-else class="stage">
       <div class="orbit-area card rounded-4">
         <PackageOrbit
           :language="language"
