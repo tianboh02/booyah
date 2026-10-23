@@ -1,7 +1,7 @@
 <!--
   src/components/trending/trending.vue
 
-  What it does:  the Trending page itself: the page title, the Trending nav bar, then the open section:
+  What it does:  the Trending page itself: the header card, the Trending nav bar, then the open section:
                    Packages       languages/languagesSection.vue (top packages, grouped by language)
                    Repositories   repositories/repositoriesSection.vue
                    Developers     developers/developersSection.vue
@@ -12,12 +12,13 @@
   Gives back:    nothing (no emits).
   Used by:       src/views/TrendingView.vue (the /trending route). Keep this file's name and place,
                  because TrendingView.vue imports it by this path.
-  Children:      trendingTabs.vue and the three sections above.
+  Children:      trendingPageHeader.vue, trendingTabs.vue and the three sections above.
 -->
 <script setup>
 // ---------- Imports ----------
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import TrendingPageHeader from '@/components/trending/trendingPageHeader.vue'
 import TrendingTabs from '@/components/trending/trendingTabs.vue'
 import LanguagesSection from '@/components/trending/languages/languagesSection.vue'
 import RepositoriesSection from '@/components/trending/repositories/repositoriesSection.vue'
@@ -51,12 +52,7 @@ const activeComponent = computed(() => TABS.find((t) => t.id === activeTab.value
 <template>
   <div class="trending-page container my-4">
     <!-- Page header -->
-    <header class="mb-3">
-      <h3 class="fw-bold mb-1">Trending</h3>
-      <p class="text-muted-github small mb-0">
-        What developers are installing, starring and following right now.
-      </p>
-    </header>
+    <TrendingPageHeader :active-tab="activeTab" />
 
     <!-- Trending nav bar -->
     <TrendingTabs v-model="activeTab" :tabs="TABS" />

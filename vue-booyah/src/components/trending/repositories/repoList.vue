@@ -16,7 +16,7 @@
                  save (repo) when its bookmark is clicked
   Used by:       repositoriesSection.vue.
   Children:      ring/CardRing.vue, ring/RingCaption.vue, ring/ViewToggle.vue (the carousel view),
-                 languages/header/periodToggle.vue (the Sort by pill, same as the Packages tab's),
+                 shared/SortPills.vue (the Sort by pill, same as My Projects and Saved),
                  shared/BookmarkButton.vue.
 -->
 <script setup>
@@ -27,12 +27,12 @@ import { getLangColor } from '@/utils/langColors'
 import { vSpotlight } from '@/utils/motion'
 import { useViewMode } from '@/composables/useViewMode'
 import { langOf } from '@/utils/top5Categories'
-import { timeAgo, shortCount, pad2, MEDALS, toPillLabels } from '@/utils/trending/github/display'
+import { timeAgo, shortCount, pad2, MEDALS } from '@/utils/trending/github/display'
 import BookmarkButton from '@/components/shared/BookmarkButton.vue'
 import CardRing from '@/components/ring/CardRing.vue'
 import RingCaption from '@/components/ring/RingCaption.vue'
 import ViewToggle from '@/components/ring/ViewToggle.vue'
-import PeriodToggle from '@/components/trending/languages/header/periodToggle.vue'
+import SortPills from '@/components/shared/SortPills.vue'
 
 // The repo card is written once in the template and used by both the carousel and the list
 const [DefineRepoCard, ReuseRepoCard] = createReusableTemplate()
@@ -58,8 +58,6 @@ const SORT_OPTIONS = [
   { value: 'newest', label: 'Newest' },
 ]
 
-// The Sort by toggle uses the Packages tab's pill (periodToggle.vue)
-const SORT_PILLS = toPillLabels(SORT_OPTIONS)
 
 // ---------- Computed values ----------
 const selectedColor = computed(() =>
@@ -300,15 +298,7 @@ const compositionLabel = (repo) =>
         </div>
 
         <!-- Sort -->
-        <div class="d-flex align-items-center gap-2">
-          <span class="text-muted-github small text-nowrap">Sort by</span>
-          <PeriodToggle
-            v-model="sortBy"
-            :periods="SORT_PILLS.values"
-            :labels="SORT_PILLS.labels"
-            aria-label="Sort repositories"
-          />
-        </div>
+        <SortPills v-model="sortBy" :options="SORT_OPTIONS" aria-label="Sort repositories" />
 
         <ViewToggle v-model="view" />
       </div>
@@ -435,13 +425,9 @@ const compositionLabel = (repo) =>
 }
 
 /* ---------- Controls ---------- */
+/* fixed width, so focusing the search never pushes Sort by onto a new line */
 .search-wrap {
   width: 240px;
-  transition: width 0.35s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.search-wrap:focus-within {
-  width: min(320px, 100%);
 }
 
 .search-icon {

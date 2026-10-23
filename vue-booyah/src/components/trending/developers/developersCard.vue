@@ -14,7 +14,7 @@
   Gives back:    nothing (no emits).
   Used by:       developersSection.vue.
   Children:      discovery/discoveryLangPill.vue (the same language pill Discovery uses),
-                 languages/header/periodToggle.vue (the Sort by pill, same as the Packages tab's).
+                 shared/SortPills.vue (the Sort by pill, same as My Projects and Saved).
 -->
 <script setup>
 // ---------- Imports ----------
@@ -22,9 +22,9 @@ import { ref, computed } from 'vue'
 import { getLangColor } from '@/utils/langColors'
 import { vSpotlight, useCountUp } from '@/utils/motion'
 import { langOf } from '@/utils/top5Categories'
-import { shortCount, pad2, MEDALS, toPillLabels } from '@/utils/trending/github/display'
+import { shortCount, pad2, MEDALS } from '@/utils/trending/github/display'
 import DiscoveryLangPill from '@/components/discovery/discoveryLangPill.vue'
-import PeriodToggle from '@/components/trending/languages/header/periodToggle.vue'
+import SortPills from '@/components/shared/SortPills.vue'
 
 // ---------- Props ----------
 const props = defineProps({
@@ -39,8 +39,6 @@ const SORT_OPTIONS = [
   { value: 'joined', label: 'Joined' },
 ]
 
-// The Sort by toggle uses the Packages tab's pill (periodToggle.vue)
-const SORT_PILLS = toPillLabels(SORT_OPTIONS)
 const MAX_LANG_PILLS = 6
 
 // ---------- State ----------
@@ -90,15 +88,7 @@ const joinedYear = (iso) => (iso ? new Date(iso).getUTCFullYear() : '–')
         </span>
       </div>
 
-      <div class="d-flex align-items-center gap-2">
-        <span class="text-muted-github small text-nowrap">Sort by</span>
-        <PeriodToggle
-          v-model="sortBy"
-          :periods="SORT_PILLS.values"
-          :labels="SORT_PILLS.labels"
-          aria-label="Sort developers"
-        />
-      </div>
+      <SortPills v-model="sortBy" :options="SORT_OPTIONS" aria-label="Sort developers" />
     </header>
 
     <!-- ===================== Language filter ===================== -->
