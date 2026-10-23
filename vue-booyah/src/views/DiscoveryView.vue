@@ -88,7 +88,10 @@ function saveFromDetail(project) {
 
 onMounted(() => {
     load()
-    loadSaved()
+    loadSaved().then(() => {
+        // loadSaved only sets an error when the saves request fails
+        if (saveError.value) saveError.value = 'Could not load Discovery Page'
+    })
 })
 </script>
 
@@ -103,10 +106,10 @@ onMounted(() => {
             <DiscoveryBanners :warning="warning" :error="error" @retry="load" />
 
             <!-- Saved-project error message -->
-            <div v-if="saveError" class="alert alert-danger alert-dismissible py-2 px-3 small mb-3" role="alert">
-                {{ saveError }}
+            <div v-if="saveError" class="alert alert-danger d-flex align-items-center py-2 px-3 small mb-3" role="alert">
+                <span class="flex-grow-1">{{ saveError }}</span>
 
-                <button type="button" class="btn-close" aria-label="Dismiss" @click="saveError = ''"></button>
+                <button type="button" class="btn-close ms-3" aria-label="Dismiss" @click="saveError = ''"></button>
             </div>
 
             <template v-if="!error">

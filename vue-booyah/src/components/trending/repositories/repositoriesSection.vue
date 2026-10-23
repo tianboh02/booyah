@@ -164,11 +164,11 @@ onMounted(loadSaved)
       <!-- Saved-project error message (same as Discovery) -->
       <div
         v-if="saveError"
-        class="alert alert-danger alert-dismissible py-2 px-3 small mb-3"
+        class="alert alert-danger d-flex align-items-center py-2 px-3 small mb-3"
         role="alert"
       >
-        {{ saveError }}
-        <button type="button" class="btn-close" aria-label="Dismiss" @click="saveError = ''"></button>
+        <span class="flex-grow-1">{{ saveError }}</span>
+        <button type="button" class="btn-close ms-3" aria-label="Dismiss" @click="saveError = ''"></button>
       </div>
 
       <RepoStats
