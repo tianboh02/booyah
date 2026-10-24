@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import Setup from '@/components/setup/setup.vue'
 import ExperienceForm from '@/components/setup/experienceForm.vue'
 
-const experience = ref('New')
+const experience = ref('Newcomer')
 </script>
 
 <template>

@@ -2,10 +2,10 @@
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 
 const props = defineProps({
-    // Shared with the form via SetupView: 'New' | 'Practitioner'
+    // Shared with the form via SetupView: 'Newcomer' | 'Practitioner'
     experience: {
         type: String,
-        default: 'New'
+        default: 'Newcomer'
     }
 })
 
