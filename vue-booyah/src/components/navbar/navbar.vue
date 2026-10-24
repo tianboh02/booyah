@@ -157,6 +157,7 @@ function logout() {
 
 .app-header.is-landing { position: fixed; top: 0; left: 0; right: 0; }
 .app-header.nav-hidden { transform: translateY(-110%); } 
+/* Tailwind also has a class called .collapse (visibility: collapse), and it picks up
 
 .header-user-name {
     color: var(--app-text);
