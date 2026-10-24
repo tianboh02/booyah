@@ -89,9 +89,9 @@ onBeforeUnmount(() => clearTimeout(savedTimer))
 
         <!-- What happens next, updates as you pick -->
         <Transition name="swap" mode="out-in">
-            <p :key="current.lands" class="landing-note small d-flex align-items-center gap-2 mt-3 mb-0">
+            <p :key="current.lands" class="landing-note small d-flex align-items-start gap-2 mt-3 mb-0">
                 <span class="note-dot rounded-circle" :style="{ backgroundColor: current.accent }"></span>
-                Next time you sign in, you'll land on <strong>{{ current.lands }}</strong>.
+                <span>Next time you sign in, you'll land on <strong>{{ current.lands }}</strong>.</span>
             </p>
         </Transition>
 
@@ -257,7 +257,17 @@ onBeforeUnmount(() => clearTimeout(savedTimer))
     width: 8px;
     height: 8px;
     flex-shrink: 0;
+    /* centre the dot on the first line of text, even when the sentence wraps */
+    margin-top: calc((1.5em - 8px) / 2);
     transition: background-color 0.3s ease;
+}
+
+/* On phones the sentence can take two lines, and "My Project" is longer than "Discovery".
+   Reserving two lines stops the card from jumping in height when you switch options. */
+@media (max-width: 575.98px) {
+    .landing-note {
+        min-height: 3em;
+    }
 }
 
 .swap-enter-active,
