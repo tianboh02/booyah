@@ -1,4 +1,4 @@
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 
 const theme = ref(localStorage.getItem('theme') || 'dark')
 
@@ -23,3 +23,7 @@ export function useTheme() {
         initTheme
     }
 }
+
+export const isDark = computed(() => theme.value === 'dark')
+export const toggleTheme = () => useTheme().toggleTheme()
+export const initTheme = () => useTheme().initTheme()
