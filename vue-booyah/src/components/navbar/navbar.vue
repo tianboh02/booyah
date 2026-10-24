@@ -158,6 +158,12 @@ function logout() {
 .app-header.is-landing { position: fixed; top: 0; left: 0; right: 0; }
 .app-header.nav-hidden { transform: translateY(-110%); } 
 /* Tailwind also has a class called .collapse (visibility: collapse), and it picks up
+   Bootstrap's "collapse navbar-collapse" menu. That hides the page links even though
+   Bootstrap is showing them. This puts the visibility back. The menu still opens and
+   closes normally on mobile, because Bootstrap does that with display, not visibility. */
+.app-header .navbar-collapse.collapse {
+    visibility: visible;
+}
 
 .header-user-name {
     color: var(--app-text);
