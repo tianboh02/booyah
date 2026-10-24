@@ -35,7 +35,7 @@ const checkAuth = () => {
 
 const userAvatar = computed(() => currentUser.value.avatar || defaultAvatar)
 const userHandle = computed(() => currentUser.value.name || 'User')
-const userExperience = computed(() => currentUser.value.experience || 'New')
+const userExperience = computed(() => currentUser.value.experience || 'Newcomer')
 const showNav = computed(() => isLogin.value && route.path !== '/setup')
 const showLogin = computed(() => route.path == '/')
 

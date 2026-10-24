@@ -8,12 +8,12 @@ import { vSpotlight, vTilt } from '@/utils/motion'
 const route = useRoute()
 const router = useRouter()
 
-// 'New' | 'Practitioner' — owned by SetupView (v-model:experience) so the
+// 'Newcomer' | 'Practitioner' — owned by SetupView (v-model:experience) so the
 // background scene can react to it. Used exactly like before: selectedExperience.value
 const props = defineProps({
     experience: {
         type: String,
-        default: 'New'
+        default: 'Newcomer'
     }
 })
 const emit = defineEmits(['update:experience'])
@@ -34,7 +34,7 @@ const wy = ref(0)
 
 const options = [
     {
-        value: 'New',
+        value: 'Newcomer',
         title: 'Newcomer',
         blurb: "See what's worth learning and building right now",
         lands: 'Discovery',
@@ -104,7 +104,7 @@ const handleSubmit = async () => {
         // 4. Play the launch animation, then route based on selection
         await playLaunch()
 
-        if (selectedExperience.value.toLowerCase() === 'new') {
+        if (selectedExperience.value.toLowerCase() === 'newcomer') {
             router.push('/discovery')
         } else {
             router.push('/my-projects')
@@ -157,7 +157,7 @@ const handleSubmit = async () => {
                         <!-- Live preview of where this path leads -->
                         <div class="preview mb-3" aria-hidden="true">
                             <!-- Discovery: skills take turns "trending" -->
-                            <div v-if="opt.value === 'New'" class="d-flex flex-wrap gap-2">
+                            <div v-if="opt.value === 'Newcomer'" class="d-flex flex-wrap gap-2">
                                 <span v-for="c in trendChips" :key="c.name" class="trend-chip small"
                                     :style="{ '--c': c.color, '--k': c.i }">
                                     <span class="chip-dot"></span>{{ c.name }}
@@ -426,6 +426,7 @@ const handleSubmit = async () => {
 
 /* Discovery chips take turns lighting up as "trending" */
 .trend-chip {
+    position: relative;
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
@@ -444,14 +445,27 @@ const handleSubmit = async () => {
     background-color: var(--c);
 }
 
+/* The "trending" arrow is a small badge on the chip's corner. It takes no space in the layout,
+   so lighting a chip up never changes its width, and chips never jump to another row. */
 .chip-up {
-    font-size: 0.6rem;
-    color: #3fb950;
-    width: 0;
-    overflow: hidden;
+    position: absolute;
+    top: -7px;
+    right: -5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    font-size: 0.45rem;
+    line-height: 1;
+    color: #0d1117;
+    background-color: #3fb950;
     opacity: 0;
+    transform: scale(0.4);
     animation: lit-arrow 6s ease-in-out infinite;
     animation-delay: calc(var(--k) * 1.1s);
+    pointer-events: none;
 }
 
 @keyframes lit {
@@ -477,14 +491,14 @@ const handleSubmit = async () => {
     0%,
     22%,
     100% {
-        width: 0;
         opacity: 0;
+        transform: scale(0.4);
     }
 
     6%,
     16% {
-        width: 0.8rem;
         opacity: 1;
+        transform: scale(1);
     }
 }
 

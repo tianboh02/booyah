@@ -9,7 +9,7 @@ const { experience, saveExperience } = useUserSettings()
 // Same options and values as the setup page ('New' | 'Practitioner')
 const options = [
     {
-        value: 'New',
+        value: 'Newcomer',
         title: 'Newcomer',
         blurb: "See what's worth learning and building right now",
         lands: 'Discovery',
