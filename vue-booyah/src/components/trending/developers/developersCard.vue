@@ -10,6 +10,9 @@
                    - 20 rows: rank, avatar, username + name + bio, main language, followers,
                      public repos, joined year, and an arrow. Clicking a row opens their GitHub
                      profile in a new tab; clicking a language filters the list instead.
+  Layout:        one CSS grid shared by the column labels and every row, so the columns always line up.
+                 Phones (under 768px) have no columns: each row becomes a small card with the developer on
+                 top and a line of figures below it ("329k followers", "12 repos", "Joined 2011").
   Receives:      props  developers (from githubTrending.fetchTopDevelopers), totalCount
   Gives back:    nothing (no emits).
   Used by:       developersSection.vue.
@@ -77,12 +80,10 @@ const joinedYear = (iso) => (iso ? new Date(iso).getUTCFullYear() : '–')
 <template>
   <section v-spotlight class="dev-card card p-3 p-md-4 rounded-3 shadow-sm" aria-label="Top developers">
     <!-- ===================== Header ===================== -->
-    <header
-      class="card-head d-flex flex-wrap align-items-center justify-content-between gap-2 pb-3 mb-2"
-    >
+    <header class="card-head d-flex flex-wrap align-items-center justify-content-between gap-2 pb-3 mb-2">
       <div class="d-flex align-items-center gap-2 flex-wrap min-w-0">
         <h2 class="h5 fw-bold section-title mb-0">Most followed on GitHub</h2>
-        <span class="badge badge-github rounded-pill fw-normal px-2 py-1 text-nowrap">
+        <span class="count-badge badge badge-github rounded-pill fw-normal px-2 py-1">
           <span class="font-monospace">{{ countBadge.toLocaleString('en-US') }}</span>
           developers with 1,000+ followers
         </span>
@@ -94,77 +95,50 @@ const joinedYear = (iso) => (iso ? new Date(iso).getUTCFullYear() : '–')
     <!-- ===================== Language filter ===================== -->
     <div class="d-flex flex-wrap align-items-center gap-2 mb-3" role="group" aria-label="Filter by language">
       <span class="text-muted-github small me-1">Main language</span>
-      <DiscoveryLangPill
-        v-for="lang in languages"
-        :key="lang"
-        :lang="lang"
-        :active="selectedLang === lang"
-        outlined
-        @click="toggleLang(lang)"
-      />
-      <button
-        v-if="selectedLang"
-        type="button"
-        class="btn btn-sm btn-outline-secondary rounded-pill"
-        @click="selectedLang = null"
-      >
+      <DiscoveryLangPill v-for="lang in languages" :key="lang" :lang="lang" :active="selectedLang === lang" outlined
+        @click="toggleLang(lang)" />
+      <button v-if="selectedLang" type="button" class="btn btn-sm btn-outline-secondary rounded-pill"
+        @click="selectedLang = null">
         Show all
       </button>
     </div>
 
     <!-- ===================== Column labels =====================
-         Header and rows share the same Bootstrap grid classes, so the columns line up.
-         Smaller screens drop columns with Bootstrap's d-none / d-*-block. -->
-    <div class="row gx-2 mx-0 px-2 pb-2 text-muted-github small text-uppercase text-nowrap head-row" aria-hidden="true">
-      <span class="col-auto rank-col">#</span>
-      <span class="col">Developer</span>
-      <span class="col-2 d-none d-md-block">Language</span>
-      <span class="col-3 col-sm-2 col-lg-1 text-end">Followers</span>
-      <span class="col-2 col-lg-1 d-none d-sm-block text-end">Repos</span>
-      <span class="col-1 d-none d-lg-block text-end">Joined</span>
-      <span class="col-auto d-none d-md-block arrow-col"></span>
+         Same grid as the rows (--dev-cols), so every column lines up exactly.
+         Hidden on phones, where each row spells out its own labels. -->
+    <div class="dev-grid head-row px-2 pb-2 text-muted-github small text-uppercase text-nowrap" aria-hidden="true">
+      <span>#</span>
+      <span>Developer</span>
+      <span class="cell-lang">Language</span>
+      <span class="cell-followers text-end">Followers</span>
+      <span class="cell-repos text-end">Repos</span>
+      <span class="cell-joined text-end">Joined</span>
+      <span class="cell-arrow"></span>
     </div>
 
     <!-- ===================== The developers ===================== -->
     <TransitionGroup v-if="rows.length" name="dev" tag="ol" class="rows list-unstyled mb-0" appear>
-      <li
-        v-for="(dev, i) in rows"
-        :key="dev.id"
-        class="dev-row row gx-2 mx-0 align-items-center position-relative px-2 py-2 rounded-2"
-        :style="{ '--lang': getLangColor(langOf(dev)), '--i': i }"
-      >
+      <li v-for="(dev, i) in rows" :key="dev.id" class="dev-row dev-grid position-relative px-2 py-3 py-md-2 rounded-2"
+        :style="{ '--lang': getLangColor(langOf(dev)), '--i': i }">
         <!-- Rank (gold / silver / bronze for the top 3) -->
-        <span class="col-auto rank-col">
-          <span
-            class="rank badge rounded-2 font-monospace text-muted-github"
-            :class="{ podium: dev.rank <= 3 }"
-            :style="dev.rank <= 3 ? { '--medal': MEDALS[dev.rank - 1] } : null"
-          >
+        <span class="cell-rank">
+          <span class="rank badge rounded-2 font-monospace text-muted-github" :class="{ podium: dev.rank <= 3 }"
+            :style="dev.rank <= 3 ? { '--medal': MEDALS[dev.rank - 1] } : null">
             {{ pad2(dev.rank) }}
           </span>
         </span>
 
         <!-- Avatar, username (the link to their profile: stretched-link makes the whole row
              clickable), name and bio -->
-        <span class="col d-flex align-items-center gap-3 min-w-0">
-          <img
-            :src="dev.avatar"
-            alt=""
-            class="avatar rounded-circle border flex-shrink-0"
-            width="40"
-            height="40"
-            loading="lazy"
-          />
+        <span class="dev-main d-flex align-items-center gap-2 gap-md-3 min-w-0">
+          <img :src="dev.avatar" alt="" class="avatar rounded-circle border flex-shrink-0" width="40" height="40"
+            loading="lazy" />
           <span class="d-flex flex-column min-w-0">
-            <a
-              :href="dev.htmlUrl"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="dev-link stretched-link fw-semibold font-monospace text-truncate"
-            >
+            <a :href="dev.htmlUrl" target="_blank" rel="noopener noreferrer"
+              class="dev-link stretched-link fw-semibold font-monospace">
               {{ dev.login }}<span class="visually-hidden"> (opens their GitHub profile)</span>
             </a>
-            <span class="text-muted-github small text-truncate">
+            <span class="dev-bio text-muted-github small">
               <template v-if="dev.name">{{ dev.name }}</template>
               <template v-if="dev.name && (dev.bio || dev.company)"> · </template>
               {{ dev.bio || dev.company || (dev.name ? '' : dev.location) }}
@@ -172,40 +146,40 @@ const joinedYear = (iso) => (iso ? new Date(iso).getUTCFullYear() : '–')
           </span>
         </span>
 
-        <!-- Main language (z-2 lifts it above the row link, so clicking it filters instead) -->
-        <span class="col-2 d-none d-md-block position-relative z-2 min-w-0">
-          <DiscoveryLangPill
-            :lang="langOf(dev)"
-            :active="selectedLang === langOf(dev)"
-            :title="selectedLang === langOf(dev) ? 'Clear filter' : 'Filter by ' + langOf(dev)"
-            @click="toggleLang(langOf(dev))"
-          />
+        <!-- The figures. On desktop these four are grid cells (display: contents); on phones they
+             are one wrapping line under the developer. -->
+        <span class="dev-meta">
+          <!-- Main language (z-2 lifts it above the row link, so clicking it filters instead) -->
+          <span class="cell-lang position-relative z-2 min-w-0">
+            <DiscoveryLangPill :lang="langOf(dev)" :active="selectedLang === langOf(dev)"
+              :title="selectedLang === langOf(dev) ? 'Clear filter' : 'Filter by ' + langOf(dev)"
+              @click="toggleLang(langOf(dev))" />
+          </span>
+
+          <span class="cell-followers stat text-md-end" title="Followers">
+            <svg class="me-1 text-muted-github" width="13" height="13" viewBox="0 0 16 16" fill="none"
+              stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
+              <circle cx="8" cy="5.5" r="2.5" />
+              <path d="M3 14c.6-2.6 2.6-4 5-4s4.4 1.4 5 4" />
+            </svg>{{ shortCount(dev.followers) }}<span class="d-md-none text-muted-github"> followers</span>
+          </span>
+
+          <span class="cell-repos stat text-md-end" title="Public repositories">
+            <svg class="me-1 text-muted-github" width="13" height="13" viewBox="0 0 16 16" fill="none"
+              stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true">
+              <path d="M3 2.5h8.5a1 1 0 0 1 1 1V12H4.2A1.2 1.2 0 0 0 3 13.2z" />
+              <path d="M3 13.2A1.2 1.2 0 0 0 4.2 14.5h8.3" stroke-linecap="round" />
+            </svg>{{ shortCount(dev.publicRepos) }}<span class="d-md-none text-muted-github"> repos</span>
+          </span>
+
+          <span class="cell-joined stat text-md-end text-muted-github" title="Joined GitHub">
+            <span class="d-md-none">Joined </span>{{ joinedYear(dev.joined) }}
+          </span>
         </span>
 
-        <span class="col-3 col-sm-2 col-lg-1 text-end text-nowrap font-monospace small" title="Followers">
-          <svg class="me-1 text-muted-github" width="13" height="13" viewBox="0 0 16 16" fill="none"
-            stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
-            <circle cx="8" cy="5.5" r="2.5" />
-            <path d="M3 14c.6-2.6 2.6-4 5-4s4.4 1.4 5 4" />
-          </svg>{{ shortCount(dev.followers) }}
-        </span>
-
-        <span class="col-2 col-lg-1 d-none d-sm-block text-end text-nowrap font-monospace small" title="Public repositories">
-          <svg class="me-1 text-muted-github" width="13" height="13" viewBox="0 0 16 16" fill="none"
-            stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true">
-            <path d="M3 2.5h8.5a1 1 0 0 1 1 1V12H4.2A1.2 1.2 0 0 0 3 13.2z" />
-            <path d="M3 13.2A1.2 1.2 0 0 0 4.2 14.5h8.3" stroke-linecap="round" />
-          </svg>{{ shortCount(dev.publicRepos) }}
-        </span>
-
-        <span class="col-1 d-none d-lg-block text-end text-muted-github small font-monospace" title="Joined GitHub">
-          {{ joinedYear(dev.joined) }}
-        </span>
-
-        <span class="col-auto d-none d-md-block arrow-col">
-          <svg class="row-arrow" width="14" height="14" viewBox="0 0 16 16" fill="none"
-            stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"
-            aria-hidden="true">
+        <span class="cell-arrow">
+          <svg class="row-arrow" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor"
+            stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M5 11L11 5M6 5h5v5" />
           </svg>
         </span>
@@ -213,7 +187,8 @@ const joinedYear = (iso) => (iso ? new Date(iso).getUTCFullYear() : '–')
     </TransitionGroup>
 
     <p v-else class="empty text-muted-github small text-center py-5 mb-0">
-      {{ selectedLang ? `No developers mainly writing ${selectedLang} in the top 20.` : 'GitHub returned no developers.' }}
+      {{ selectedLang ? `No developers mainly writing ${selectedLang} in the top 20.` : 'GitHub returned no developers.'
+      }}
     </p>
 
     <p class="text-muted-github small mt-3 mb-0">
@@ -253,18 +228,16 @@ const joinedYear = (iso) => (iso ? new Date(iso).getUTCFullYear() : '–')
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.3s ease;
-  background: radial-gradient(
-    420px circle at var(--mx, 50%) var(--my, 50%),
-    color-mix(in srgb, #58a6ff 12%, transparent),
-    transparent 70%
-  );
+  background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 50%),
+      color-mix(in srgb, #58a6ff 12%, transparent),
+      transparent 70%);
 }
 
 .dev-card:hover::before {
   opacity: 1;
 }
 
-.dev-card > * {
+.dev-card>* {
   position: relative;
 }
 
@@ -283,17 +256,60 @@ const joinedYear = (iso) => (iso ? new Date(iso).getUTCFullYear() : '–')
   letter-spacing: 0.04em;
 }
 
-/* fixed widths so the rank and arrow columns line up between the labels and the rows */
-.rank-col {
-  width: 3.25rem;
+/* ---------- The grid (shared by the column labels and every row) ---------- */
+.dev-grid {
+  display: grid;
+  align-items: center;
+  column-gap: 0.5rem;
 }
 
-.arrow-col {
-  width: 1.75rem;
+.stat {
+  font-family: var(--bs-font-monospace);
+  font-size: 0.875em;
+  white-space: nowrap;
+}
+
+/* Desktop and tablets: rank | developer | language | followers | repos | (joined) | arrow.
+   The labels and the rows use the same template, so the columns cannot drift apart. */
+@media (min-width: 768px) {
+  .dev-card {
+    --dev-cols: 3.25rem minmax(0, 1fr) 8.5rem 5rem 4.25rem 1.5rem;
+  }
+
+  .dev-grid {
+    grid-template-columns: var(--dev-cols);
+  }
+
+  .dev-meta {
+    display: contents;
+    /* the four figures become grid cells of the row */
+  }
+
+  .cell-arrow {
+    width: 1.5rem;
+  }
+}
+
+/* "Joined" only appears once there is room for it */
+@media (min-width: 768px) and (max-width: 991.98px) {
+  .cell-joined {
+    display: none;
+  }
+}
+
+@media (min-width: 992px) {
+  .dev-card {
+    --dev-cols: 3.25rem minmax(0, 1fr) 9.5rem 5.5rem 5rem 4rem 1.75rem;
+  }
+
+  .cell-joined {
+    display: block;
+  }
 }
 
 .rows {
-  min-height: calc(5 * 64px); /* keeps the card's height steady when a filter leaves few rows */
+  min-height: calc(5 * 64px);
+  /* keeps the card's height steady when a filter leaves few rows */
 }
 
 .dev-row {
@@ -301,7 +317,7 @@ const joinedYear = (iso) => (iso ? new Date(iso).getUTCFullYear() : '–')
   transition: background-color 0.2s ease;
 }
 
-.dev-row + .dev-row {
+.dev-row+.dev-row {
   border-top: 1px solid color-mix(in srgb, var(--card-border) 60%, transparent);
 }
 
@@ -361,6 +377,44 @@ const joinedYear = (iso) => (iso ? new Date(iso).getUTCFullYear() : '–')
   text-decoration-color: var(--lang);
 }
 
+/* On a phone the name and bio may take more lines, so nothing is cut off with "…" */
+.dev-link {
+  display: block;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.dev-bio {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  line-height: 1.35;
+}
+
+/* On wider screens there is one line per row, shortened with "…" when it is too long */
+@media (min-width: 768px) {
+  .dev-link {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .dev-bio {
+    display: block;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+}
+
+/* "8,710 developers with 1,000+ followers" may take two lines on a very narrow screen */
+.count-badge {
+  white-space: normal;
+  text-align: left;
+}
+
 .row-arrow {
   color: var(--lang);
   opacity: 0;
@@ -382,7 +436,8 @@ const joinedYear = (iso) => (iso ? new Date(iso).getUTCFullYear() : '–')
 }
 
 .dev-leave-active {
-  display: none; /* filtered-out rows go at once, so the rest can slide into place */
+  display: none;
+  /* filtered-out rows go at once, so the rest can slide into place */
 }
 
 .dev-move {
@@ -396,15 +451,66 @@ const joinedYear = (iso) => (iso ? new Date(iso).getUTCFullYear() : '–')
   }
 }
 
-/* phones: a smaller avatar */
-@media (max-width: 575.98px) {
+/* Phones and small tablets: each row is a small card, with no columns to squash.
+     [rank]  avatar  username
+             name · bio (up to two lines)
+             language   329k followers   12 repos   Joined 2011  */
+@media (max-width: 767.98px) {
+  .head-row {
+    display: none;
+  }
+
+  .dev-row {
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas:
+      'rank main'
+      'rank meta';
+    align-items: start;
+    column-gap: 0.65rem;
+    row-gap: 0.5rem;
+    min-height: 0;
+  }
+
+  .cell-rank {
+    grid-area: rank;
+    padding-top: 0.45rem;
+  }
+
+  .dev-main {
+    grid-area: main;
+  }
+
+  .dev-meta {
+    grid-area: meta;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem 0.9rem;
+    min-width: 0;
+  }
+
+  .cell-arrow {
+    display: none;
+  }
+
+  .rank {
+    min-width: 1.9em;
+    padding: 0.3em 0.4em;
+    font-size: 0.7rem;
+  }
+
   .avatar {
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
+  }
+
+  .rows {
+    min-height: calc(3 * 96px);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
+
   .dev-card::before,
   .dev-row,
   .dev-row::before,
