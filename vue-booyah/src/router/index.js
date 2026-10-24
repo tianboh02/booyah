@@ -68,6 +68,17 @@ const router = createRouter({
       meta: { isPublic: false }
     },
   ],
+
+  scrollBehavior(to, from, savedPosition) {
+    // Back and forward buttons: return to where the person was
+    if (savedPosition) return savedPosition
+
+    // Links like /page#section: scroll to that element
+    if (to.hash) return { el: to.hash, behavior: 'smooth' }
+
+    // Everything else: start at the top of the new page
+    return { top: 0, left: 0 }
+  }
 })
 
 function getUserExperience() {
