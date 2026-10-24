@@ -35,22 +35,26 @@ function timeAgo(isoString) {
     <article v-spotlight class="saved-card card mb-3 p-3 rounded-3 shadow-sm"
         :style="{ '--lang': getLangColor(itemLang(item)) }">
 
-        <div class="d-flex align-items-center gap-2 mb-2">
-            <h5 class="card-title h6 fw-bold font-monospace mb-0 text-truncate">
+        <div class="card-head d-flex flex-wrap align-items-center gap-2 mb-2">
+            <!-- The name wraps onto more lines if it has to, instead of being cut off with "…" -->
+            <h5 class="repo-name card-title h6 fw-bold font-monospace mb-0">
                 <a :href="item.link" target="_blank" rel="noopener noreferrer" class="repo-link stretched-link">
-                    <span v-if="item.owner" class="text-muted-github">{{ item.owner }}/</span>{{ item.name }}<span
+                    <span v-if="item.owner" class="text-muted-github">{{ item.owner }}/</span><wbr>{{ item.name }}<span
                         class="visually-hidden"> (opens on GitHub)</span>
                 </a>
             </h5>
 
             <!-- Category: click to filter -->
-            <button type="button" class="cat-badge badge rounded-pill fw-normal px-2 py-1 flex-shrink-0"
+            <button type="button" class="cat-badge badge rounded-pill fw-normal px-2 py-1"
                 :class="{ 'is-selected': selectedCategory === itemCategory(item) }"
                 :style="{ '--c': categoryColor(itemCategory(item)) }"
-                :title="selectedCategory === itemCategory(item) ? 'Clear filter' : 'Filter by ' + itemCategory(item)"
+                :title="selectedCategory === itemCategory(item) ? 'Clear filter: ' + itemCategory(item) : 'Filter by ' + itemCategory(item)"
                 @click="$emit('toggle-category', itemCategory(item))">
-                {{ itemCategory(item) }}
+                <span class="cat-text">{{ itemCategory(item) }}</span>
             </button>
+
+            <!-- phones only: forces the category onto its own line under the name -->
+            <span class="head-break" aria-hidden="true"></span>
 
             <svg class="repo-arrow flex-shrink-0 ms-auto" width="16" height="16" viewBox="0 0 16 16" fill="none"
                 stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"
@@ -62,8 +66,8 @@ function timeAgo(isoString) {
             <button type="button" class="bookmark-btn btn btn-sm btn-link p-0 flex-shrink-0"
                 :aria-label="`Remove ${item.name} from saved`" title="Saved. Click to remove"
                 @click="$emit('remove', item)">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor"
-                    stroke-width="1.5" stroke-linejoin="round" aria-hidden="true">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"
+                    stroke-linejoin="round" aria-hidden="true">
                     <path d="M3.5 2.5h9v11.2L8 10.6l-4.5 3.1z" />
                 </svg>
             </button>
@@ -84,8 +88,7 @@ function timeAgo(isoString) {
                 <template v-else>{{ item.description || 'No description' }}</template>
             </p>
 
-            <div v-if="item.status === 'ok'"
-                class="d-flex align-items-center gap-3 text-muted-github small flex-wrap">
+            <div v-if="item.status === 'ok'" class="d-flex align-items-center gap-3 text-muted-github small flex-wrap">
                 <button type="button" class="lang-link d-flex align-items-center gap-1 rounded-2"
                     :class="{ 'is-selected': selectedLang === itemLang(item) }"
                     :title="selectedLang === itemLang(item) ? 'Clear filter' : 'Filter by ' + itemLang(item)"
@@ -96,14 +99,15 @@ function timeAgo(isoString) {
 
                 <span class="meta-star d-inline-flex align-items-center gap-1">
                     <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
-                        <path d="M8 .25l2.3 4.66 5.15.75-3.72 3.63.88 5.13L8 12.04l-4.61 2.38.88-5.13L.55 5.66l5.15-.75z" />
+                        <path
+                            d="M8 .25l2.3 4.66 5.15.75-3.72 3.63.88 5.13L8 12.04l-4.61 2.38.88-5.13L.55 5.66l5.15-.75z" />
                     </svg>
                     <span class="font-monospace">{{ shortStars(item.stars) }}</span>
                 </span>
 
                 <span class="d-inline-flex align-items-center gap-1">
-                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor"
-                        stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"
+                        stroke-linecap="round" aria-hidden="true">
                         <circle cx="4" cy="3" r="1.6" />
                         <circle cx="12" cy="3" r="1.6" />
                         <circle cx="8" cy="13" r="1.6" />
@@ -198,6 +202,65 @@ function timeAgo(isoString) {
 }
 
 /* Everything clickable must sit above the stretched link */
+.card-head {
+    row-gap: 0.4rem;
+}
+
+/* The repo name is the most important text on the card: it may wrap, it is never cut with "…" */
+.repo-name {
+    flex: 0 1 auto;
+    min-width: 0;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+}
+
+.head-break {
+    display: none;
+}
+
+/* The category can shrink and shows "…" only if it is longer than the whole card.
+   The full name is in the tooltip. */
+.cat-badge {
+    flex: 0 1 auto;
+    min-width: 0;
+    max-width: 100%;
+}
+
+.cat-text {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Phones and small tablets: name + bookmark on the first line, category underneath */
+@media (max-width: 767.98px) {
+    .repo-name {
+        flex: 1 1 0;
+        order: 1;
+    }
+
+    .bookmark-btn {
+        order: 2;
+    }
+
+    .head-break {
+        display: block;
+        flex-basis: 100%;
+        height: 0;
+        order: 3;
+    }
+
+    .cat-badge {
+        order: 4;
+    }
+
+    /* the hover arrow does nothing on a touch screen */
+    .repo-arrow {
+        display: none;
+    }
+}
+
 .cat-badge,
 .lang-link,
 .bookmark-btn {
