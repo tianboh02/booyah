@@ -5,7 +5,9 @@ import defaultAvatar from '@/assets/login.png'
 import logoSvg from '@/assets/booyah-logo1.png'
 import ThemeToggle from '@/components/navbar/themeToggle.vue'
 import { useTheme } from '@/composables/useTheme'
-import GitHubSSO from '../landing/GitHubSSO.vue'
+import ShinyButton from '../landing/ShinyButton.vue'
+import { redirectToGitHub } from '@/composables/useGitHubLogin'
+import { navHidden } from '@/composables/useLandingNav'
 
 const route = useRoute()
 const router = useRouter()
@@ -40,7 +42,6 @@ const showLogin = computed(() => route.path == '/')
 onMounted(() => {
     initTheme()
     checkAuth()
-    // refresh when settings saves a new name or experience level
     window.addEventListener('booyah:user-updated', checkAuth)
 })
 
@@ -65,7 +66,7 @@ function logout() {
 </script>
 
 <template>
-    <header class="sticky-top app-header border-bottom mb-3">
+    <header class="sticky-top app-header border-bottom mb-3" :class="{ 'is-landing': showLogin, 'nav-hidden': showLogin && navHidden }">
         <nav class="navbar navbar-expand-md px-4 px-md-5">
             <!-- Logo -->
             <div class="navbar-brand me-auto me-md-4">
@@ -101,7 +102,7 @@ function logout() {
             <div class="d-flex align-items-center gap-3 ms-auto">
                 <!-- Theme Toggle Switch (Always Visible) -->
                 <div v-if="showLogin">
-                    <GitHubSSO />
+                    <ShinyButton small @click="redirectToGitHub" />
                 </div>
                 <ThemeToggle />
 
@@ -151,8 +152,11 @@ function logout() {
 .app-header {
     background-color: var(--app-bg);
     border-color: var(--card-border) !important;
-    transition: background-color 0.2s ease, border-color 0.2s ease;
+    transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.45s;
 }
+
+.app-header.is-landing { position: fixed; top: 0; left: 0; right: 0; }
+.app-header.nav-hidden { transform: translateY(-110%); } 
 
 .header-user-name {
     color: var(--app-text);
