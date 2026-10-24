@@ -66,27 +66,18 @@ onMounted(() => load())
   <section class="developers" aria-labelledby="devs-heading">
     <!-- Heading -->
     <div class="mb-3">
-      <h4 id="devs-heading" class="fw-bold mb-1">Top Developers</h4>
+      <h4 id="devs-heading" class="fw-bold mb-1">Top {{ RULES.limit }} Developers</h4>
       <p class="text-muted-github small mb-0">
         The {{ RULES.limit }} most followed developers on GitHub, with what they mostly build in.
       </p>
     </div>
 
     <!-- Loading: the signal globe, like Discovery -->
-    <SignalLoader
-      v-if="status === 'loading'"
-      :done="progress.done"
-      :total="progress.total"
-      :status="loaderStatus"
-      :legend="LOADER_LEGEND"
-    />
+    <SignalLoader v-if="status === 'loading'" :done="progress.done" :total="progress.total" :status="loaderStatus"
+      :legend="LOADER_LEGEND" />
 
-    <RetryCard
-      v-else-if="status === 'error'"
-      title="Couldn't load the top developers."
-      :message="error"
-      @retry="load(true)"
-    />
+    <RetryCard v-else-if="status === 'error'" title="Couldn't load the top developers." :message="error"
+      @retry="load(true)" />
 
     <!-- The one big card -->
     <template v-else>

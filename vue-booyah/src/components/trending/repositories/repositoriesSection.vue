@@ -21,7 +21,7 @@
 <script setup>
 // ---------- Imports ----------
 import { ref, computed, watch, onMounted } from 'vue'
-import { fetchTopRepos, TIMEFRAMES } from '@/utils/trending/github/githubTrending'
+import { fetchTopRepos, TIMEFRAMES, RULES } from '@/utils/trending/github/githubTrending'
 import { useSavedProjects } from '@/utils/savedProjects'
 import { langOf } from '@/utils/top5Categories'
 import SignalLoader from '@/components/shared/SignalLoader.vue'
@@ -109,32 +109,18 @@ onMounted(loadSaved)
     <!-- Heading + timeframe toggle -->
     <div class="d-flex flex-wrap align-items-end justify-content-between gap-3 mb-3">
       <div>
-        <h4 id="repos-heading" class="fw-bold mb-1">Top 20 Repositories</h4>
+        <h4 id="repos-heading" class="fw-bold mb-1">Top {{ RULES.limit }} Repositories</h4>
         <p class="text-muted-github small mb-0">
-          The most starred public repositories created {{ frame.words }}, straight from GitHub.
+          The {{ RULES.limit }} most starred public repositories created {{ frame.words }}, straight from GitHub.
         </p>
       </div>
-      <PeriodToggle
-        v-model="timeframe"
-        :periods="TIMEFRAME_VALUES"
-        :labels="TIMEFRAMES"
-        aria-label="Created within"
-      />
+      <PeriodToggle v-model="timeframe" :periods="TIMEFRAME_VALUES" :labels="TIMEFRAMES" aria-label="Created within" />
     </div>
 
     <!-- Public-only disclaimer (GitHub only shares data for public repositories) -->
     <p class="public-note card flex-row align-items-start gap-2 px-3 py-2 mb-4 small text-muted-github">
-      <svg
-        class="note-icon flex-shrink-0 mt-1"
-        width="14"
-        height="14"
-        viewBox="0 0 16 16"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="1.5"
-        stroke-linecap="round"
-        aria-hidden="true"
-      >
+      <svg class="note-icon flex-shrink-0 mt-1" width="14" height="14" viewBox="0 0 16 16" fill="none"
+        stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
         <circle cx="8" cy="8" r="6.5" />
         <path d="M8 7.2v4M8 4.9v.1" />
       </svg>
@@ -145,46 +131,24 @@ onMounted(loadSaved)
     </p>
 
     <!-- Loading: the signal globe, like Discovery -->
-    <SignalLoader
-      v-if="loading"
-      :done="progress.done"
-      :total="progress.total"
-      :status="loaderStatus"
-      :legend="LOADER_LEGEND"
-    />
+    <SignalLoader v-if="loading" :done="progress.done" :total="progress.total" :status="loaderStatus"
+      :legend="LOADER_LEGEND" />
 
-    <RetryCard
-      v-else-if="status === 'error'"
-      title="Couldn't load the top repositories."
-      :message="error"
-      @retry="load(true)"
-    />
+    <RetryCard v-else-if="status === 'error'" title="Couldn't load the top repositories." :message="error"
+      @retry="load(true)" />
 
     <template v-else>
       <!-- Saved-project error message (same as Discovery) -->
-      <div
-        v-if="saveError"
-        class="alert alert-danger d-flex align-items-center py-2 px-3 small mb-3"
-        role="alert"
-      >
+      <div v-if="saveError" class="alert alert-danger d-flex align-items-center py-2 px-3 small mb-3" role="alert">
         <span class="flex-grow-1">{{ saveError }}</span>
         <button type="button" class="btn-close ms-3" aria-label="Dismiss" @click="saveError = ''"></button>
       </div>
 
-      <RepoStats
-        v-model:selected-lang="selectedLang"
-        :repos="data.repos"
-        :total-count="data.totalCount"
-        :timeframe-words="frame.words"
-      />
+      <RepoStats v-model:selected-lang="selectedLang" :repos="data.repos" :total-count="data.totalCount"
+        :timeframe-words="frame.words" />
 
-      <RepoList
-        v-model:selected-lang="selectedLang"
-        :repos="data.repos"
-        :saved-map="saved"
-        :pending-links="pending"
-        @save="saveRepo"
-      />
+      <RepoList v-model:selected-lang="selectedLang" :repos="data.repos" :saved-map="saved" :pending-links="pending"
+        @save="saveRepo" />
     </template>
   </section>
 </template>
