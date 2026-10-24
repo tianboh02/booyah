@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useRoute, useRouter, RouterLink } from 'vue-router'
+import { Collapse } from 'bootstrap'
 import defaultAvatar from '@/assets/login.png'
 import logoSvg from '@/assets/booyah-logo1.png'
 import ThemeToggle from '@/components/navbar/themeToggle.vue'
@@ -12,6 +13,16 @@ import { navHidden } from '@/composables/useLandingNav'
 const route = useRoute()
 const router = useRouter()
 const { initTheme } = useTheme()
+
+// The mobile menu (the collapsible block with the page links)
+const menuEl = ref(null)
+
+// Closes the mobile menu if it is open. On desktop it is always visible, so this does nothing there.
+function closeMenu() {
+    const el = menuEl.value
+    if (!el || !el.classList.contains('show')) return
+    Collapse.getOrCreateInstance(el, { toggle: false }).hide()
+}
 
 const isLogin = ref(false)
 const currentUser = ref({})
@@ -53,6 +64,7 @@ watch(
     () => route.path,
     () => {
         checkAuth()
+        closeMenu()
     }
 )
 
@@ -66,15 +78,16 @@ function logout() {
 </script>
 
 <template>
-    <header class="sticky-top app-header border-bottom mb-3" :class="{ 'is-landing': showLogin, 'nav-hidden': showLogin && navHidden }">
+    <header class="sticky-top app-header border-bottom mb-3"
+        :class="{ 'is-landing': showLogin, 'nav-hidden': showLogin && navHidden }">
         <nav class="navbar navbar-expand-md px-4 px-md-5">
             <!-- Logo -->
             <div class="navbar-brand me-auto me-md-4">
                 <img class="rounded-4" :src="logoSvg" width="30" height="30" alt="booyah logo" />
             </div>
 
-            <div v-if="showNav" class="collapse navbar-collapse mt-2 mt-md-0" id="navbarSupportedContent">
-                <ul class="navbar-nav me-auto gap-1">
+            <div v-if="showNav" ref="menuEl" class="collapse navbar-collapse mt-2 mt-md-0" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto gap-1" @click="closeMenu">
                     <li class="nav-item">
                         <RouterLink to="/discovery" class="nav-link custom-nav-link rounded-3 px-3 py-2"
                             active-class="active">Discovery</RouterLink>
@@ -155,8 +168,17 @@ function logout() {
     transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.45s;
 }
 
-.app-header.is-landing { position: fixed; top: 0; left: 0; right: 0; }
-.app-header.nav-hidden { transform: translateY(-110%); } 
+.app-header.is-landing {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+}
+
+.app-header.nav-hidden {
+    transform: translateY(-110%);
+}
+
 /* Tailwind also has a class called .collapse (visibility: collapse), and it picks up
    Bootstrap's "collapse navbar-collapse" menu. That hides the page links even though
    Bootstrap is showing them. This puts the visibility back. The menu still opens and
