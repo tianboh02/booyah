@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import { gsap, useScene } from '@/composables/useScrollScene'
-import { cta as c } from './landingContent'
+import { cta as c } from '../../utils/landingContent'
 import ShinyButton from './ShinyButton.vue'
 
 defineEmits(['signin'])
@@ -35,7 +35,8 @@ useScene(root, (q) => {
     <div class="wrap">
       <div class="burst-wrap">
         <div class="burst-word grad">{{ c.word }}</div>
-        <span v-for="(s, i) in sparks" :key="i" class="sp" :style="{ background: s.colour, boxShadow: '0 0 10px ' + s.colour }"></span>
+        <span v-for="(s, i) in sparks" :key="i" class="sp"
+          :style="{ background: s.colour, boxShadow: '0 0 10px ' + s.colour }"></span>
       </div>
       <p class="cta-line cta-up">{{ c.before }}<span class="grad">{{ c.grad }}</span></p>
       <ShinyButton class="cta-up" @click="$emit('signin')" />
@@ -45,13 +46,68 @@ useScene(root, (q) => {
 </template>
 
 <style scoped>
-.scene.cta { padding-top: 56px; }
-.outline { position: absolute; left: 0; white-space: nowrap; font-size: clamp(6rem, 20vw, 16rem); font-weight: 800; letter-spacing: -0.05em; color: transparent; -webkit-text-stroke: 1.5px color-mix(in srgb, var(--text) 22%, transparent); will-change: transform; pointer-events: none; line-height: 1; }
-.outline.o1 { top: 12%; }
-.outline.o2 { bottom: 8%; }
-.burst-wrap { position: relative; display: inline-block; }
-.burst-word { font-size: clamp(3.4rem, 12vw, 7rem); font-weight: 800; letter-spacing: -0.04em; line-height: 1.05; filter: drop-shadow(0 0 30px rgba(131, 64, 240, 0.6)); }
-.sp { position: absolute; top: 50%; left: 50%; width: 9px; height: 9px; margin: -4px 0 0 -4px; border-radius: 50%; opacity: 0; }
-.cta-line { font-size: clamp(1.6rem, 4vw, 3rem); font-weight: 800; letter-spacing: -0.03em; margin-top: 0.5rem; }
-.fine { max-width: 560px; margin: 1.5rem auto 0; color: var(--muted); font-size: 0.85rem; line-height: 1.55; }
+.scene.cta {
+  padding-top: 56px;
+}
+
+.outline {
+  position: absolute;
+  left: 0;
+  white-space: nowrap;
+  font-size: clamp(6rem, 20vw, 16rem);
+  font-weight: 800;
+  letter-spacing: -0.05em;
+  color: transparent;
+  -webkit-text-stroke: 1.5px color-mix(in srgb, var(--text) 22%, transparent);
+  will-change: transform;
+  pointer-events: none;
+  line-height: 1;
+}
+
+.outline.o1 {
+  top: 12%;
+}
+
+.outline.o2 {
+  bottom: 8%;
+}
+
+.burst-wrap {
+  position: relative;
+  display: inline-block;
+}
+
+.burst-word {
+  font-size: clamp(3.4rem, 12vw, 7rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+  filter: drop-shadow(0 0 30px rgba(131, 64, 240, 0.6));
+}
+
+.sp {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 9px;
+  height: 9px;
+  margin: -4px 0 0 -4px;
+  border-radius: 50%;
+  opacity: 0;
+}
+
+.cta-line {
+  font-size: clamp(1.6rem, 4vw, 3rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin-top: 0.5rem;
+}
+
+.fine {
+  max-width: 560px;
+  margin: 1.5rem auto 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+  line-height: 1.55;
+}
 </style>

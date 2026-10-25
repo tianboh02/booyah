@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import { gsap, tlm, pin, srand, useScene } from '@/composables/useScrollScene'
-import { noise as n } from './landingContent'
+import { noise as n } from '../../utils/landingContent'
 
 const root = ref(null)
 const cols = Array.from({ length: 4 }, () => {
@@ -53,23 +53,98 @@ useScene(root, (q) => {
 </template>
 
 <style scoped>
-.scene.feed { padding-top: 0; }
-.wall-fade { position: absolute; inset: 0; }
+.scene.feed {
+  padding-top: 0;
+}
+
+.wall-fade {
+  position: absolute;
+  inset: 0;
+}
+
 .wall {
-  position: absolute; inset: -25% -15%; display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px;
-  transform: rotate(-9deg); will-change: transform, filter, opacity;
+  position: absolute;
+  inset: -25% -15%;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+  transform: rotate(-9deg);
+  will-change: transform, filter, opacity;
   -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 34%, #000 66%, transparent 100%);
   mask-image: linear-gradient(to bottom, transparent 0, #000 34%, #000 66%, transparent 100%);
 }
-.col-in { display: flex; flex-direction: column; gap: 18px; will-change: transform; }
-.ncard { border: 1px solid var(--line); border-left: 4px solid var(--tone); background: var(--card); border-radius: 14px; padding: 14px 16px; text-align: left; }
-.ncard small { display: block; font: 0.7rem var(--mono); color: var(--muted); margin-bottom: 6px; }
-.ncard b { font-size: 0.98rem; line-height: 1.3; font-weight: 600; }
-.feed-text { position: absolute; inset: 56px 0 0; display: grid; place-items: center; text-align: center; padding: 0 5vw; pointer-events: none; }
-.feed-text > div { grid-area: 1 / 1; }
-.feed-intro { font-size: clamp(2rem, 6vw, 4.6rem); font-weight: 800; letter-spacing: -0.04em; text-shadow: 0 0 40px var(--bg), 0 0 12px var(--bg); }
-.feed-cap { font-size: clamp(1.7rem, 4.6vw, 3.6rem); font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; }
-.feed-cap span { display: block; }
-.feed-veil { position: absolute; inset: 0; background: radial-gradient(ellipse at center, var(--bg) 20%, transparent 75%); opacity: 0; }
-@media (max-width: 820px) { .wall { grid-template-columns: repeat(2, 1fr); } }
+
+.col-in {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  will-change: transform;
+}
+
+.ncard {
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--tone);
+  background: var(--card);
+  border-radius: 14px;
+  padding: 14px 16px;
+  text-align: left;
+}
+
+.ncard small {
+  display: block;
+  font: 0.7rem var(--mono);
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.ncard b {
+  font-size: 0.98rem;
+  line-height: 1.3;
+  font-weight: 600;
+}
+
+.feed-text {
+  position: absolute;
+  inset: 56px 0 0;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  padding: 0 5vw;
+  pointer-events: none;
+}
+
+.feed-text>div {
+  grid-area: 1 / 1;
+}
+
+.feed-intro {
+  font-size: clamp(2rem, 6vw, 4.6rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  text-shadow: 0 0 40px var(--bg), 0 0 12px var(--bg);
+}
+
+.feed-cap {
+  font-size: clamp(1.7rem, 4.6vw, 3.6rem);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1.1;
+}
+
+.feed-cap span {
+  display: block;
+}
+
+.feed-veil {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, var(--bg) 20%, transparent 75%);
+  opacity: 0;
+}
+
+@media (max-width: 820px) {
+  .wall {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
 </style>
