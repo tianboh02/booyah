@@ -3,7 +3,7 @@ import DiscoveryCategoryCard from '@/components/discovery/discoveryCategoryCard.
 import CardRing from '@/components/ring/CardRing.vue'
 import RingCaption from '@/components/ring/RingCaption.vue'
 import ViewToggle from '@/components/ring/ViewToggle.vue'
-import { useViewMode } from '@/composables/useViewMode'
+import { useViewMode, isSmallScreen } from '@/composables/useViewMode'
 
 defineProps({
     categories: { type: Array, default: () => [] },
@@ -27,7 +27,7 @@ const pad = (n) => String(n).padStart(2, '0')
 
 <template>
     <div>
-        <div class="d-flex justify-content-end mb-2">
+        <div v-if="!isSmallScreen" class="d-flex justify-content-end mb-2">
             <ViewToggle v-model="view" />
         </div>
 

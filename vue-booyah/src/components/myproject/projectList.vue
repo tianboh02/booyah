@@ -111,17 +111,17 @@ const pad = (n) => String(n).padStart(2, '0')
             <div v-spotlight class="repo-card card p-3 rounded-3 shadow-sm" :class="inRing ? 'h-100' : 'mb-3'"
                 :style="{ '--lang': getLangColor(langOf(repo)), '--i': Math.min(index, 10) }">
                 <div class="d-flex align-items-center gap-2 mb-2">
-                    <h5 class="card-title h6 fw-bold mb-0">
+                    <h5 class="card-title h6 fw-bold mb-0 text-truncate min-w-0" :title="repo.name">
                         <a :href="repo.html_url" target="_blank" rel="noopener noreferrer"
                             class="repo-link stretched-link">
                             {{ repo.name }}
                             <span class="visually-hidden">(opens on GitHub)</span>
                         </a>
                     </h5>
-                    <span class="badge badge-github rounded-pill text-capitalize fw-normal px-2 py-1">
+                    <span class="badge badge-github rounded-pill text-capitalize fw-normal px-2 py-1 flex-shrink-0">
                         {{ repo.private ? "Private" : "Public" }}
                     </span>
-                    <svg class="repo-arrow ms-auto" width="16" height="16" viewBox="0 0 16 16" fill="none"
+                    <svg class="repo-arrow ms-auto flex-shrink-0" width="16" height="16" viewBox="0 0 16 16" fill="none"
                         stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"
                         aria-hidden="true">
                         <path d="M5 11L11 5M6 5h5v5" />

@@ -60,10 +60,7 @@ const status = computed(() =>
       subtitle="What developers are installing, starring and following right now."
       :status="status"
       live
-    >
-      <!-- no pulse dot on Trending (an empty slot would fall back to the dot, so pass a hidden span) -->
-      <template #marker><span class="d-none"></span></template>
-    </PageHeader>
+    />
 
     <!-- Trending nav bar -->
     <TrendingTabs v-model="activeTab" :tabs="TABS" />

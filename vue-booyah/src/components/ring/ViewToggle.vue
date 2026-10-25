@@ -1,5 +1,8 @@
 <script setup>
 // Carousel / list switch: two icon buttons in one outlined pill, same look as the sort buttons.
+// Hidden at 768px and below, where useViewMode always shows the list.
+import { isSmallScreen } from '@/composables/useViewMode'
+
 const view = defineModel({ type: String, default: 'list' })
 
 const options = [
@@ -9,7 +12,7 @@ const options = [
 </script>
 
 <template>
-    <div class="view-toggle d-inline-flex rounded-pill p-1" role="group" aria-label="View">
+    <div v-if="!isSmallScreen" class="view-toggle d-inline-flex rounded-pill p-1" role="group" aria-label="View">
         <button v-for="opt in options" :key="opt.value" type="button"
             class="toggle-btn d-inline-flex align-items-center justify-content-center rounded-pill"
             :class="{ active: view === opt.value }" :aria-pressed="view === opt.value" :aria-label="opt.label"

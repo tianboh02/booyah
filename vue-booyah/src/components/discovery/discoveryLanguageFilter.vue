@@ -69,12 +69,13 @@ const note = `Categories are ranked by number of builders. Projects within a cat
 
 <template>
     <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
-        <div class="d-flex align-items-center gap-2">
+        <!-- position-relative: the info box is placed from here, so it starts at the content edge on phones -->
+        <div class="d-flex align-items-center gap-2 position-relative">
             <h2 class="h4 fw-bold section-title mb-0">
                 Top categories
             </h2>
 
-            <div class="info position-relative d-inline-flex" @mouseenter="infoOpen = true"
+            <div class="info d-inline-flex" @mouseenter="infoOpen = true"
                 @mouseleave="infoOpen = false" @focusout="infoOpen = false" @keydown.esc="infoOpen = false">
                 <button type="button" class="info-btn d-inline-flex align-items-center justify-content-center rounded-circle"
                     aria-label="How categories and projects are ranked" :aria-expanded="infoOpen"
@@ -136,11 +137,10 @@ const note = `Categories are ranked by number of builders. Projects within a cat
 
 .info-pop {
     top: 100%;
-    left: 50%;
-    transform: translateX(-20px);
+    left: 0;
     z-index: 20;
     padding-top: 0.5rem;
-    width: min(320px, 80vw);
+    width: min(320px, 85vw);
 }
 
 .info-box {

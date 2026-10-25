@@ -37,8 +37,8 @@ const headerColors = computed(() =>
 )
 const live = computed(() => !loading.value && !error.value && categories.value.length > 0)
 const status = computed(() => {
-    if (loading.value) return 'Reading Show HN'
-    return live.value ? 'Live from Show HN · Last 30 days' : 'Not connected'
+    if (loading.value) return 'Reading Hacker News'
+    return live.value ? 'Live from Hacker News · Last 30 days' : 'Not connected'
 })
 
 // Shared language selection for filters, statistics, and project labels.
@@ -109,7 +109,7 @@ onMounted(() => {
 <template>
     <div class="container my-4">
         <PageHeader title="Discovery"
-            subtitle="What developers are building this month, from Show HN launches checked against GitHub."
+            subtitle="What developers are building this month."
             :status="status" :live="live" :colors="headerColors" />
 
         <SignalLoader v-if="loading" :done="progress.done" :total="progress.total" :status="loaderStatus"
