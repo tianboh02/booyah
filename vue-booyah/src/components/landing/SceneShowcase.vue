@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import { gsap, tlm, pin, useScene } from '@/composables/useScrollScene'
+import { paced } from '@/composables/useLandingPace'
 import { showcase, demand, trendingRows, steps } from '../../utils/landingContent'
 
 const root = ref(null)
@@ -38,7 +39,7 @@ useScene(root, (q) => {
     enter(s)
     tl.to({}, { duration: 0.7 })
   }
-  pin(root.value, 300, tl)
+  pin(root.value, paced(300), tl)
 })
 </script>
 
@@ -68,7 +69,7 @@ useScene(root, (q) => {
               <path d="M10 48 C80 52 160 60 310 70" style="stroke: color-mix(in srgb, var(--text) 35%, transparent)" />
             </svg>
             <div v-for="r in trendingRows" :key="r[0]" class="wrow"><span>{{ r[0] }}</span><span class="up">{{ r[1]
-                }}</span></div>
+            }}</span></div>
           </div>
         </div>
         <!-- window 2: demand -->
@@ -90,7 +91,7 @@ useScene(root, (q) => {
             <h4 class="ctr">Your next 3 steps</h4>
             <div class="psteps">
               <div v-for="(s, i) in steps" :key="i" class="prow"><span class="pd">{{ i + 1 }}</span><b>{{ s[0]
-                  }}</b><small>{{ s[1] }}</small></div>
+              }}</b><small>{{ s[1] }}</small></div>
             </div>
           </div>
         </div>

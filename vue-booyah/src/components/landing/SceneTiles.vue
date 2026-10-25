@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import { gsap, tlm, pin, srand, useScene } from '@/composables/useScrollScene'
+import { paced } from '@/composables/useLandingPace'
 import { stat2 as s } from '../../utils/landingContent'
 
 const root = ref(null)
@@ -58,7 +59,7 @@ useScene(root, (q) => {
     .to(stage.value, { marginTop: () => -Math.round(oy()), marginBottom: () => -Math.round(oy()), duration: 0.9, ease: 'power3.inOut' }, 3.3)
     .to(q('.stat-copy, .src'), { opacity: 1, y: 0, duration: 0.4, stagger: 0.1 }, 4.4)
     .to({}, { duration: 0.7 })
-  pin(root.value, 300, tl)
+  pin(root.value, paced(300), tl)
 })
 </script>
 

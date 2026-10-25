@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import { gsap, tlm, pin, useScene } from '@/composables/useScrollScene'
+import { paced } from '@/composables/useLandingPace'
 import { ring as r, steps } from '../../utils/landingContent'
 
 const root = ref(null)
@@ -15,7 +16,7 @@ useScene(root, (q) => {
     .to(num, { v: 100, duration: 1.5, onUpdate: () => (count.value.textContent = Math.round(num.v)) }, '<')
     .from(q('.step-chip'), { opacity: 0, y: 16, stagger: 0.5, duration: 0.3 }, '<+=.2')
     .to({}, { duration: 0.5 })
-  pin(root.value, 200, tl)
+  pin(root.value, paced(200), tl)
 })
 </script>
 

@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import { gsap, tlm, pin, useScene } from '@/composables/useScrollScene'
+import { paced } from '@/composables/useLandingPace'
 import { features } from '../../utils/landingContent'
 
 const root = ref(null)
@@ -31,7 +32,7 @@ useScene(root, (q) => {
   focus(0); tl.to({}, { duration: 0.5 })
   focus(1); tl.to({}, { duration: 0.5 })
   focus(2); tl.to({}, { duration: 0.6 })
-  pin(root.value, 280, tl)
+  pin(root.value, paced(280), tl)
 })
 </script>
 

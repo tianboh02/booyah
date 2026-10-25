@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import { gsap, tlm, pin, srand, useScene } from '@/composables/useScrollScene'
+import { paced } from '@/composables/useLandingPace'
 import { noise as n } from '../../utils/landingContent'
 
 const root = ref(null)
@@ -27,7 +28,7 @@ useScene(root, (q) => {
     .to(q('.feed-veil'), { opacity: 0.9, duration: 0.8 }, 0.9)
     .to(q('.feed-cap'), { opacity: 1, scale: 1, duration: 0.6, ease: 'power2.out' }, 1.3)
     .to({}, { duration: 0.7 })
-  pin(root.value, 260, tl)
+  pin(root.value, paced(260), tl)
 })
 </script>
 

@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import { gsap, tlm, pin, useScene } from '@/composables/useScrollScene'
+import { paced } from '@/composables/useLandingPace'
 import { hero as h } from '../../utils/landingContent'
 
 const root = ref(null)
@@ -18,7 +19,7 @@ useScene(root, (q) => {
 
   pin(
     root.value,
-    70,
+    paced(70),
     tlm()
       .to(q('.hero-in'), { scale: 3.4, filter: 'blur(14px)', opacity: 0, duration: 1, ease: 'power2.in' })
       .to(q('.blobs'), { scale: 1.4, opacity: 0.5, duration: 1 }, 0)

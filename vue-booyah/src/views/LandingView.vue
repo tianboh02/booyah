@@ -27,39 +27,43 @@ onMounted(() => {
   initTheme()
 
   if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    lenis = new Lenis({ lerp: 0.1 })
+    // lerp: higher = the page follows the wheel more closely (less floaty).
+    // wheelMultiplier: how far one wheel tick scrolls (1 is the default).
+    lenis = new Lenis({ lerp: 0.14, wheelMultiplier: 1.35 })
     lenis.on('scroll', ScrollTrigger.update)
     tick = (t) => lenis.raf(t * 1000)
     gsap.ticker.add(tick)
     gsap.ticker.lagSmoothing(0)
   }
-    const updateCursor = () => {
-        const cta = document.getElementById('cta')
-        const ctaTop = cta ? cta.getBoundingClientRect().top + window.scrollY : Infinity
-        cursorOn.value = window.scrollY < window.innerHeight * 0.7 * 0.85 || window.scrollY > ctaTop - window.innerHeight * 0.55
-    }
-    ScrollTrigger.create({ start: 0, end: 'max', onUpdate: updateCursor, onRefresh: updateCursor })
-    updateCursor()
+  const updateCursor = () => {
+    const cta = document.getElementById('cta')
+    const ctaTop = cta ? cta.getBoundingClientRect().top + window.scrollY : Infinity
+    cursorOn.value = window.scrollY < window.innerHeight * 0.7 * 0.85 || window.scrollY > ctaTop - window.innerHeight * 0.55
+  }
+  ScrollTrigger.create({ start: 0, end: 'max', onUpdate: updateCursor, onRefresh: updateCursor })
+  updateCursor()
 
-    ScrollTrigger.create({
+  ScrollTrigger.create({
     trigger: '#cta', start: 'top 55%',
     onEnter: () => (navHidden.value = true),
     onLeaveBack: () => (navHidden.value = false),
-    })
+  })
 
-    ScrollTrigger.refresh()
+  ScrollTrigger.refresh()
 })
 onBeforeUnmount(() => {
-    navHidden.value = false
-    if (tick) gsap.ticker.remove(tick)
-    lenis?.destroy()
+  navHidden.value = false
+  if (tick) gsap.ticker.remove(tick)
+  lenis?.destroy()
 })
 </script>
 
 <template>
   <div class="landing">
     <NeuralDots />
-    <Transition name="cur"><SleekLineCursor v-if="cursorOn" /></Transition>
+    <Transition name="cur">
+      <SleekLineCursor v-if="cursorOn" />
+    </Transition>
 
     <SceneHero />
     <SceneFeed />

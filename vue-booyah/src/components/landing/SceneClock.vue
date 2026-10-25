@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import { gsap, tlm, pin, useScene } from '@/composables/useScrollScene'
+import { paced } from '@/composables/useLandingPace'
 import { stat1 as s } from '../../utils/landingContent'
 
 const root = ref(null)
@@ -28,7 +29,7 @@ useScene(root, (q) => {
     .to(q('.stat-copy'), { opacity: 1, y: 0, duration: 0.5 }, step * n + 0.5)
     .to({}, { duration: 0.6 })
   tl.eventCallback('onUpdate', () => hot.classList.toggle('hot', tl.time() > step * n + 0.15))
-  pin(root.value, 240, tl)
+  pin(root.value, paced(240), tl)
 })
 </script>
 

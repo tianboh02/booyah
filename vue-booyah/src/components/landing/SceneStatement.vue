@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import { gsap, tlm, pin, useScene } from '@/composables/useScrollScene'
+import { paced } from '@/composables/useLandingPace'
 import { statement as s } from '../../utils/landingContent'
 import IconCloud from '@/components/ui/icon-cloud/IconCloud.vue'
 import { isDark } from '@/composables/useTheme'
@@ -16,7 +17,7 @@ useScene(root, (q) => {
     .from(q('.sw'), { opacity: 0.14, stagger: 0.09, duration: 0.2 }, 0)
     .from(q('.cloud-wrap'), { opacity: 0, scale: 0.6, rotate: -12, duration: 0.8, ease: 'power3.out' }, 0.2)
     .to({}, { duration: 0.8 })
-  pin(root.value, 220, tl)
+  pin(root.value, paced(220), tl)
 })
 </script>
 
