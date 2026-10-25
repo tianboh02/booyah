@@ -272,13 +272,17 @@ onBeforeUnmount(() => {
               :class="{ win: row.win === side }"
             >
               <span
-                class="cell-name d-block d-sm-none w-100 text-truncate font-monospace text-muted-github"
+                class="cell-name d-block d-sm-none text-truncate font-monospace text-muted-github"
                 aria-hidden="true"
                 >{{ side === 'a' ? a.name : b.name }}</span>
-              <span class="cell-value fw-semibold" :class="tone(row, side)">{{ format(row, side) }}</span>
+              <!-- the trend's % is its own span, so narrow columns can put it on a second line (see .trend-pct) -->
+              <span v-if="row.key === 'trend' && row[side] !== null" class="cell-value fw-semibold" :class="tone(row, side)"
+                >{{ row[side + 'Label'] }} <span class="trend-pct">({{ pct(row[side]) }})</span></span
+              >
+              <span v-else class="cell-value fw-semibold" :class="tone(row, side)">{{ format(row, side) }}</span>
               <span
                 v-if="row.win === side"
-                class="check d-inline-grid rounded-circle fw-bold"
+                class="check d-inline-grid flex-shrink-0 rounded-circle fw-bold"
                 :style="{ '--side': colors[side === 'a' ? 0 : 1] }"
               >
                 ✓<span class="visually-hidden"> higher</span>
@@ -507,6 +511,20 @@ onBeforeUnmount(() => {
 
 .cell {
   gap: 6px;
+  /* lets .trend-pct below react to how wide the cell is */
+  container-type: inline-size;
+}
+
+/* A long trend ("Growing (+20.7%)") doesn't fit narrow table columns (e.g. beside the chart).
+   If it just wrapped, the value would stretch to the full column and push the ✓ to the far edge.
+   Breaking before the % on purpose keeps the value as wide as its text, so the ✓ stays 6px from
+   it like every other row. (Phones are left alone: there the ✓ sits by the name, not the value.) */
+@media (min-width: 576px) {
+  @container (max-width: 180px) {
+    .trend-pct {
+      display: block;
+    }
+  }
 }
 
 .cell-value {
@@ -741,17 +759,35 @@ button:focus-visible {
     padding: 14px 14px 20px;
   }
 
-  /* each row stacks: label on top, the two values side by side underneath */
+  /* each row stacks: label on top, the two values side by side underneath. The two sides line
+     up along the top, so a value that wraps (e.g. a long 90-day trend) can't push the other
+     side down. */
   .row-line {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: start !important;
   }
 
   .row-label {
     grid-column: 1 / -1;
   }
 
+  /* every cell looks the same: "name ✓" on the first line, the value on its own line below.
+     The ✓ sits next to the name, not the value, so a long value never pushes it onto a new line.
+     The name line is as tall as the ✓, so both sides stay level with or without one. */
   .cell-name {
+    flex: 0 1 auto;
+    min-width: 0;
     font-size: 0.72rem;
+    line-height: 20px;
+  }
+
+  .check {
+    order: 1;
+  }
+
+  .cell-value {
+    order: 2;
+    flex-basis: 100%;
   }
 
   .chart {
