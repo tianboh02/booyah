@@ -37,8 +37,8 @@ const pad = (n) => String(n).padStart(2, '0')
                 card-width="min(560px, 90vw)" :radius="1.2" label="Top categories this month">
                 <template #card="{ item: category }">
                     <DiscoveryCategoryCard v-model:selected-lang="selectedLang" :category="category"
-                        :saved-map="savedMap" :pending-links="pendingLinks" @open="$emit('open', category, $event)"
-                        @save="$emit('save', category, $event)" />
+                        :saved-map="savedMap" :pending-links="pendingLinks" in-ring
+                        @open="$emit('open', category, $event)" @save="$emit('save', category, $event)" />
                 </template>
 
                 <template #caption="{ item: category, index, total }">

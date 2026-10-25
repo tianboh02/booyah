@@ -245,7 +245,7 @@ onUpdated(() => {
 
             <!-- Arrows pinned to the ring's sides -->
             <button type="button"
-                class="ring-arrow is-prev d-inline-flex align-items-center justify-content-center rounded-circle"
+                class="ring-arrow is-prev d-none d-sm-inline-flex align-items-center justify-content-center rounded-circle"
                 aria-label="Previous card" :disabled="items.length < 2" @click="prev">
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"
                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -253,7 +253,7 @@ onUpdated(() => {
                 </svg>
             </button>
             <button type="button"
-                class="ring-arrow is-next d-inline-flex align-items-center justify-content-center rounded-circle"
+                class="ring-arrow is-next d-none d-sm-inline-flex align-items-center justify-content-center rounded-circle"
                 aria-label="Next card" :disabled="items.length < 2" @click="next">
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"
                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -319,6 +319,8 @@ onUpdated(() => {
 /* --- Stage ---------------------------------------------------------------- */
 /* Room above for the lifted far side; the mask fades cards out at the container edges. */
 .ring-stage {
+    /* how much of each side fades out; none on phones, where the front card spans the screen */
+    --edge-fade: 7%;
     position: relative;
     padding: var(--pad-top, 8rem) 0 3rem;
     overflow-x: clip;
@@ -328,10 +330,10 @@ onUpdated(() => {
     outline: none;
     /* Sides fade out, and so does the top, where the highest back cards are clipped. */
     -webkit-mask-image:
-        linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent),
+        linear-gradient(90deg, transparent, #000 var(--edge-fade), #000 calc(100% - var(--edge-fade)), transparent),
         linear-gradient(180deg, transparent 0, #000 var(--top-fade, 0px));
     mask-image:
-        linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent),
+        linear-gradient(90deg, transparent, #000 var(--edge-fade), #000 calc(100% - var(--edge-fade)), transparent),
         linear-gradient(180deg, transparent 0, #000 var(--top-fade, 0px));
     -webkit-mask-composite: source-in;
     mask-composite: intersect;
@@ -356,6 +358,7 @@ onUpdated(() => {
 .ring-platform {
     position: relative;
     display: grid;
+    grid-template-columns: minmax(0, 1fr); /* the column never grows past the stage, so max-width below works */
     justify-items: center;
     perspective: 1600px;
 }
@@ -366,6 +369,8 @@ onUpdated(() => {
     position: relative;
     grid-area: 1 / 1;
     width: var(--card-w);
+    /* --card-w is usually in vw, which is wider than the container on small phones */
+    max-width: 100%;
     opacity: calc((var(--ring-min-op) + (1 - var(--ring-min-op)) * var(--v)) * var(--fade, 1));
     filter: blur(calc(var(--blur, 0) * (1 - var(--hover, 0)) * 1px)) grayscale(calc((1 - var(--v)) * var(--ring-gray))) brightness(calc(1 - (1 - var(--v)) * var(--ring-dim)));
     will-change: transform, opacity, filter;
@@ -537,6 +542,10 @@ onUpdated(() => {
 }
 
 @media (max-width: 575.98px) {
+    .ring-stage {
+        --edge-fade: 0%;
+    }
+
     .ring-arrow {
         width: 36px;
         height: 36px;

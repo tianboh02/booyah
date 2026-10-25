@@ -48,10 +48,10 @@ const orbColors = computed(() => [0, 1, 2].map((i) => props.colors[i] || FALLBAC
                     </p>
 
                     <span v-if="status"
-                        class="status-pill badge rounded-pill fw-normal d-inline-flex align-items-center gap-2 px-3 py-2"
+                        class="status-pill badge rounded-pill fw-normal d-inline-flex align-items-center gap-2 px-3 py-2 text-wrap text-start"
                         :class="{ 'is-live': live }">
                         <slot name="marker">
-                            <span class="pulse-dot position-relative rounded-circle d-inline-block"></span>
+                            <span class="pulse-dot position-relative rounded-circle d-inline-block flex-shrink-0"></span>
                         </slot>
                         <span>{{ status }}</span>
                     </span>

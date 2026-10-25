@@ -110,6 +110,7 @@ button {
   color: var(--ink-2);
   font-size: 0.86rem;
   font-weight: 600;
+  white-space: nowrap;
   cursor: pointer;
   transition: color 250ms var(--ease);
 }
@@ -126,10 +127,11 @@ button:focus-visible {
 }
 
 /* ---------- Responsive (phone) ---------- */
-/* a little less side padding so "Monthly" never touches the pill's edge */
+/* tighter pills so "This month" stays on one line and three options fit a 320px screen */
 @media (max-width: 575.98px) {
   button {
-    padding: 7px 10px;
+    padding: 6px 8px;
+    font-size: 0.8rem;
   }
 }
 

@@ -27,7 +27,7 @@
 
 import axios from 'axios'
 import { getLangColor } from '@/utils/langColors'
-import { mostCommon } from '@/utils/trending/github/display'
+import { mostCommon, OTHER_COLOR } from '@/utils/trending/github/display'
 
 // ===========================================================================
 // 1. SETTINGS
@@ -157,7 +157,7 @@ function toComposition(bytesByLanguage) {
     .sort((a, b) => b.pct - a.pct)
   const main = shares.filter((s) => s.pct >= 1)
   const rest = shares.filter((s) => s.pct < 1).reduce((sum, s) => sum + s.pct, 0)
-  if (rest > 0) main.push({ name: 'Other', pct: rest, color: '#8b949e' })
+  if (rest > 0) main.push({ name: 'Other', pct: rest, color: OTHER_COLOR })
   return main
 }
 

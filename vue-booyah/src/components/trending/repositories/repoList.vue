@@ -7,8 +7,8 @@
                    - click a card's language to filter by it (shared with the stat cards)
                  Each card shows: rank, owner avatar + owner/name (opens GitHub), Public badge,
                  a bookmark (save to Saved Projects), description, up to 4 topics, the language
-                 composition bar (from GitHub's /languages endpoint), language, stars, forks and
-                 when it was created.
+                 composition bar and its legend (from GitHub's /languages endpoint), language,
+                 stars, forks and when it was created.
   Receives:      props  repos (from githubTrending.fetchTopRepos),
                         savedMap ({ [htmlUrl]: saveId }), pendingLinks (Set of htmlUrls in flight),
                         v-model:selectedLang
@@ -27,7 +27,7 @@ import { getLangColor } from '@/utils/langColors'
 import { vSpotlight } from '@/utils/motion'
 import { useViewMode } from '@/composables/useViewMode'
 import { langOf } from '@/utils/top5Categories'
-import { timeAgo, shortCount, pad2, MEDALS } from '@/utils/trending/github/display'
+import { timeAgo, shortCount, pad2, toLegend, MEDALS } from '@/utils/trending/github/display'
 import BookmarkButton from '@/components/shared/BookmarkButton.vue'
 import CardRing from '@/components/ring/CardRing.vue'
 import RingCaption from '@/components/ring/RingCaption.vue'
@@ -91,10 +91,6 @@ const shownRepos = computed(() => {
 function toggleLang(name) {
   selectedLang.value = selectedLang.value === name ? null : name
 }
-
-/** The composition bar's hover text: 'TypeScript 82% · CSS 12% · Other 6%'. */
-const compositionLabel = (repo) =>
-  repo.composition.map((c) => `${c.name} ${Math.round(c.pct)}%`).join(' · ')
 </script>
 
 <template>
@@ -137,9 +133,10 @@ const compositionLabel = (repo) =>
               <span class="visually-hidden">(opens on GitHub)</span>
             </a>
           </h5>
-          <span class="badge badge-github rounded-pill fw-normal px-2 py-1 flex-shrink-0">Public</span>
+          <!-- Public badge and arrow drop out on phones so the repo name has room -->
+          <span class="badge badge-github rounded-pill fw-normal px-2 py-1 flex-shrink-0 d-none d-sm-inline-block">Public</span>
           <svg
-            class="repo-arrow ms-auto flex-shrink-0"
+            class="repo-arrow ms-auto flex-shrink-0 d-none d-sm-block"
             width="16"
             height="16"
             viewBox="0 0 16 16"
@@ -154,7 +151,7 @@ const compositionLabel = (repo) =>
           </svg>
           <!-- z-2 lifts the bookmark above the card's stretched link, so it saves instead of opening GitHub -->
           <BookmarkButton
-            class="position-relative z-2 flex-shrink-0"
+            class="position-relative z-2 flex-shrink-0 ms-auto ms-sm-0"
             :saved="!!savedMap[repo.htmlUrl]"
             :pending="pendingLinks.has(repo.htmlUrl)"
             :label="repo.fullName"
@@ -177,23 +174,34 @@ const compositionLabel = (repo) =>
           </span>
         </div>
 
-        <!-- Language composition (GitHub /languages), as a Bootstrap stacked progress bar -->
-        <div
-          v-if="repo.composition.length"
-          class="composition progress-stacked mb-3"
-          role="img"
-          :aria-label="`Languages: ${compositionLabel(repo)}`"
-          :title="compositionLabel(repo)"
-        >
-          <div
-            v-for="part in repo.composition"
-            :key="part.name"
-            class="progress"
-            :style="{ width: part.pct + '%' }"
-          >
-            <div class="progress-bar" :style="{ backgroundColor: part.color }"></div>
+        <!-- Language composition (GitHub /languages): a Bootstrap stacked progress bar, and a
+             legend under it so the small languages can still be read (also on phones) -->
+        <template v-if="repo.composition.length">
+          <div class="composition progress-stacked mb-1" aria-hidden="true">
+            <div
+              v-for="part in repo.composition"
+              :key="part.name"
+              class="progress"
+              :style="{ width: part.pct + '%' }"
+            >
+              <div class="progress-bar" :style="{ backgroundColor: part.color }"></div>
+            </div>
           </div>
-        </div>
+          <ul class="list-unstyled d-flex flex-wrap column-gap-3 row-gap-1 small text-muted-github mb-3" aria-label="Languages">
+            <li
+              v-for="part in toLegend(repo.composition)"
+              :key="part.name"
+              class="d-inline-flex align-items-center gap-1"
+            >
+              <span
+                class="lang-dot rounded-circle d-inline-block flex-shrink-0"
+                :style="{ '--lang': part.color }"
+              ></span>
+              <span>{{ part.name }}</span>
+              <span class="font-monospace">{{ Math.round(part.pct) }}%</span>
+            </li>
+          </ul>
+        </template>
 
         <!-- Metadata row: language (click to filter), stars, forks, created -->
         <div class="d-flex align-items-center gap-3 text-muted-github small flex-wrap mt-auto">

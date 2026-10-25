@@ -3,7 +3,8 @@
  *
  * What it does:  small helpers that turn GitHub numbers and dates into the text on the
  *                Top Repositories and Top Developers tabs.
- * Gives back:    timeAgo(), shortCount(), pad2(), mostCommon(), toPillLabels(), MEDALS.
+ * Gives back:    timeAgo(), shortCount(), pad2(), mostCommon(), toPillLabels(), toLegend(),
+ *                MEDALS, OTHER_COLOR.
  * Used by:       components/trending/repositories/*, components/trending/developers/*.
  */
 
@@ -51,6 +52,19 @@ export function mostCommon(list, pick) {
 
 /** Gold, silver and bronze for the top 3 rank badges (readable in both themes). */
 export const MEDALS = ['#d4a72c', '#8c959f', '#c26c2b']
+
+/** Colour of the "Other" share in a repo's language composition. */
+export const OTHER_COLOR = '#8b949e'
+
+/**
+ * A repo's composition [{ name, pct, color }] (biggest first) → the legend under its bar:
+ * the top `max` languages, with everything after them summed into one "Other".
+ */
+export function toLegend(composition, max = 3) {
+  if (composition.length <= max + 1) return composition
+  const rest = composition.slice(max).reduce((sum, part) => sum + part.pct, 0)
+  return [...composition.slice(0, max), { name: 'Other', pct: rest, color: OTHER_COLOR }]
+}
 
 /**
  * [{ value, label }] → what periodToggle.vue's pill reads: { values: [...], labels: { value: { label } } }.

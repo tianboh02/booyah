@@ -9,7 +9,9 @@ const props = defineProps({
     selectedLang: { type: String, default: null },
     // { [ghUrl]: saveId } and the set of ghUrls with a request in flight
     savedMap: { type: Object, default: () => ({}) },
-    pendingLinks: { type: Object, default: () => new Set() }
+    pendingLinks: { type: Object, default: () => new Set() },
+    // true inside the carousel: on phones the rows scroll within the card instead of making it tall
+    inRing: { type: Boolean, default: false }
 })
 
 const emit = defineEmits(['open', 'save', 'update:selectedLang'])
@@ -37,7 +39,7 @@ const toggleLang = (lang) => {
 
 <template>
     <section v-spotlight class="cat-card card h-100 p-3 rounded-3 shadow-sm" :aria-label="category.name">
-        <header class="d-flex align-items-center justify-content-between gap-2 pb-2 mb-2 card-head">
+        <header class="d-flex flex-wrap align-items-center justify-content-between gap-2 pb-2 mb-2 card-head">
             <div class="d-flex align-items-baseline gap-2 min-w-0">
                 <span class="text-muted-github small font-monospace">
                     {{ String(category.rank).padStart(2, '0') }}
@@ -54,10 +56,10 @@ const toggleLang = (lang) => {
             </span>
         </header>
 
-        <ul v-if="rows.length" class="rows list-unstyled mb-0">
+        <ul v-if="rows.length" class="rows list-unstyled mb-0" :class="{ 'rows-scroll overflow-auto': inRing }">
             <li v-for="project in rows" :key="project.id" class="project-row"
                 :style="{ '--lang': getLangColor(langOf(project)) }">
-                <span class="d-flex align-items-center gap-2 min-w-0">
+                <span class="cell-name d-flex align-items-center gap-2 min-w-0">
                     <!-- The owner prefix gives way first, so the repo name stays readable; the title has the full name -->
                     <button type="button" class="project-link btn btn-link d-flex p-0 text-start font-monospace min-w-0"
                         :title="project.id" :aria-label="`Open details for ${project.id}`"
@@ -74,7 +76,7 @@ const toggleLang = (lang) => {
                 </span>
 
                 <!-- Clicking a language filters every category by that language. -->
-                <span class="min-w-0">
+                <span class="cell-lang min-w-0">
                     <button type="button" class="lang-link d-inline-flex align-items-center gap-1 rounded-2 small"
                         :class="{ 'is-selected': selectedLang === langOf(project) }"
                         :aria-pressed="selectedLang === langOf(project)" :title="selectedLang === langOf(project)
@@ -200,6 +202,55 @@ const toggleLang = (lang) => {
 /* Keep card height stable when filtering projects. */
 .rows {
     min-height: calc(5 * 44px);
+}
+
+/* Phones: the five columns don't fit, so each row becomes two lines:
+   name + bookmark on top, language + HN points + stars underneath. */
+@media (max-width: 575.98px) {
+    .project-row {
+        grid-template-columns: minmax(0, 1fr) auto auto 1.5rem;
+        grid-template-areas:
+            'name name name save'
+            'lang hn star star';
+        column-gap: 0.5rem;
+        row-gap: 0.15rem;
+        height: auto;
+        padding: 0.4rem 0.5rem;
+    }
+
+    .rows {
+        min-height: calc(5 * 58px);
+    }
+
+    /* in the carousel: two and a half rows show, the half row hinting that the rest scroll */
+    .rows-scroll {
+        min-height: 0;
+        max-height: calc(2.5 * 58px);
+    }
+
+    .cell-name {
+        grid-area: name;
+    }
+
+    .cell-lang {
+        grid-area: lang;
+    }
+
+    .meta-hn {
+        grid-area: hn;
+    }
+
+    .meta-star {
+        grid-area: star;
+    }
+
+    .bookmark-btn {
+        grid-area: save;
+    }
+
+    .metric span {
+        min-width: 0;
+    }
 }
 
 .project-row:hover {

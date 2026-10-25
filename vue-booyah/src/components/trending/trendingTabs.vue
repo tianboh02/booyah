@@ -161,6 +161,13 @@ onBeforeUnmount(() => observer && observer.disconnect())
   display: none;
 }
 
+/* phones: smaller labels so all three tabs fit without scrolling */
+@media (max-width: 575.98px) {
+  .tab-bar {
+    --bs-nav-link-font-size: 0.85rem;
+  }
+}
+
 .tab {
   background: transparent;
   transition:
