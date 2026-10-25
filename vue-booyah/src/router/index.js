@@ -4,6 +4,7 @@ import DiscoveryView from '@/views/DiscoveryView.vue'
 import AuthView from '@/views/AuthView.vue'
 import JobsView from '@/views/JobsView.vue'
 import TrendingView from '@/views/TrendingView.vue'
+import LearnView from '@/views/LearnView.vue'
 import MyProjectView from '@/views/MyProjectView.vue'
 import SavedView from '@/views/SavedView.vue'
 import SettingsView from '@/views/SettingsView.vue'
@@ -41,6 +42,12 @@ const router = createRouter({
       path: '/trending',
       name: 'trending',
       component: TrendingView,
+      meta: { isPublic: false }
+    },
+    {
+      path: '/learn',
+      name: 'learn',
+      component: LearnView,
       meta: { isPublic: false }
     },
     {

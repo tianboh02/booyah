@@ -45,7 +45,7 @@ const options = [
         value: 'Practitioner',
         title: 'Practitioner',
         blurb: 'Track the ecosystem against your own work',
-        lands: 'My Project',
+        lands: 'My Projects',
         accent: '#58a6ff',
         accent2: '#6b8aff'
     }
@@ -165,7 +165,7 @@ const handleSubmit = async () => {
                                 </span>
                             </div>
 
-                            <!-- My Project: language bars fill in -->
+                            <!-- My Projects: language bars fill in -->
                             <div v-else class="d-flex flex-column gap-2">
                                 <div v-for="(b, bi) in previewBars" :key="b.name"
                                     class="d-flex align-items-center gap-2">
@@ -502,7 +502,7 @@ const handleSubmit = async () => {
     }
 }
 
-/* My Project bars grow, hold, then fade and replay */
+/* My Projects bars grow, hold, then fade and replay */
 .bar-name {
     width: 76px;
 }

@@ -85,7 +85,7 @@ function logout() {
 <template>
     <header class="sticky-top app-header border-bottom mb-3"
         :class="{ 'is-landing': showLogin, 'nav-hidden': showLogin && navHidden }">
-        <nav class="navbar navbar-expand-md px-3 px-md-5 py-3">
+        <nav class="navbar navbar-expand-lg px-3 px-md-5 py-3">
             <div class="container-fluid px-0 d-flex align-items-center justify-content-between">
 
                 <!-- Logo -->
@@ -94,27 +94,31 @@ function logout() {
                 </RouterLink>
 
                 <!-- Navigation Links -->
-                <div v-if="showNav" ref="menuEl" class="collapse navbar-collapse order-3 order-md-1 mt-2 mt-md-0"
+                <div v-if="showNav" ref="menuEl" class="collapse navbar-collapse order-3 order-lg-1 mt-2 mt-lg-0"
                     id="navbarSupportedContent">
-                    <ul class="navbar-nav me-auto gap-1 align-items-md-center p-3 p-md-0 mobile-menu-card">
+                    <ul class="navbar-nav me-auto gap-1 align-items-lg-center p-3 p-lg-0 mobile-menu-card">
                         <li class="nav-item">
-                            <RouterLink to="/discovery" class="nav-link custom-nav-link rounded-3 px-3 py-2"
+                            <RouterLink to="/discovery" class="nav-link custom-nav-link text-nowrap rounded-3 px-3 py-2"
                                 active-class="active">Discovery</RouterLink>
                         </li>
                         <li class="nav-item">
-                            <RouterLink to="/trending" class="nav-link custom-nav-link rounded-3 px-3 py-2"
+                            <RouterLink to="/trending" class="nav-link custom-nav-link text-nowrap rounded-3 px-3 py-2"
                                 active-class="active">Trending</RouterLink>
                         </li>
                         <li class="nav-item">
-                            <RouterLink to="/jobs" class="nav-link custom-nav-link rounded-3 px-3 py-2"
+                            <RouterLink to="/learn" class="nav-link custom-nav-link text-nowrap rounded-3 px-3 py-2"
+                                active-class="active">Learn</RouterLink>
+                        </li>
+                        <li class="nav-item">
+                            <RouterLink to="/jobs" class="nav-link custom-nav-link text-nowrap rounded-3 px-3 py-2"
                                 active-class="active">Jobs</RouterLink>
                         </li>
                         <li class="nav-item">
-                            <RouterLink to="/my-projects" class="nav-link custom-nav-link rounded-3 px-3 py-2"
-                                active-class="active">My Project</RouterLink>
+                            <RouterLink to="/my-projects" class="nav-link custom-nav-link text-nowrap rounded-3 px-3 py-2"
+                                active-class="active">My Projects</RouterLink>
                         </li>
                         <li class="nav-item">
-                            <RouterLink to="/saved-projects" class="nav-link custom-nav-link rounded-3 px-3 py-2"
+                            <RouterLink to="/saved-projects" class="nav-link custom-nav-link text-nowrap rounded-3 px-3 py-2"
                                 active-class="active">Saved</RouterLink>
                         </li>
                     </ul>
@@ -201,7 +205,7 @@ function logout() {
                     </div>
 
                     <!-- Mobile Toggler -->
-                    <button v-if="showNav" class="navbar-toggler border-0 shadow-none p-1 ms-1 d-md-none" type="button"
+                    <button v-if="showNav" class="navbar-toggler border-0 shadow-none p-1 ms-1 d-lg-none" type="button"
                         data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
                         aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                         <span class="navbar-toggler-icon"></span>
@@ -360,7 +364,7 @@ function logout() {
     cursor: pointer;
 }
 
-@media (max-width: 767.98px) {
+@media (max-width: 991.98px) {
     .mobile-menu-card {
         background-color: var(--card-bg);
         border: 1px solid var(--card-border);

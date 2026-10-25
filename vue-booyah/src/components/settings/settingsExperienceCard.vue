@@ -20,7 +20,7 @@ const options = [
         value: 'Practitioner',
         title: 'Practitioner',
         blurb: 'Track the ecosystem against your own work',
-        lands: 'My Project',
+        lands: 'My Projects',
         accent: '#58a6ff',
         accent2: '#6b8aff'
     }
@@ -262,7 +262,7 @@ onBeforeUnmount(() => clearTimeout(savedTimer))
     transition: background-color 0.3s ease;
 }
 
-/* On phones the sentence can take two lines, and "My Project" is longer than "Discovery".
+/* On phones the sentence can take two lines, and "My Projects" is longer than "Discovery".
    Reserving two lines stops the card from jumping in height when you switch options. */
 @media (max-width: 575.98px) {
     .landing-note {

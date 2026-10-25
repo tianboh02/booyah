@@ -11,7 +11,7 @@ import SettingsLogoutCard from '@/components/settings/settingsLogoutCard.vue'
 
 const { isSignedIn, refreshUser, handle, avatarUrl, initial, experience } = useUserSettings()
 
-// Same palette as the setup page: Discovery is warm, My Project is cool.
+// Same palette as the setup page: Discovery is warm, My Projects is cool.
 // The aurora shifts color the moment you save a different experience level.
 const headerColors = computed(() =>
     experience.value.toLowerCase() === 'newcomer'

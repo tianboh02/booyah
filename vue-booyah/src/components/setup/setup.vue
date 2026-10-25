@@ -31,7 +31,7 @@ const words = computed(() => {
 // --- Scene that morphs with the chosen path ---------------------------------
 const isDiscovery = computed(() => props.experience.toLowerCase() === 'new')
 
-// Discovery = warm, exploratory palette. My Project = cool, structured palette.
+// Discovery = warm, exploratory palette. My Projects = cool, structured palette.
 // All colors come from your existing language/accent colors.
 const sceneVars = computed(() => {
     const palette = isDiscovery.value
@@ -212,7 +212,7 @@ onBeforeUnmount(() => {
     }
 }
 
-/* Grid only fades in for the structured (My Project) path */
+/* Grid only fades in for the structured (My Projects) path */
 .grid {
     position: absolute;
     inset: 0;
