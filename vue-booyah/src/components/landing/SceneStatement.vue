@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 import { gsap, tlm, pin, useScene } from '@/composables/useScrollScene'
 import { statement as s } from './landingContent'
-import { IconCloud } from '@/components/ui/icon-cloud'
+import IconCloud from '@/components/ui/icon-cloud/IconCloud.vue'
 import { isDark } from '@/composables/useTheme'
 import { iconUrls } from './landingIcons'
 

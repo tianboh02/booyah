@@ -1,92 +1,63 @@
-<script setup lang="ts">
-import type { HTMLAttributes } from "vue";
-import { cn } from "@inspira-ui/plugins";
+<script setup>
 import { onMounted, onUnmounted, ref } from "vue";
 import { isDark } from "@/composables/useTheme";
 
-interface Props {
-  friction?: number;
-  trails?: number;
-  size?: number;
-  dampening?: number;
-  tension?: number;
-  class?: HTMLAttributes["class"];
-}
-
-const props = withDefaults(defineProps<Props>(), {
-  friction: 0.5,
-  trails: 20,
-  size: 50,
-  dampening: 0.25,
-  tension: 0.98,
+const props = defineProps({
+  friction: { type: Number, default: 0.5 },
+  trails: { type: Number, default: 20 },
+  size: { type: Number, default: 50 },
+  dampening: { type: Number, default: 0.25 },
+  tension: { type: Number, default: 0.98 },
 });
 
-const canvasRef = ref<HTMLCanvasElement | null>(null);
-
-interface NodeType {
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
-}
-
-interface WaveOptions {
-  phase?: number;
-  offset?: number;
-  frequency?: number;
-  amplitude?: number;
-}
-
-interface LineOptions {
-  spring: number;
-}
+const canvasRef = ref(null);
 
 class Wave {
-  phase: number = 0;
-  offset: number = 0;
-  frequency: number = 0.001;
-  amplitude: number = 1;
-  private e: number = 0;
+  phase = 0;
+  offset = 0;
+  frequency = 0.001;
+  amplitude = 1;
+  e = 0;
 
-  constructor(options: WaveOptions = {}) {
+  constructor(options = {}) {
     this.init(options);
   }
 
-  init(options: WaveOptions): void {
+  init(options) {
     this.phase = options.phase || 0;
     this.offset = options.offset || 0;
     this.frequency = options.frequency || 0.001;
     this.amplitude = options.amplitude || 1;
   }
 
-  update(): number {
+  update() {
     this.phase += this.frequency;
     this.e = this.offset + Math.sin(this.phase) * this.amplitude;
     return this.e;
   }
 
-  value(): number {
+  value() {
     return this.e;
   }
 }
 
-class Node implements NodeType {
-  x: number = 0;
-  y: number = 0;
-  vx: number = 0;
-  vy: number = 0;
+class Node {
+  x = 0;
+  y = 0;
+  vx = 0;
+  vy = 0;
 }
 
 class Line {
-  spring: number = 0;
-  friction: number = 0;
-  nodes: NodeType[] = [];
+  spring = 0;
+  friction = 0;
+  nodes = [];
 
-  constructor(options: LineOptions) {
+  constructor(options) {
     this.init(options);
   }
 
-  init(options: LineOptions): void {
+  init(options) {
     this.spring = options.spring + 0.1 * Math.random() - 0.02;
     this.friction = E.friction + 0.01 * Math.random() - 0.002;
     this.nodes = [];
@@ -99,7 +70,7 @@ class Line {
     }
   }
 
-  update(): void {
+  update() {
     let e = this.spring;
     let t = this.nodes[0];
 
@@ -125,8 +96,8 @@ class Line {
     }
   }
 
-  draw(ctx: CanvasRenderingContext2D): void {
-    let e: NodeType, t: NodeType;
+  draw(ctx) {
+    let e, t;
     let n = this.nodes[0].x;
     let i = this.nodes[0].y;
 
@@ -149,10 +120,10 @@ class Line {
   }
 }
 
-let ctx: CanvasRenderingContext2D & { running?: boolean; frame?: number };
-let f: Wave;
+let ctx;
+let f;
 let pos = { x: 0, y: 0 };
-let lines: Line[] = [];
+let lines = [];
 
 const E = {
   debug: true,
@@ -163,14 +134,14 @@ const E = {
   tension: props.tension,
 };
 
-function createLines(): void {
+function createLines() {
   lines = [];
   for (let e = 0; e < E.trails; e++) {
     lines.push(new Line({ spring: 0.4 + (e / E.trails) * 0.025 }));
   }
 }
 
-function updatePosition(e: MouseEvent | TouchEvent): void {
+function updatePosition(e) {
   if ("touches" in e) {
     pos.x = e.touches[0].pageX;
     pos.y = e.touches[0].pageY;
@@ -181,14 +152,14 @@ function updatePosition(e: MouseEvent | TouchEvent): void {
   e.preventDefault();
 }
 
-function handleTouchMove(e: TouchEvent): void {
+function handleTouchMove(e) {
   if (e.touches.length === 1) {
     pos.x = e.touches[0].pageX;
     pos.y = e.touches[0].pageY;
   }
 }
 
-function render(): void {
+function render() {
   if (ctx.running) {
     ctx.globalCompositeOperation = "source-over";
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
@@ -208,14 +179,14 @@ function render(): void {
   }
 }
 
-function resizeCanvas(): void {
+function resizeCanvas() {
   if (ctx && ctx.canvas) {
     ctx.canvas.width = window.innerWidth - 20;
     ctx.canvas.height = window.innerHeight;
   }
 }
 
-function onMouseMove(e: MouseEvent | TouchEvent): void {
+function onMouseMove(e) {
   document.removeEventListener("mousemove", onMouseMove);
   document.removeEventListener("touchstart", onMouseMove);
   document.addEventListener("mousemove", updatePosition);
@@ -226,25 +197,22 @@ function onMouseMove(e: MouseEvent | TouchEvent): void {
   render();
 }
 
-function handleFocus(): void {
+function handleFocus() {
   if (!ctx.running) {
     ctx.running = true;
     render();
   }
 }
 
-function handleBlur(): void {
+function handleBlur() {
   ctx.running = true;
 }
 
-function initCanvas(): void {
+function initCanvas() {
   const canvas = canvasRef.value;
   if (!canvas) return;
 
-  ctx = canvas.getContext("2d") as CanvasRenderingContext2D & {
-    running?: boolean;
-    frame?: number;
-  };
+  ctx = canvas.getContext("2d");
 
   ctx.running = true;
   ctx.frame = 1;
@@ -266,7 +234,7 @@ function initCanvas(): void {
   resizeCanvas();
 }
 
-function cleanup(): void {
+function cleanup() {
   if (ctx) {
     ctx.running = false;
   }
@@ -295,6 +263,6 @@ onUnmounted(() => {
   <canvas
     id="canvas"
     ref="canvasRef"
-    :class="cn(`pointer-events-none fixed inset-0 z-50`, props.class)"
+    class="pointer-events-none fixed inset-0 z-50"
   />
 </template>

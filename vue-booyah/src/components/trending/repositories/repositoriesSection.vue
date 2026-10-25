@@ -14,7 +14,7 @@
                    saved         which repos are bookmarked (utils/savedProjects.js, as on Discovery)
   Receives:      nothing (no props).
   Gives back:    nothing (no emits).
-  Used by:       trending.vue (the "Top 20 Repositories" tab).
+  Used by:       views/TrendingView.vue (the "Top 20 Repositories" tab).
   Children:      repoStats.vue, repoList.vue, languages/header/periodToggle.vue (the timeframe pill),
                  shared/SignalLoader.vue, shared/RetryCard.vue.
 -->

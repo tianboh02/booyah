@@ -28,7 +28,7 @@ import { ref, reactive, computed, watch, onMounted, onBeforeUnmount, nextTick } 
 import * as d3 from 'd3'
 import { useMediaQuery } from '@vueuse/core'
 import { compact, pct, trendClass, PERIOD_INFO } from '@/utils/trending/helpers/format'
-import { prefersReducedMotion } from '@/utils/trending/helpers/motion'
+import { prefersReducedMotion } from '@/utils/motion'
 import { useCountUp } from '@/composables/trending/useCountUp'
 
 // ---------- Props & emits ----------

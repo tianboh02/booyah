@@ -7,7 +7,7 @@
   Receives:      props  tabs ([{ id, label }]),
                         v-model (the open tab's id)
   Gives back:    update:modelValue (through v-model) when a tab is chosen
-  Used by:       trending.vue.
+  Used by:       views/TrendingView.vue.
 -->
 <script setup>
 // ---------- Imports ----------

@@ -31,7 +31,6 @@ import {
   trendArrow,
   PERIOD_INFO,
 } from '@/utils/trending/helpers/format'
-import { packagePageUrl } from '@/utils/trending/helpers/packageLinks'
 import { lineAccent } from '@/utils/trending/languages'
 
 // ---------- Props & emits ----------
@@ -47,6 +46,15 @@ defineEmits(['add'])
 
 const { theme } = useTheme() // 'dark' | 'light', from the navbar toggle
 
+// ---------- Settings ----------
+// Each registry's package pages start the same way; only the name changes at the end.
+// PHP names already include the vendor ("psr/log"), so they're added as they are.
+const REGISTRY_PAGES = {
+  javascript: 'https://www.npmjs.com/package/',
+  rust: 'https://crates.io/crates/',
+  php: 'https://packagist.org/packages/',
+}
+
 // ---------- Computed values ----------
 // The wording and day count for the selected period (see PERIOD_INFO in helpers/format.js)
 const info = computed(() => PERIOD_INFO[props.period])
@@ -54,9 +62,10 @@ const info = computed(() => PERIOD_INFO[props.period])
 const chartColor = computed(() => lineAccent(props.language, theme.value))
 
 // The package's page on its registry website (null hides the Explore button)
-const exploreUrl = computed(() =>
-  props.pkg ? packagePageUrl(props.language.id, props.pkg.name) : null,
-)
+const exploreUrl = computed(() => {
+  const start = REGISTRY_PAGES[props.language.id]
+  return start && props.pkg?.name ? start + props.pkg.name : null
+})
 
 // % change for the selected period
 const change = computed(() => (props.pkg ? props.pkg.changePercent[props.period] : null))

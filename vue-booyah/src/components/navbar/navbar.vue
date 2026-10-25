@@ -150,8 +150,9 @@ function logout() {
                                 <div class="user-profile-header p-2 rounded-3 d-flex align-items-center gap-2">
                                     <img class="rounded-circle object-fit-cover flex-shrink-0" :src="userAvatar"
                                         width="38" height="38" alt="user avatar" />
-                                    <div class="d-flex flex-column min-w-0 me-2">
-                                        <div class="fw-bold header-user-name text-truncate small fs-6 mb-1">{{
+                                    <div class="d-flex flex-column flex-grow-1 min-w-0">
+                                        <div class="fw-bold header-user-name text-truncate small fs-6 mb-1"
+                                            :title="userHandle">{{
                                             userHandle }}</div>
                                         <div class="d-flex align-items-center gap-1">
                                             <span class="experience-badge badge rounded-pill px-2 py-1 small fw-normal">
@@ -283,8 +284,9 @@ function logout() {
 }
 
 /* Custom Dropdown Overrides */
+/* fixed width so a long display name truncates with … instead of stretching the menu */
 .custom-dropdown-menu {
-    min-width: 210px;
+    width: 210px;
     background-color: var(--card-bg);
     border: 1px solid var(--card-border);
 }

@@ -8,7 +8,7 @@
                  ("Reading profiles 12 / 40"); on failure, a message with "Try again".
   Receives:      nothing (no props).
   Gives back:    nothing (no emits).
-  Used by:       trending.vue (the "Top Developers" tab).
+  Used by:       views/TrendingView.vue (the "Top Developers" tab).
   Children:      developersCard.vue, shared/SignalLoader.vue, shared/RetryCard.vue.
 -->
 <script setup>

@@ -1,46 +1,34 @@
-<script lang="ts" setup>
-import type { HTMLAttributes } from "vue";
-import type { SphereIcon } from "./index";
-import { cn } from "@inspira-ui/plugins";
+<script setup>
 import { onBeforeUnmount, onMounted, reactive, ref, watchEffect } from "vue";
 
-const props = defineProps<{
-  images?: string[];
-  class?: HTMLAttributes["class"];
-}>();
+const props = defineProps({
+  images: { type: Array, default: () => [] },
+});
 
 const { images } = props;
 
-const canvasRef = ref<HTMLCanvasElement | null>(null);
-const animationFrameRef = ref<number>(0);
+const canvasRef = ref(null);
+const animationFrameRef = ref(0);
 
-const imageCanvasesRef = ref<HTMLCanvasElement[]>([]);
-const imagesLoadedRef = ref<boolean[]>([]);
+const imageCanvasesRef = ref([]);
+const imagesLoadedRef = ref([]);
 
-const imagePositions = ref<SphereIcon[]>([]);
+const imagePositions = ref([]);
 
 const rotation = reactive({ x: 0, y: 0 });
 const isDragging = ref(false);
 const lastMousePos = reactive({ x: 0, y: 0 });
 const mousePos = reactive({ x: 0, y: 0 });
 
-const targetRotation = ref<{
-  x: number;
-  y: number;
-  startX: number;
-  startY: number;
-  distance: number;
-  startTime: number;
-  duration: number;
-} | null>(null);
+const targetRotation = ref(null);
 
-function easeOutCubic(t: number): number {
+function easeOutCubic(t) {
   return 1 - (1 - t) ** 3;
 }
 
 watchEffect(() => {
   if (!images) return;
-  imagesLoadedRef.value = new Array(images.length).fill(false);
+  imagesLoadedRef.value = images.map(() => false);
 
   const newImageCanvases = images.map((url, idx) => {
     const offscreen = document.createElement("canvas");
@@ -79,7 +67,7 @@ watchEffect(() => {
     return;
   }
 
-  const newPositions: SphereIcon[] = [];
+  const newPositions = [];
   const offset = 2 / count;
   const increment = Math.PI * (3 - Math.sqrt(5)); // ~2.3999632
 
@@ -102,7 +90,7 @@ watchEffect(() => {
   imagePositions.value = newPositions;
 });
 
-function handleMouseDown(e: MouseEvent) {
+function handleMouseDown(e) {
   const canvas = canvasRef.value;
   if (!canvas) return;
   const rect = canvas.getBoundingClientRect();
@@ -154,7 +142,7 @@ function handleMouseDown(e: MouseEvent) {
   lastMousePos.y = e.clientY;
 }
 
-function handleMouseMove(e: MouseEvent) {
+function handleMouseMove(e) {
   const canvas = canvasRef.value;
   if (!canvas) return;
   const rect = canvas.getBoundingClientRect();
@@ -256,7 +244,7 @@ onBeforeUnmount(() => {
     height="300"
     role="img"
     aria-label="Interactive 3D Image Cloud"
-    :class="cn(`rounded-lg`, $props.class)"
+    class="rounded-lg"
     @mousedown="handleMouseDown"
     @mousemove="handleMouseMove"
     @mouseup="handleMouseUp"

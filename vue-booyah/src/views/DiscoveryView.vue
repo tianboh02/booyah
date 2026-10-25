@@ -2,9 +2,10 @@
 import { computed, onMounted, ref } from 'vue'
 import { fetchDiscoveryData } from '@/utils/hackernewsDiscovery'
 import { useSavedProjects } from '@/utils/savedProjects'
+import { topLangColors } from '@/utils/langColors'
 
-import DiscoveryPageHeader from '@/components/discovery/discoveryPageHeader.vue'
-import DiscoveryBanners from '@/components/discovery/discoveryBanners.vue'
+import PageHeader from '@/components/shared/PageHeader.vue'
+import AlertBanners from '@/components/shared/AlertBanners.vue'
 import DiscoveryStats from '@/components/discovery/discoveryStats.vue'
 import DiscoveryLanguageFilter from '@/components/discovery/discoveryLanguageFilter.vue'
 import DiscoveryCategoryGrid from '@/components/discovery/discoveryCategoryGrid.vue'
@@ -29,6 +30,16 @@ const loaderStatus = computed(() => {
 
 const categories = ref([])
 const selectedProject = ref(null)
+
+// Header: the aurora takes its colours from the three most common languages across the launches.
+const headerColors = computed(() =>
+    topLangColors(categories.value.flatMap(c => c.projects.map(p => p.language))),
+)
+const live = computed(() => !loading.value && !error.value && categories.value.length > 0)
+const status = computed(() => {
+    if (loading.value) return 'Reading Show HN'
+    return live.value ? 'Live from Show HN · Last 30 days' : 'Not connected'
+})
 
 // Shared language selection for filters, statistics, and project labels.
 const selectedLang = ref(null)
@@ -97,13 +108,15 @@ onMounted(() => {
 
 <template>
     <div class="container my-4">
-        <DiscoveryPageHeader :categories="categories" :loading="loading" :error="!!error" />
+        <PageHeader title="Discovery"
+            subtitle="What developers are building this month, from Show HN launches checked against GitHub."
+            :status="status" :live="live" :colors="headerColors" />
 
         <SignalLoader v-if="loading" :done="progress.done" :total="progress.total" :status="loaderStatus"
             :legend="LOADER_LEGEND" />
 
         <template v-else>
-            <DiscoveryBanners :warning="warning" :error="error" @retry="load" />
+            <AlertBanners :warning="warning" :error="error" @retry="load" />
 
             <!-- Saved-project error message -->
             <div v-if="saveError" class="alert alert-danger d-flex align-items-center py-2 px-3 small mb-3" role="alert">

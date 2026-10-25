@@ -15,7 +15,7 @@
  * (A "composable" is Vue's name for a reusable function that holds its own reactive state.)
  */
 import { ref, watch, onBeforeUnmount } from 'vue'
-import { prefersReducedMotion } from '@/utils/trending/helpers/motion'
+import { prefersReducedMotion } from '@/utils/motion'
 
 /** Returns a ref that eases towards whatever `source()` returns. */
 export function useCountUp(source, duration = 750) {

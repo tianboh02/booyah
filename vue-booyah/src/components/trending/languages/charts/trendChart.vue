@@ -25,7 +25,7 @@
 import { ref, reactive, computed, watch, onMounted, onBeforeUnmount } from 'vue'
 import * as d3 from 'd3'
 import { compact, num, itemLabel, trendArrow } from '@/utils/trending/helpers/format'
-import { prefersReducedMotion } from '@/utils/trending/helpers/motion'
+import { prefersReducedMotion } from '@/utils/motion'
 
 // ---------- Props ----------
 const props = defineProps({

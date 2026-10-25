@@ -1,14 +1,23 @@
 <script setup>
-import { onMounted } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useUserSettings } from '@/utils/userSettings'
 
-import SettingsPageHeader from '@/components/settings/settingsPageHeader.vue'
+import PageHeader from '@/components/shared/PageHeader.vue'
+import SettingsAvatar from '@/components/settings/settingsAvatar.vue'
 import SettingsProfileCard from '@/components/settings/settingsProfileCard.vue'
 import SettingsExperienceCard from '@/components/settings/settingsExperienceCard.vue'
 import SettingsAccountCard from '@/components/settings/settingsAccountCard.vue'
 import SettingsLogoutCard from '@/components/settings/settingsLogoutCard.vue'
 
-const { isSignedIn, refreshUser } = useUserSettings()
+const { isSignedIn, refreshUser, handle, avatarUrl, initial, experience } = useUserSettings()
+
+// Same palette as the setup page: Discovery is warm, My Project is cool.
+// The aurora shifts color the moment you save a different experience level.
+const headerColors = computed(() =>
+    experience.value.toLowerCase() === 'newcomer'
+        ? ['#41b883', '#58a6ff', '#f1e05a']
+        : ['#58a6ff', '#6b8aff', '#3178c6']
+)
 
 // pick up anything that changed in localStorage since the last visit
 onMounted(refreshUser)
@@ -16,7 +25,16 @@ onMounted(refreshUser)
 
 <template>
     <div class="container my-4">
-        <SettingsPageHeader />
+        <PageHeader title="Settings" :colors="headerColors">
+            <template #subtitle>
+                <template v-if="handle">Signed in as <span class="font-monospace">@{{ handle }}</span></template>
+                <template v-else>Manage your profile and preferences.</template>
+            </template>
+
+            <template #aside>
+                <SettingsAvatar :src="avatarUrl" :initial="initial" :size="72" ring :ring-color="headerColors[0]" />
+            </template>
+        </PageHeader>
 
         <div v-if="!isSignedIn" class="alert alert-warning py-2 px-3 small mb-4" role="status">
             We could not find your account details. Sign in again to change your settings.

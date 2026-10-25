@@ -16,7 +16,6 @@
     "format": "prettier --write --experimental-cli src/"
   },
   "dependencies": {
-    "@inspira-ui/plugins": "^0.0.2",
     "@number-flow/vue": "^0.5.2",
     "@popperjs/core": "^2.11.8",
     "@tailwindcss/vite": "^4.3.3",

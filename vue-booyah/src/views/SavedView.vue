@@ -6,8 +6,10 @@ import {
     itemLang,
     useSavedLibrary,
 } from '@/utils/savedLibrary'
+import { topLangColors } from '@/utils/langColors'
 
-import SavedPageHeader from '@/components/saved/savedPageHeader.vue'
+import PageHeader from '@/components/shared/PageHeader.vue'
+import AlertBanners from '@/components/shared/AlertBanners.vue'
 import SavedStats from '@/components/saved/savedStats.vue'
 import SavedToolbar from '@/components/saved/savedToolbar.vue'
 import SavedList from '@/components/saved/savedList.vue'
@@ -23,6 +25,19 @@ const {
     undo,
     dismissUndo,
 } = useSavedLibrary()
+
+// Header: the aurora takes its colors from the languages of your saved projects.
+const HEADER_FALLBACK = ['#58a6ff', '#6b8aff', '#e3b341']
+const headerColors = computed(() => {
+    const top = topLangColors(items.value.filter(i => i.status === 'ok' && i.language).map(itemLang))
+    return HEADER_FALLBACK.map((c, i) => top[i] || c)
+})
+const filled = computed(() => !loading.value && items.value.length > 0)
+const pillText = computed(() => {
+    if (loading.value) return 'Loading your bookmarks'
+    if (items.value.length === 0) return 'Nothing saved yet'
+    return `${items.value.length} saved`
+})
 
 // Shared filters for the statistics, toolbar, and list.
 const selectedCategory = ref(null)
@@ -121,19 +136,18 @@ onMounted(load)
 
 <template>
     <div class="container my-4">
-        <SavedPageHeader :items="items" :loading="loading" />
+        <PageHeader title="Saved Projects" subtitle="Everything you bookmarked in Discovery, in one place."
+            :status="pillText" :live="filled" :colors="headerColors">
+            <!-- Bookmark instead of the pulse dot; it fills in once something is saved -->
+            <template #marker>
+                <svg class="pill-mark" :class="{ 'is-filled': filled }" width="13" height="13" viewBox="0 0 16 16"
+                    fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M3.5 2.5h9v11.2L8 10.6l-4.5 3.1z" />
+                </svg>
+            </template>
+        </PageHeader>
 
-        <!-- Error message -->
-        <div v-if="error"
-            class="alert alert-danger d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-2 mb-3"
-            role="alert">
-            <span>{{ error }}</span>
-
-            <button type="button"
-                class="btn btn-sm btn-outline-danger flex-shrink-0 align-self-start align-self-sm-center" @click="load">
-                Try again
-            </button>
-        </div>
+        <AlertBanners :error="error" @retry="load" />
 
         <!-- Saved project statistics -->
         <SavedStats v-if="loading || items.length" v-model:selected-category="selectedCategory"
@@ -154,3 +168,18 @@ onMounted(load)
             @dismiss="dismissUndo" />
     </div>
 </template>
+
+<style scoped>
+.pill-mark path {
+    fill: transparent;
+    transition: fill 0.4s ease;
+}
+
+.pill-mark.is-filled {
+    color: #58a6ff;
+}
+
+.pill-mark.is-filled path {
+    fill: currentColor;
+}
+</style>

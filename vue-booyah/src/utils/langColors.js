@@ -125,3 +125,14 @@ export function getLangColor(lang) {
     const name = aliases[lang] || lang
     return langColors[name] || lowerCaseColors[String(name).toLowerCase()] || generatedColor(String(name))
 }
+
+// Colors of the three most common languages in a list (falsy entries are skipped).
+// The page headers use this to tint their aurora.
+export function topLangColors(langs) {
+    const counts = {}
+    for (const lang of langs) if (lang) counts[lang] = (counts[lang] || 0) + 1
+    return Object.entries(counts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 3)
+        .map(([name]) => getLangColor(name))
+}

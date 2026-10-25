@@ -12,7 +12,7 @@
                  It hands that state down to its children as props and listens for their events.
   Receives:      nothing (no props).
   Gives back:    nothing (no emits).
-  Used by:       trending.vue.
+  Used by:       views/TrendingView.vue.
                  While a language loads it shows the same signal globe as Discovery.
   Children:      header/languageBar, orbit/packageOrbit, detail/packageDashboard,
                  compare/compareTray, compare/compareView, shared/SignalLoader.
