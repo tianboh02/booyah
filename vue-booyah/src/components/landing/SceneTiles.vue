@@ -10,7 +10,7 @@ const stage = ref(null)
 const G3 = ['11110', '00011', '00011', '01110', '00011', '00011', '11110']
 const G9 = ['01110', '11011', '11011', '01111', '00011', '00011', '01110']
 const GP = ['11001', '11010', '00010', '00100', '01000', '01011', '10011']
-// turn [glyph, firstColumn] pairs into a list of [column, row] cells
+// turn [glyph, firstColumn] pairs into a list of [column, row] cells 
 const cellsOf = (list) => list.flatMap(([g, c0]) => g.flatMap((row, r) => [...row].flatMap((v, c) => (v === '1' ? [[c0 + c, r]] : []))))
 const COLS = 17
 
