@@ -33,7 +33,7 @@ watch(
 </script>
 
 <template>
-    <div v-spotlight class="panel card p-4 h-100 rounded-3 shadow-sm">
+    <div v-spotlight class="panel card overflow-hidden p-4 h-100 rounded-3 shadow-sm">
         <div class="d-flex align-items-baseline justify-content-between gap-2 mb-1">
             <h2 class="h5 fw-bold section-title mb-0">{{ title }}</h2>
             <span v-if="selected" class="text-muted-github small">Click again to clear</span>
@@ -53,12 +53,12 @@ watch(
                     'is-dim': selected && selected !== b.name
                 }" :style="{ '--c': b.color }" :aria-pressed="selected === b.name" @click="emit('toggle', b.name)">
                 <span class="d-flex align-items-baseline justify-content-between gap-3 mb-1">
-                    <span class="stat-label bar-name small text-truncate">{{ b.name }}</span>
+                    <span class="stat-label small text-truncate min-w-0">{{ b.name }}</span>
                     <span class="text-muted-github small flex-shrink-0 font-monospace">{{ b.count }}</span>
                 </span>
 
                 <div class="progress rounded-pill progress-track" style="height: 12px;">
-                    <div class="progress-bar bar-fill rounded-pill" role="progressbar" :style="{
+                    <div class="progress-bar bar-fill position-relative rounded-pill" role="progressbar" :style="{
                         width: ready ? b.width + '%' : '0%',
                         backgroundColor: b.color,
                         transitionDelay: idx * 90 + 'ms'
@@ -78,8 +78,6 @@ watch(
 }
 
 .panel {
-    position: relative;
-    overflow: hidden;
     isolation: isolate;
 }
 
@@ -136,8 +134,6 @@ watch(
 }
 
 .bar-fill {
-    position: relative;
-    overflow: hidden;
     transition: width 1.1s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s ease;
 }
 
@@ -152,10 +148,6 @@ watch(
     background: linear-gradient(100deg, transparent 30%, rgba(255, 255, 255, 0.35) 50%, transparent 70%);
     transform: translateX(-100%);
     animation: sheen 3.6s ease-in-out 1.4s infinite;
-}
-
-.bar-name {
-    min-width: 0;
 }
 
 @keyframes sheen {

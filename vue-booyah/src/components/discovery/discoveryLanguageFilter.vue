@@ -77,15 +77,15 @@ const note = `Categories are ranked by number of builders. Projects within a cat
 
             <div class="info d-inline-flex" @mouseenter="infoOpen = true"
                 @mouseleave="infoOpen = false" @focusout="infoOpen = false" @keydown.esc="infoOpen = false">
-                <button type="button" class="info-btn d-inline-flex align-items-center justify-content-center rounded-circle"
+                <button type="button" class="info-btn d-inline-flex align-items-center justify-content-center rounded-circle p-0"
                     aria-label="How categories and projects are ranked" :aria-expanded="infoOpen"
                     aria-controls="discovery-info" @click="infoOpen = true">
                     i
                 </button>
 
                 <!-- Transparent top padding bridges the gap so the box stays open while the pointer moves into it. -->
-                <div v-if="infoOpen" id="discovery-info" class="info-pop position-absolute" role="note">
-                    <p class="info-box small mb-0 rounded-3 shadow p-3">
+                <div v-if="infoOpen" id="discovery-info" class="info-pop position-absolute top-100 start-0 pt-2" role="note">
+                    <p class="info-box small lh-base mb-0 rounded-3 shadow p-3">
                         {{ note }}
                     </p>
                 </div>
@@ -118,7 +118,6 @@ const note = `Categories are ranked by number of builders. Projects within a cat
 .info-btn {
     width: 22px;
     height: 22px;
-    padding: 0;
     color: #58a6ff;
     background-color: color-mix(in srgb, #58a6ff 14%, transparent);
     border: 1.5px solid color-mix(in srgb, #58a6ff 60%, transparent);
@@ -136,10 +135,7 @@ const note = `Categories are ranked by number of builders. Projects within a cat
 }
 
 .info-pop {
-    top: 100%;
-    left: 0;
     z-index: 20;
-    padding-top: 0.5rem;
     width: min(320px, 85vw);
 }
 
@@ -147,7 +143,6 @@ const note = `Categories are ranked by number of builders. Projects within a cat
     color: var(--app-text);
     background-color: var(--card-bg);
     border: 1px solid var(--card-border);
-    line-height: 1.5;
 }
 
 .info-btn:focus-visible,

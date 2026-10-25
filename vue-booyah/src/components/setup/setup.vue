@@ -76,13 +76,14 @@ onBeforeUnmount(() => {
     <section class="setup-hero">
 
         <!-- Background scene (fixed, behind everything) -->
-        <div ref="scene" class="scene" :class="{ 'is-structured': !isDiscovery }" :style="sceneVars" aria-hidden="true">
-            <span class="orb o1"></span>
-            <span class="orb o2"></span>
-            <span class="orb o3"></span>
-            <span class="grid"></span>
-            <span class="cursor-glow"></span>
-            <span v-for="m in motes" :key="m.id" class="mote" :style="{
+        <div ref="scene" class="position-fixed top-0 bottom-0 start-0 end-0 z-n1 overflow-hidden pe-none"
+            :class="{ 'is-structured': !isDiscovery }" :style="sceneVars" aria-hidden="true">
+            <span class="orb o1 position-absolute rounded-circle"></span>
+            <span class="orb o2 position-absolute rounded-circle"></span>
+            <span class="orb o3 position-absolute rounded-circle"></span>
+            <span class="grid position-absolute top-0 bottom-0 start-0 end-0"></span>
+            <span class="cursor-glow position-absolute start-0 top-0"></span>
+            <span v-for="m in motes" :key="m.id" class="mote position-absolute" :style="{
                 left: m.left + '%',
                 width: m.size + 'px',
                 height: m.size + 'px',
@@ -95,7 +96,7 @@ onBeforeUnmount(() => {
         <!-- Greeting -->
         <header class="hero-copy container pt-4 pb-2">
             <h1 class="hero-title display-5 fw-bold mb-3" :aria-label="words.join(' ')">
-                <span v-for="(w, i) in words" :key="i" class="word" aria-hidden="true" :style="{ '--i': i }">{{ w
+                <span v-for="(w, i) in words" :key="i" class="word d-inline-block" aria-hidden="true" :style="{ '--i': i }">{{ w
                 }}&nbsp;</span>
             </h1>
             <p class="hero-sub text-muted-github fs-5 mb-0">
@@ -118,7 +119,6 @@ onBeforeUnmount(() => {
 
 /* One orchestrated entrance: words resolve out of blur */
 .word {
-    display: inline-block;
     opacity: 0;
     filter: blur(14px);
     transform: translateY(45%) scale(0.96);
@@ -152,20 +152,10 @@ onBeforeUnmount(() => {
     }
 }
 
-/* --- Scene ------------------------------------------------------------------ */
-.scene {
-    position: fixed;
-    inset: 0;
-    z-index: -1;
-    overflow: hidden;
-    pointer-events: none;
-}
-
+/* --- Scene (fixed, behind everything) ------------------------------------------ */
 .orb {
-    position: absolute;
     width: 52vmax;
     aspect-ratio: 1;
-    border-radius: 50%;
     filter: blur(90px);
     opacity: 0.28;
     will-change: transform;
@@ -214,8 +204,6 @@ onBeforeUnmount(() => {
 
 /* Grid only fades in for the structured (My Projects) path */
 .grid {
-    position: absolute;
-    inset: 0;
     background-image:
         linear-gradient(var(--card-border) 1px, transparent 1px),
         linear-gradient(90deg, var(--card-border) 1px, transparent 1px);
@@ -233,9 +221,6 @@ onBeforeUnmount(() => {
 }
 
 .cursor-glow {
-    position: absolute;
-    left: 0;
-    top: 0;
     width: 560px;
     height: 560px;
     margin: -280px 0 0 -280px;
@@ -245,7 +230,6 @@ onBeforeUnmount(() => {
 }
 
 .mote {
-    position: absolute;
     bottom: -20px;
     background-color: var(--o1);
     border-radius: var(--mote-radius);

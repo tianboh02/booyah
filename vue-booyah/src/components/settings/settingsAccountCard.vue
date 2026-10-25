@@ -10,7 +10,7 @@ const access = ['Your profile', 'Your public and private repositories']
 </script>
 
 <template>
-    <section v-spotlight class="settings-card card rounded-4 p-4">
+    <section v-spotlight class="settings-card card overflow-hidden rounded-4 p-4">
         <h2 class="h5 fw-bold card-heading mb-4">GitHub account</h2>
 
         <div class="d-flex align-items-center gap-3 mb-4">
@@ -20,7 +20,7 @@ const access = ['Your profile', 'Your public and private repositories']
                 <div class="d-flex align-items-center gap-2 flex-wrap">
                     <span class="handle font-monospace fs-5 text-truncate">{{ handle ? '@' + handle : 'GitHub user' }}</span>
                     <span class="connected badge rounded-pill fw-normal d-inline-flex align-items-center gap-2">
-                        <span class="live-dot"></span>Connected
+                        <span class="live-dot position-relative rounded-circle"></span>Connected
                     </span>
                 </div>
                 <div class="card-sub">Connected via GitHub sign-in</div>
@@ -58,11 +58,7 @@ const access = ['Your profile', 'Your public and private repositories']
 
 <style scoped>
 .settings-card {
-    position: relative;
-    overflow: hidden;
     isolation: isolate;
-    background-color: var(--card-bg);
-    border: 1px solid var(--card-border);
 }
 
 .settings-card::before {
@@ -82,10 +78,6 @@ const access = ['Your profile', 'Your public and private repositories']
     opacity: 1;
 }
 
-.min-w-0 {
-    min-width: 0;
-}
-
 .card-heading,
 .handle,
 .card-sub {
@@ -99,10 +91,8 @@ const access = ['Your profile', 'Your public and private repositories']
 }
 
 .live-dot {
-    position: relative;
     width: 7px;
     height: 7px;
-    border-radius: 50%;
     background-color: #3fb950;
 }
 

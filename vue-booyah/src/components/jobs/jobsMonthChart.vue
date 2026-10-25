@@ -69,13 +69,12 @@ const option = computed(() => {
 </script>
 
 <template>
-    <VChart class="month-chart" :option="option" autoresize aria-label="Job posts per month" />
+    <VChart class="month-chart w-100" :option="option" autoresize aria-label="Job posts per month" />
 </template>
 
 <style scoped>
 .month-chart {
     /* grows to the card's height when the parent is a flex column */
     min-height: var(--jobs-chart-h, 240px);
-    width: 100%;
 }
 </style>

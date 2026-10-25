@@ -16,11 +16,12 @@ watch(() => props.src, () => (failed.value = false))
 </script>
 
 <template>
-    <span class="avatar" :class="{ 'has-ring': ring }" :style="{ '--size': size + 'px', '--ring': ringColor }">
+    <span class="avatar position-relative d-inline-flex flex-shrink-0" :class="{ 'has-ring': ring }"
+        :style="{ '--size': size + 'px', '--ring': ringColor }">
         <span v-if="ring" class="ring-spin" aria-hidden="true"></span>
-        <span class="face rounded-circle">
+        <span class="face position-absolute d-flex align-items-center justify-content-center overflow-hidden rounded-circle">
             <img v-if="src && !failed" :src="src" alt="" class="w-100 h-100 rounded-circle" @error="failed = true" />
-            <span v-else class="initial fw-bold">{{ initial }}</span>
+            <span v-else class="initial fw-bold lh-1">{{ initial }}</span>
         </span>
     </span>
 </template>
@@ -33,20 +34,12 @@ watch(() => props.src, () => (failed.value = false))
 }
 
 .avatar {
-    position: relative;
-    display: inline-flex;
-    flex-shrink: 0;
     width: var(--size);
     height: var(--size);
 }
 
 .face {
-    position: absolute;
     inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
     background-color: var(--card-border);
     border: 1px solid var(--card-border);
     color: var(--app-text);
@@ -75,7 +68,6 @@ watch(() => props.src, () => (failed.value = false))
 
 .initial {
     font-size: calc(var(--size) * 0.42);
-    line-height: 1;
 }
 
 @media (prefers-reduced-motion: reduce) {

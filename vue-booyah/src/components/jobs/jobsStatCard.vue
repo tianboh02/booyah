@@ -19,7 +19,7 @@ onMounted(() => requestAnimationFrame(() => (ready.value = true)))
 </script>
 
 <template>
-    <div v-tilt="5" v-spotlight class="card stat-card p-3 h-100 rounded-3 shadow-sm" :class="{ 'is-in': ready }"
+    <div v-tilt="5" v-spotlight class="card stat-card overflow-hidden p-3 h-100 rounded-3 shadow-sm" :class="{ 'is-in': ready }"
         :style="{ '--i': index, '--accent': accent }">
         <span class="h3 fw-bold stat-value mb-1 font-monospace">{{ count }}</span>
         <span class="stat-label fw-semibold small">{{ label }}</span>
@@ -34,8 +34,6 @@ onMounted(() => requestAnimationFrame(() => (ready.value = true)))
 }
 
 .stat-card {
-    position: relative;
-    overflow: hidden;
     transform: perspective(700px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
     transition: transform 0.2s ease-out, border-color 0.3s ease, box-shadow 0.3s ease,
         opacity 0.6s ease, translate 0.7s cubic-bezier(0.22, 1, 0.36, 1);

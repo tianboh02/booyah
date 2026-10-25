@@ -105,16 +105,17 @@ function onKey(event) {
 </script>
 
 <template>
-    <div class="sort-pills d-flex flex-wrap align-items-center">
+    <!-- if the label and the pill do not fit side by side, the pill drops under the label -->
+    <div class="d-flex flex-wrap align-items-center row-gap-1 column-gap-2 min-w-0 mw-100">
         <span class="text-muted-github small text-nowrap">{{ label }}</span>
 
-        <div class="segmented" :class="{ 'is-ready': ready }">
-            <div ref="scroller" class="scroller" role="radiogroup" :aria-label="ariaLabel"
+        <div class="segmented d-inline-flex overflow-hidden min-w-0 mw-100 rounded-pill" :class="{ 'is-ready': ready }">
+            <div ref="scroller" class="scroller position-relative d-flex overflow-x-auto min-w-0" role="radiogroup" :aria-label="ariaLabel"
                 :style="{ '--x': thumb.x + 'px', '--w': thumb.w + 'px', '--fade-l': fadeLeft ? '18px' : '0px', '--fade-r': fadeRight ? '18px' : '0px' }"
                 @keydown="onKey" @scroll.passive="updateEdges">
-                <span class="thumb" aria-hidden="true"></span>
+                <span class="thumb position-absolute start-0 rounded-pill" aria-hidden="true"></span>
                 <button v-for="(opt, i) in options" :key="opt.value" :ref="(el) => { if (el) buttons[i] = el }"
-                    type="button" role="radio" class="text-nowrap" :aria-checked="model === opt.value"
+                    type="button" role="radio" class="position-relative flex-shrink-0 border-0 fw-semibold text-nowrap" :aria-checked="model === opt.value"
                     :tabindex="model === opt.value ? 0 : -1" :class="{ active: model === opt.value }"
                     @click="model = opt.value">
                     {{ opt.label }}
@@ -126,35 +127,19 @@ function onKey(event) {
 
 <style scoped>
 /* main.css's theme colours, so the pill looks the same on every page */
-.sort-pills {
-    min-width: 0;
-    max-width: 100%;
-    /* if the label and the pill do not fit side by side, the pill drops under the label */
-    gap: 0.25rem 0.5rem;
-}
-
 .segmented {
     --pill-ink: var(--app-text);
     --pill-ink-2: var(--text-muted-github, #8b949e);
     --pill-accent: var(--brand-blue, #58a6ff);
     --pill-ease: cubic-bezier(0.22, 1, 0.36, 1);
 
-    display: inline-flex;
-    min-width: 0;
-    max-width: 100%;
-    overflow: hidden;
-    border-radius: 999px;
     background: color-mix(in srgb, var(--pill-ink) 4%, transparent);
     border: 1px solid var(--card-border);
 }
 
 /* The row of options. It scrolls sideways only if the screen is too narrow for all of them. */
 .scroller {
-    position: relative;
-    display: flex;
-    min-width: 0;
     padding: 3px 0;
-    overflow-x: auto;
     overscroll-behavior-x: contain;
     scrollbar-width: none;
     -webkit-mask-image: linear-gradient(to right, transparent 0, #000 var(--fade-l, 0px), #000 calc(100% - var(--fade-r, 0px)), transparent 100%);
@@ -176,13 +161,10 @@ function onKey(event) {
 
 /* The thumb takes the exact left edge and width of the chosen button (set from the script) */
 .thumb {
-    position: absolute;
     top: 3px;
     bottom: 3px;
-    left: 0;
     width: var(--w, 0px);
     transform: translateX(var(--x, 0px));
-    border-radius: 999px;
     background: color-mix(in srgb, var(--pill-accent) 22%, color-mix(in srgb, var(--pill-ink) 4%, transparent));
     box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--pill-accent) 55%, transparent);
 }
@@ -197,14 +179,10 @@ function onKey(event) {
 }
 
 button {
-    position: relative;
-    flex: 0 0 auto;
     padding: 7px 16px;
-    border: 0;
     background: none;
     color: var(--pill-ink-2);
     font-size: 0.86rem;
-    font-weight: 600;
     cursor: pointer;
     transition: color 250ms var(--pill-ease);
 }

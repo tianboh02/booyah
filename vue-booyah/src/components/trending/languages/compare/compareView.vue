@@ -152,10 +152,13 @@ onBeforeUnmount(() => {
 
 <template>
   <!-- the open/close animation (.backdrop-*) is run by the <Transition> around this component -->
-  <div class="backdrop" @click.self="$emit('close')">
+  <div
+    class="backdrop position-fixed top-0 start-0 end-0 bottom-0 d-grid p-0 p-sm-4"
+    @click.self="$emit('close')"
+  >
     <div
       ref="panel"
-      class="compare"
+      class="compare position-relative d-flex flex-column overflow-hidden"
       role="dialog"
       aria-modal="true"
       aria-labelledby="compare-title"
@@ -167,36 +170,42 @@ onBeforeUnmount(() => {
       }"
     >
       <!-- ===================== Header: names, date range, period toggle, Clear, × ===================== -->
-      <header class="compare-head">
-        <div class="title-block">
-          <h4 id="compare-title" class="names">
-            <span class="name" :style="{ '--side': colors[0] }">
-              <span class="name-text"
+      <header class="compare-head d-flex align-items-start justify-content-between">
+        <div class="title-block flex-fill min-w-0">
+          <h4 id="compare-title" class="names d-flex align-items-center flex-wrap fw-bold">
+            <span class="d-inline-flex align-items-center gap-2 min-w-0" :style="{ '--side': colors[0] }">
+              <span class="name-text font-monospace"
                 ><template v-for="(part, i) in nameParts(a.name)" :key="i"
                   ><wbr v-if="i" />{{ part }}</template
                 ></span
               >
-              <span class="badge-lang" :style="{ '--lang': lineAccent(a.language, theme) }">{{
+              <span
+                class="badge-lang rounded-pill fw-semibold"
+                :style="{ '--lang': lineAccent(a.language, theme) }"
+                >{{
                 a.language.name
               }}</span>
             </span>
-            <span class="vs">vs</span>
-            <span class="name" :style="{ '--side': colors[1] }">
-              <span class="name-text"
+            <span class="vs text-muted-github fw-semibold">vs</span>
+            <span class="d-inline-flex align-items-center gap-2 min-w-0" :style="{ '--side': colors[1] }">
+              <span class="name-text font-monospace"
                 ><template v-for="(part, i) in nameParts(b.name)" :key="i"
                   ><wbr v-if="i" />{{ part }}</template
                 ></span
               >
-              <span class="badge-lang" :style="{ '--lang': lineAccent(b.language, theme) }">{{
+              <span
+                class="badge-lang rounded-pill fw-semibold"
+                :style="{ '--lang': lineAccent(b.language, theme) }"
+                >{{
                 b.language.name
               }}</span>
             </span>
           </h4>
-          <p class="range">
+          <p class="range m-0 text-muted-github">
             Measured over the same days: {{ dateRange(comparison.from, comparison.to) }}
           </p>
         </div>
-        <div class="head-actions">
+        <div class="head-actions flex-shrink-0 d-flex align-items-center">
           <PeriodToggle
             :model-value="period"
             :periods="PERIODS"
@@ -205,7 +214,7 @@ onBeforeUnmount(() => {
           />
           <button
             type="button"
-            class="clear"
+            class="clear flex-shrink-0 rounded-pill fw-semibold"
             aria-label="Clear compared packages and close"
             @click="$emit('clear')"
           >
@@ -216,7 +225,7 @@ onBeforeUnmount(() => {
         <button
           ref="closeBtn"
           type="button"
-          class="close"
+          class="close position-absolute z-1 d-grid p-0 rounded-circle lh-1"
           aria-label="Close compare"
           @click="$emit('close')"
         >
@@ -224,41 +233,52 @@ onBeforeUnmount(() => {
         </button>
       </header>
 
-      <div class="compare-body">
+      <div class="compare-body d-grid overflow-y-auto">
         <!-- ===================== The six rows (a small table; ✓ marks the better side) ===================== -->
-        <div class="rows" role="table" :aria-label="`${a.name} compared with ${b.name}`">
-          <div class="row-line head-line" role="row">
+        <div class="rows d-grid align-content-start" role="table" :aria-label="`${a.name} compared with ${b.name}`">
+          <div class="row-line head-line d-none d-sm-grid align-items-center gap-2" role="row">
             <!-- An empty slot over the row labels. The "Measure" text inside is for screen readers only.
                  (Putting .visually-hidden on the slot itself made it position:absolute, so it left
                  the grid and both names slid one column left, out of line with their values.) -->
             <span role="columnheader" class="col-blank"><span class="visually-hidden">Measure</span></span>
-            <span role="columnheader" class="col-name" :style="{ '--side': colors[0] }">{{
+            <span
+              role="columnheader"
+              class="col-name text-truncate font-monospace fw-semibold pb-1"
+              :style="{ '--side': colors[0] }"
+              >{{
               a.name
             }}</span>
-            <span role="columnheader" class="col-name" :style="{ '--side': colors[1] }">{{
+            <span
+              role="columnheader"
+              class="col-name text-truncate font-monospace fw-semibold pb-1"
+              :style="{ '--side': colors[1] }"
+              >{{
               b.name
             }}</span>
           </div>
           <div
             v-for="(row, i) in comparison.rows"
             :key="period + row.key"
-            class="row-line"
+            class="row-line d-grid align-items-center gap-2"
             role="row"
             :style="{ '--i': i }"
           >
-            <span class="row-label" role="rowheader">{{ row.label }}</span>
+            <span class="row-label text-muted-github" role="rowheader">{{ row.label }}</span>
             <span
               v-for="side in ['a', 'b']"
               :key="side"
-              class="cell"
+              class="cell d-flex align-items-center flex-wrap flex-sm-nowrap min-w-0"
               role="cell"
               :class="{ win: row.win === side }"
             >
-              <span class="cell-name" aria-hidden="true">{{ side === 'a' ? a.name : b.name }}</span>
-              <span class="cell-value" :class="tone(row, side)">{{ format(row, side) }}</span>
+              <span
+                class="cell-name d-block d-sm-none w-100 text-truncate font-monospace text-muted-github"
+                aria-hidden="true"
+                >{{ side === 'a' ? a.name : b.name }}</span>
+              <span class="cell-value fw-semibold" :class="tone(row, side)">{{ format(row, side) }}</span>
               <span
                 v-if="row.win === side"
-                class="check"
+                class="check d-inline-grid rounded-circle fw-bold"
                 :style="{ '--side': colors[side === 'a' ? 0 : 1] }"
               >
                 ✓<span class="visually-hidden"> higher</span>
@@ -268,19 +288,19 @@ onBeforeUnmount(() => {
         </div>
 
         <!-- ===================== Chart: legend, Downloads / Growth toggle, help line, D3 chart ===================== -->
-        <section class="chart-card" aria-label="Comparison chart">
-          <div class="chart-head">
-            <ul class="legend">
-              <li :style="{ '--side': colors[0] }">
-                <span class="swatch"></span>
+        <section class="chart-card rounded-4 min-w-0" aria-label="Comparison chart">
+          <div class="chart-head d-flex align-items-center justify-content-between">
+            <ul class="legend flex-fill d-flex flex-wrap m-0 list-unstyled min-w-0">
+              <li class="d-flex align-items-center min-w-0 font-monospace" :style="{ '--side': colors[0] }">
+                <span class="swatch flex-shrink-0"></span>
                 <span
                   ><template v-for="(part, i) in nameParts(a.name)" :key="i"
                     ><wbr v-if="i" />{{ part }}</template
                   ></span
                 >
               </li>
-              <li :style="{ '--side': colors[1] }">
-                <span class="swatch" :class="{ dashed: dashedB }"></span>
+              <li class="d-flex align-items-center min-w-0 font-monospace" :style="{ '--side': colors[1] }">
+                <span class="swatch flex-shrink-0" :class="{ dashed: dashedB }"></span>
                 <span
                   ><template v-for="(part, i) in nameParts(b.name)" :key="i"
                     ><wbr v-if="i" />{{ part }}</template
@@ -295,7 +315,7 @@ onBeforeUnmount(() => {
               aria-label="Chart mode"
             />
           </div>
-          <p class="chart-help">
+          <p class="chart-help mt-2 mx-0 mb-1 text-muted-github">
             <template v-if="mode === 'growth'"
               >Both lines start at 100, so 120 means 20% higher than at the start.</template
             >
@@ -317,8 +337,8 @@ onBeforeUnmount(() => {
         <!-- ===================== Verdict + notes (fade when the sentence changes) ===================== -->
         <Transition name="verdict" mode="out-in" appear>
           <div :key="comparison.verdict" class="verdict-block">
-            <p class="verdict">{{ comparison.verdict }}</p>
-            <p v-for="note in comparison.notes" :key="note" class="note">{{ note }}</p>
+            <p class="verdict fs-6">{{ comparison.verdict }}</p>
+            <p v-for="note in comparison.notes" :key="note" class="note mt-1 mx-0 mb-0 text-muted-github">{{ note }}</p>
           </div>
         </Transition>
       </div>
@@ -335,20 +355,13 @@ onBeforeUnmount(() => {
 
 /* ---------- Layout: the dimmed, blurred backdrop and the panel ---------- */
 .backdrop {
-  position: fixed;
-  inset: 0;
   z-index: 1055;
-  display: grid;
   place-items: center;
-  padding: 24px;
   background: var(--overlay);
   backdrop-filter: blur(6px);
 }
 
 .compare {
-  position: relative;
-  display: flex;
-  flex-direction: column;
   width: min(1040px, 100%);
   max-height: calc(100vh - 48px);
   border: 1px solid var(--edge);
@@ -369,94 +382,59 @@ onBeforeUnmount(() => {
     ),
     var(--card);
   box-shadow: 0 30px 80px color-mix(in srgb, var(--shadow) 60%, transparent);
-  overflow: hidden;
 }
 
 /* ---------- Components: header ---------- */
 .compare-head {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
   gap: 12px 20px;
   /* the right padding leaves room for the × in the corner */
   padding: 20px 72px 16px 24px;
   border-bottom: 1px solid var(--edge);
 }
 
-/* long names (e.g. PHP's vendor/package) wrap inside the title, so the toggle never gets pushed down */
-.title-block {
-  flex: 1 1 auto;
-  min-width: 0;
-}
-
+/* long names (e.g. PHP's vendor/package) wrap inside the title (.title-block), so the toggle never
+   gets pushed down */
 .names {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
   gap: 6px 12px;
   margin: 0 0 4px;
-  font-weight: 700;
-}
-
-.name {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  min-width: 0;
 }
 
 .name-text {
   color: var(--ink);
-  font-family: var(--font-code);
   overflow-wrap: break-word;
   border-bottom: 3px solid var(--side);
 }
 
 .badge-lang {
   padding: 2px 8px;
-  border-radius: 999px;
   border: 1px solid color-mix(in srgb, var(--lang) 60%, transparent);
   background: color-mix(in srgb, var(--lang) 16%, transparent);
   color: var(--ink);
   font-size: 0.72rem;
-  font-weight: 600;
 }
 
 .vs {
-  color: var(--ink-2);
   font-size: 0.9rem;
-  font-weight: 600;
 }
 
 .range {
-  margin: 0;
-  color: var(--ink-2);
   font-size: 0.85rem;
 }
 
 .head-actions {
-  flex: none;
-  display: flex;
-  align-items: center;
   gap: 10px;
 }
 
 .close {
-  position: absolute;
   top: 16px;
   right: 16px;
-  z-index: 1;
-  display: grid;
   place-items: center;
   width: 36px;
   height: 36px;
-  padding: 0;
   border: 1px solid var(--edge);
-  border-radius: 50%;
   background: color-mix(in srgb, var(--ink) 4%, transparent);
   color: var(--ink);
   font-size: 1.3rem;
-  line-height: 1;
   cursor: pointer;
   transition: background-color 200ms var(--ease);
 }
@@ -466,15 +444,12 @@ onBeforeUnmount(() => {
 }
 
 .clear {
-  flex: none;
   height: 36px;
   padding: 0 14px;
   border: 1px solid var(--edge);
-  border-radius: 999px;
   background: transparent;
   color: var(--ink-2);
   font-size: 0.85rem;
-  font-weight: 600;
   cursor: pointer;
   transition:
     background-color 200ms var(--ease),
@@ -488,29 +463,22 @@ onBeforeUnmount(() => {
 
 /* ---------- Layout: body (rows | chart, verdict underneath) ---------- */
 .compare-body {
-  display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
   grid-template-areas:
     'rows chart'
     'verdict verdict';
   gap: 18px 20px;
   padding: 18px 24px 24px;
-  overflow-y: auto;
 }
 
 /* ---------- Components: the six rows ---------- */
 .rows {
   grid-area: rows;
-  display: grid;
-  align-content: start;
   gap: 6px;
 }
 
 .row-line {
-  display: grid;
   grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 1fr);
-  align-items: center;
-  gap: 8px;
   padding: 10px 12px;
   border-radius: 12px;
   background: color-mix(in srgb, var(--ink) 2.5%, transparent);
@@ -528,36 +496,21 @@ onBeforeUnmount(() => {
 }
 
 .col-name {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
   color: var(--ink);
-  font-family: var(--font-code);
   font-size: 0.82rem;
-  font-weight: 600;
   border-bottom: 2px solid var(--side);
-  padding-bottom: 4px;
 }
 
 .row-label {
-  color: var(--ink-2);
   font-size: 0.82rem;
 }
 
 .cell {
-  display: flex;
-  align-items: center;
   gap: 6px;
-  min-width: 0;
-}
-
-.cell-name {
-  display: none;
 }
 
 .cell-value {
   color: var(--ink);
-  font-weight: 600;
   font-size: 0.92rem;
   font-variant-numeric: tabular-nums;
 }
@@ -571,32 +524,24 @@ onBeforeUnmount(() => {
 }
 
 .check {
-  display: inline-grid;
   place-items: center;
   width: 20px;
   height: 20px;
-  border-radius: 50%;
   background: color-mix(in srgb, var(--side) 22%, transparent);
   color: var(--ink);
   font-size: 0.72rem;
-  font-weight: 700;
   animation: pop 350ms var(--ease) calc(var(--i) * 60ms + 380ms) backwards;
 }
 
 /* ---------- Components: chart card ---------- */
 .chart-card {
   grid-area: chart;
-  min-width: 0;
   padding: 14px 14px 10px;
-  border-radius: 16px;
   background: color-mix(in srgb, var(--ink) 2%, transparent);
   border: 1px solid var(--edge);
 }
 
 .chart-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
   gap: 10px;
 }
 
@@ -606,29 +551,17 @@ onBeforeUnmount(() => {
 }
 
 .legend {
-  flex: 1 1 auto;
-  min-width: 0;
-  display: flex;
-  flex-wrap: wrap;
   gap: 6px 14px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
 }
 
 .legend li {
-  display: flex;
-  align-items: center;
   gap: 6px;
-  min-width: 0;
   overflow-wrap: break-word;
   color: var(--ink);
-  font-family: var(--font-code);
   font-size: 0.82rem;
 }
 
 .swatch {
-  flex: none;
   width: 18px;
   height: 3px;
   border-radius: 2px;
@@ -640,8 +573,6 @@ onBeforeUnmount(() => {
 }
 
 .chart-help {
-  margin: 8px 0 4px;
-  color: var(--ink-2);
   font-size: 0.78rem;
 }
 
@@ -661,13 +592,10 @@ onBeforeUnmount(() => {
   border-radius: 0 12px 12px 0;
   background: color-mix(in srgb, var(--accent) 7%, transparent);
   color: var(--ink);
-  font-size: 1rem;
   line-height: 1.55;
 }
 
 .note {
-  margin: 4px 0 0;
-  color: var(--ink-2);
   font-size: 0.8rem;
 }
 
@@ -782,10 +710,6 @@ button:focus-visible {
 
 /* ---------- Responsive (phone): full screen ---------- */
 @media (max-width: 575.98px) {
-  .backdrop {
-    padding: 0;
-  }
-
   .compare {
     width: 100%;
     height: 100%;
@@ -826,22 +750,7 @@ button:focus-visible {
     grid-column: 1 / -1;
   }
 
-  .head-line {
-    display: none;
-  }
-
-  .cell {
-    flex-wrap: wrap;
-  }
-
   .cell-name {
-    display: block;
-    width: 100%;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    color: var(--ink-2);
-    font-family: var(--font-code);
     font-size: 0.72rem;
   }
 

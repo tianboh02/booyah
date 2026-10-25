@@ -14,7 +14,7 @@ const options = [
 <template>
     <div v-if="!isSmallScreen" class="view-toggle d-inline-flex rounded-pill p-1" role="group" aria-label="View">
         <button v-for="opt in options" :key="opt.value" type="button"
-            class="toggle-btn d-inline-flex align-items-center justify-content-center rounded-pill"
+            class="toggle-btn d-inline-flex align-items-center justify-content-center rounded-pill p-0 border-0"
             :class="{ active: view === opt.value }" :aria-pressed="view === opt.value" :aria-label="opt.label"
             :title="opt.label" @click="view = opt.value">
             <!-- Carousel: a front card with two cards peeking behind it -->
@@ -46,10 +46,8 @@ const options = [
 .toggle-btn {
     width: 30px;
     height: 24px;
-    padding: 0;
     color: var(--text-muted-github);
     background-color: transparent;
-    border: 0;
     transition: background-color 0.2s ease, color 0.2s ease;
 }
 

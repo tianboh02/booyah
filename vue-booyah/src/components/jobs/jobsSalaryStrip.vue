@@ -70,11 +70,11 @@ const option = computed(() => {
 
 <template>
     <div>
-        <VChart class="salary-strip" :option="option" autoresize aria-label="Salary bands, one dot per post" />
+        <VChart class="salary-strip w-100" :option="option" autoresize aria-label="Salary bands, one dot per post" />
         <p v-if="stats" class="key small text-muted-github mb-0 d-flex flex-wrap gap-3">
-            <span><i class="swatch band"></i>Typical range (middle 50%)</span>
-            <span><i class="swatch median"></i>Median</span>
-            <span><i class="swatch dot"></i>One posted band</span>
+            <span><i class="swatch band d-inline-block"></i>Typical range (middle 50%)</span>
+            <span><i class="swatch median d-inline-block"></i>Median</span>
+            <span><i class="swatch dot d-inline-block rounded-circle"></i>One posted band</span>
         </p>
     </div>
 </template>
@@ -82,7 +82,6 @@ const option = computed(() => {
 <style scoped>
 .salary-strip {
     height: var(--jobs-chart-h, 200px);
-    width: 100%;
 }
 
 .key {
@@ -90,7 +89,6 @@ const option = computed(() => {
 }
 
 .swatch {
-    display: inline-block;
     width: 10px;
     height: 10px;
     margin-right: 5px;
@@ -108,7 +106,6 @@ const option = computed(() => {
 }
 
 .swatch.dot {
-    border-radius: 50%;
     background: rgba(88, 166, 255, 0.55);
     border: 1px solid #58a6ff;
 }

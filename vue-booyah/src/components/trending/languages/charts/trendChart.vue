@@ -535,27 +535,27 @@ onBeforeUnmount(() => observer && observer.disconnect())
 </script>
 
 <template>
-  <div ref="root" class="trend" :style="{ '--c': color }">
-    <svg ref="svgEl" class="trend-svg" role="img" :aria-label="ariaLabel"></svg>
+  <div ref="root" class="trend position-relative" :style="{ '--c': color }">
+    <svg ref="svgEl" class="d-block overflow-visible" role="img" :aria-label="ariaLabel"></svg>
 
     <!-- Hover box (plain HTML on top of the chart) -->
     <div
       v-show="tip.show"
-      class="tip"
+      class="tip position-absolute text-nowrap pe-none z-2"
       :class="{ below: tip.below }"
       :style="{ left: tip.x + 'px', top: tip.y + 'px' }"
     >
-      <span class="tip-label">{{ tip.label }}</span>
+      <span class="tip-label text-muted-github">{{ tip.label }}</span>
       <strong class="tip-value">{{ tip.value }}</strong>
-      <span v-if="tip.change" class="tip-change" :class="tip.trend">{{ tip.change }}</span>
-      <span v-if="tip.note" class="tip-note">{{ tip.note }}</span>
+      <span v-if="tip.change" class="tip-change fw-semibold" :class="tip.trend">{{ tip.change }}</span>
+      <span v-if="tip.note" class="tip-note text-muted-github fst-italic">{{ tip.note }}</span>
     </div>
 
     <!-- Daily only: the zoom hint, or the button to zoom back out -->
-    <p v-if="zoomable && kind === 'line' && !zoomed" class="help">
+    <p v-if="zoomable && kind === 'line' && !zoomed" class="help position-absolute m-0 text-muted-github">
       Drag across the chart to zoom in
     </p>
-    <button v-if="zoomed" class="reset" @click="resetZoom">
+    <button v-if="zoomed" class="reset position-absolute rounded-pill" @click="resetZoom">
       Show all {{ points.length }} days
     </button>
   </div>
@@ -564,12 +564,7 @@ onBeforeUnmount(() => observer && observer.disconnect())
 <style scoped>
 /* ---------- Layout ---------- */
 .trend {
-  position: relative;
   height: var(--chart-height, 250px); /* the parent sets --chart-height */
-}
-.trend-svg {
-  display: block;
-  overflow: visible;
 }
 
 /* ---------- Colours & theme: the chart parts D3 draws ----------
@@ -636,7 +631,6 @@ onBeforeUnmount(() => observer && observer.disconnect())
 
 /* ---------- Components: hover box ---------- */
 .tip {
-  position: absolute;
   transform: translate(-50%, calc(-100% - 14px));
   display: grid;
   gap: 2px;
@@ -645,15 +639,11 @@ onBeforeUnmount(() => observer && observer.disconnect())
   background: var(--float-bg);
   border: 1px solid var(--edge);
   box-shadow: 0 10px 30px color-mix(in srgb, var(--shadow) 40%, transparent);
-  white-space: nowrap;
-  pointer-events: none;
-  z-index: 2;
 }
 .tip.below {
   transform: translate(-50%, 16px);
 }
 .tip-label {
-  color: var(--ink-2);
   font-size: 0.72rem;
 }
 .tip-value {
@@ -663,7 +653,6 @@ onBeforeUnmount(() => observer && observer.disconnect())
 }
 .tip-change {
   font-size: 0.72rem;
-  font-weight: 600;
 }
 .tip-change.up {
   color: var(--up);
@@ -672,27 +661,20 @@ onBeforeUnmount(() => observer && observer.disconnect())
   color: var(--down);
 }
 .tip-note {
-  color: var(--ink-2);
   font-size: 0.7rem;
-  font-style: italic;
 }
 
 /* ---------- Components: zoom hint and "Show all" button ---------- */
 .help {
-  position: absolute;
   right: 16px;
   top: -4px;
-  margin: 0;
-  color: var(--ink-2);
   font-size: 0.72rem;
 }
 .reset {
-  position: absolute;
   right: 16px;
   top: -8px;
   padding: 4px 10px;
   border: 1px solid var(--edge);
-  border-radius: 999px;
   background: color-mix(in srgb, var(--ink) 5%, transparent);
   color: var(--ink);
   font-size: 0.75rem;

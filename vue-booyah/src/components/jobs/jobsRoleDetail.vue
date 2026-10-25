@@ -35,9 +35,9 @@ onBeforeUnmount(() => document.body.classList.remove('overflow-hidden'))
 
 <template>
     <!-- clicking the dimmed backdrop lands on the <dialog> itself, which closes it -->
-    <dialog ref="dialog" class="role-dialog" aria-labelledby="role-dialog-title" @close="$emit('close')"
+    <dialog ref="dialog" class="role-dialog p-0 border-0 bg-transparent text-reset" aria-labelledby="role-dialog-title" @close="$emit('close')"
         @click.self="dialog.close()">
-        <div class="card role-dialog-body p-4 rounded-3 shadow">
+        <div class="card role-dialog-body overflow-y-auto p-4 rounded-3 shadow">
             <div class="d-flex justify-content-between align-items-start mb-3">
                 <div>
                     <h2 id="role-dialog-title" class="h4 fw-bold section-title mb-1">{{ role }}</h2>
@@ -119,10 +119,6 @@ onBeforeUnmount(() => document.body.classList.remove('overflow-hidden'))
 .role-dialog {
     width: min(1120px, 94vw);
     max-width: none;
-    padding: 0;
-    border: 0;
-    background: transparent;
-    color: inherit;
 }
 
 /* one chart height for every card, so the 2x2 frames line up */
@@ -130,7 +126,6 @@ onBeforeUnmount(() => document.body.classList.remove('overflow-hidden'))
     --jobs-chart-h: 200px;
     font-size: 0.95rem;
     max-height: 90vh;
-    overflow-y: auto;
 }
 
 .role-dialog[open] {

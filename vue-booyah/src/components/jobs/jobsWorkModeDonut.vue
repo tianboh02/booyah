@@ -50,7 +50,7 @@ function onOver(e) {
 <template>
     <div class="d-flex align-items-center gap-3">
         <div class="donut position-relative flex-shrink-0">
-            <VChart :option="option" autoresize aria-label="Work mode split" @mouseover="onOver"
+            <VChart class="w-100 h-100" :option="option" autoresize aria-label="Work mode split" @mouseover="onOver"
                 @mouseout="hovered = null" />
             <div v-if="centre" class="centre position-absolute top-50 start-50 translate-middle text-center pe-none">
                 <div class="centre-value font-monospace fw-bold">{{ pct(centre.value) }}%</div>
@@ -78,11 +78,6 @@ function onOver(e) {
 
 .legend {
     font-size: 0.9rem;
-}
-
-.donut > :first-child {
-    width: 100%;
-    height: 100%;
 }
 
 .centre-value {

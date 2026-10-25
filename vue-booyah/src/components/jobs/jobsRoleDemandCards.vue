@@ -33,7 +33,7 @@ const postsLabel = (r) => (r.count != null ? `${r.count.toLocaleString()} posts`
         <div class="row g-3">
             <!-- Left Card: Roles -->
             <div class="col-md-6">
-                <div v-spotlight class="panel card p-3 h-100 rounded-3 shadow-sm">
+                <div v-spotlight class="spot-card card p-3 h-100 rounded-3 shadow-sm" :style="{ '--accent': '#58a6ff' }">
                     <div class="d-flex align-items-center justify-content-between gap-2 pb-2 mb-2 panel-head">
                         <h3 class="panel-title fw-bold section-title mb-0">Roles</h3>
                         <SegmentedToggle v-if="roles.length > TOP_N" v-model="roleView" label="Roles shown"
@@ -42,17 +42,19 @@ const postsLabel = (r) => (r.count != null ? `${r.count.toLocaleString()} posts`
                     <!-- fixed at five rows tall, so switching to All scrolls instead of resizing the card -->
                     <ul class="roles-list list-unstyled mb-0" :class="{ 'is-scrolling': roleView === 'all' }">
                         <li v-for="(r, i) in visibleRoles" :key="r.name" :style="{ '--i': i }" class="role-item">
-                            <button type="button" class="role-row w-100 text-start"
+                            <button type="button"
+                                class="role-row position-relative d-flex flex-column justify-content-center fs-6 border-0 w-100 text-start"
                                 :aria-label="`${r.name}: ${r.share}% of posts. View details`"
                                 @click="$emit('select', r.name)">
                                 <span class="d-flex align-items-center gap-2">
-                                    <span class="role-name flex-grow-1 text-truncate">{{ r.name }}</span>
-                                    <span v-if="postsLabel(r)" class="row-meta font-monospace text-muted-github">
+                                    <span class="role-name fw-semibold flex-grow-1 text-truncate">{{ r.name }}</span>
+                                    <span v-if="postsLabel(r)" class="row-meta font-monospace text-muted-github text-nowrap">
                                         {{ postsLabel(r) }} ·
                                     </span>
-                                    <span class="share font-monospace">{{ r.share }}%</span>
+                                    <span class="share font-monospace fw-bold text-end">{{ r.share }}%</span>
                                     <!-- round chevron at rest, slides open to "Details" on hover/focus -->
-                                    <span class="details-cta d-inline-flex align-items-center rounded-pill"
+                                    <span
+                                        class="details-cta d-inline-flex align-items-center justify-content-end overflow-hidden rounded-pill fw-semibold text-nowrap"
                                         aria-hidden="true">
                                         <span class="cta-label">Details</span>
                                         <svg class="cta-chevron flex-shrink-0" width="14" height="14" viewBox="0 0 16 16"
@@ -62,13 +64,13 @@ const postsLabel = (r) => (r.count != null ? `${r.count.toLocaleString()} posts`
                                         </svg>
                                     </span>
                                 </span>
-                                <span class="bar-track d-block mt-2">
-                                    <span class="bar-fill d-block" :style="{ width: `${r.share}%` }"></span>
+                                <span class="bar-track position-relative overflow-hidden d-block mt-2">
+                                    <span class="bar-fill d-block h-100" :style="{ width: `${r.share}%` }"></span>
                                 </span>
                             </button>
                         </li>
                     </ul>
-                    <div class="scale d-flex justify-content-between font-monospace text-muted-github mt-1"
+                    <div class="scale d-flex justify-content-between overflow-hidden font-monospace text-muted-github mt-1"
                         aria-hidden="true">
                         <span>0%</span><span>25%</span><span>50%</span><span>75%</span><span>100%</span>
                     </div>
@@ -77,7 +79,8 @@ const postsLabel = (r) => (r.count != null ? `${r.count.toLocaleString()} posts`
 
             <!-- Right Card: Posts Per Month -->
             <div class="col-md-6">
-                <div v-spotlight class="panel card p-3 h-100 rounded-3 shadow-sm d-flex flex-column">
+                <div v-spotlight class="spot-card card p-3 h-100 rounded-3 shadow-sm d-flex flex-column"
+                    :style="{ '--accent': '#58a6ff' }">
                     <div class="d-flex align-items-center justify-content-between gap-2 pb-2 mb-2 panel-head">
                         <h3 class="panel-title fw-bold section-title mb-0">Posts per month</h3>
                         <SegmentedToggle v-model="monthView" label="Chart type"
@@ -97,44 +100,7 @@ const postsLabel = (r) => (r.count != null ? `${r.count.toLocaleString()} posts`
     transition: color 0.2s ease;
 }
 
-.role-name {
-    font-weight: 600;
-}
-
-/* --- Panels: lift + cursor spotlight (same recipe as the My Project and Discovery cards) -- */
-.panel {
-    position: relative;
-    overflow: hidden;
-    isolation: isolate;
-    transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.25s ease, box-shadow 0.25s ease;
-}
-
-.panel::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    background: radial-gradient(300px circle at var(--mx, 50%) var(--my, 50%),
-            color-mix(in srgb, #58a6ff 18%, transparent),
-            transparent 70%);
-}
-
-.panel>* {
-    position: relative;
-}
-
-.panel:hover {
-    transform: translateY(-3px);
-    border-color: color-mix(in srgb, #58a6ff 50%, var(--card-border)) !important;
-    box-shadow: 0 14px 30px -16px color-mix(in srgb, #58a6ff 55%, transparent) !important;
-}
-
-.panel:hover::before {
-    opacity: 1;
-}
-
+/* --- Panels: lift + cursor spotlight come from main.css (.spot-card), tinted blue by --accent -- */
 .panel-head {
     border-bottom: 1px solid var(--card-border);
 }
@@ -186,14 +152,8 @@ const postsLabel = (r) => (r.count != null ? `${r.count.toLocaleString()} posts`
 }
 
 .role-row {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
     height: var(--row-h);
     padding: 0 0.6rem;
-    font-size: 1rem;
-    border: 0;
     border-radius: 0.4rem;
     background: transparent;
     transition: background-color 0.2s ease;
@@ -232,9 +192,7 @@ const postsLabel = (r) => (r.count != null ? `${r.count.toLocaleString()} posts`
 
 .share {
     color: var(--app-text);
-    font-weight: 700;
     min-width: 3rem;
-    text-align: right;
 }
 
 /* Post count slides in on hover, so the resting list stays uncluttered */
@@ -243,7 +201,6 @@ const postsLabel = (r) => (r.count != null ? `${r.count.toLocaleString()} posts`
     opacity: 0;
     transform: translateX(6px);
     transition: opacity 0.2s ease, transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
-    white-space: nowrap;
 }
 
 .role-row:hover .row-meta,
@@ -259,11 +216,7 @@ const postsLabel = (r) => (r.count != null ? `${r.count.toLocaleString()} posts`
     max-width: 26px;
     padding: 0 6px;
     gap: 2px;
-    overflow: hidden;
-    justify-content: flex-end;
     font-size: 0.78rem;
-    font-weight: 600;
-    white-space: nowrap;
     color: #58a6ff;
     background: color-mix(in srgb, #58a6ff 14%, transparent);
     border: 1px solid color-mix(in srgb, #58a6ff 35%, transparent);
@@ -292,20 +245,17 @@ const postsLabel = (r) => (r.count != null ? `${r.count.toLocaleString()} posts`
 
 /* Share bars: true 0-100% scale, with quarter ticks so the scale is readable */
 .bar-track {
-    position: relative;
     height: 8px;
     border-radius: 4px;
     background-color: var(--badge-bg);
     background-image: linear-gradient(90deg, transparent calc(25% - 1px), var(--card-border) calc(25% - 1px) 25%,
             transparent 25% calc(50% - 1px), var(--card-border) calc(50% - 1px) 50%,
             transparent 50% calc(75% - 1px), var(--card-border) calc(75% - 1px) 75%, transparent 75%);
-    overflow: hidden;
 }
 
 /* same side padding and scrollbar gutter as the rows, so the ticks line up with the bars */
 .scale {
     padding: 0 0.6rem;
-    overflow: hidden;
     scrollbar-gutter: stable;
     scrollbar-width: thin;
     font-size: 0.72rem;
@@ -313,7 +263,6 @@ const postsLabel = (r) => (r.count != null ? `${r.count.toLocaleString()} posts`
 }
 
 .bar-fill {
-    height: 100%;
     border-radius: 4px;
     box-shadow: 0 0 10px -1px color-mix(in srgb, #58a6ff 70%, transparent);
     transition: filter 0.2s ease;
@@ -347,8 +296,6 @@ const postsLabel = (r) => (r.count != null ? `${r.count.toLocaleString()} posts`
 
 @media (prefers-reduced-motion: reduce) {
 
-    .panel,
-    .panel::before,
     .role-row,
     .role-row::after,
     .row-meta,
@@ -360,10 +307,6 @@ const postsLabel = (r) => (r.count != null ? `${r.count.toLocaleString()} posts`
     .role-item,
     .bar-fill {
         animation: none !important;
-    }
-
-    .panel:hover {
-        transform: none;
     }
 }
 </style>

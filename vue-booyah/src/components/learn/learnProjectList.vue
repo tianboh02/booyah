@@ -41,8 +41,4 @@ defineProps({
 .project-link {
     color: var(--brand-blue);
 }
-
-.min-w-0 {
-    min-width: 0;
-}
 </style>

@@ -133,36 +133,36 @@ const insight = computed(() => {
       <!-- Only one of these two sections shows at a time; <Transition> fades between them -->
 
       <!-- ===================== Error / nothing yet ===================== -->
-      <section v-if="status === 'error' || !pkg" key="empty" class="empty">
+      <section v-if="status === 'error' || !pkg" key="empty" class="empty d-flex flex-column">
         <h5 class="fw-bold mb-0">No package to show yet</h5>
-        <p class="description">
+        <p class="m-0 text-muted-github lh-base">
           Once {{ language.name }} packages load, pick one to see its downloads here.
         </p>
       </section>
 
       <!-- ===================== Package detail ===================== -->
-      <section v-else :key="language.id + '/' + pkg.name" class="detail">
+      <section v-else :key="language.id + '/' + pkg.name" class="detail d-flex flex-column">
         <!-- Header: rank badge, Explore + Compare buttons, then the name on its own line -->
-        <div class="head">
-          <span class="rank-badge" :title="`Ranked by downloads in the ${info.latest}`">
+        <div class="head d-flex align-items-center flex-wrap">
+          <span class="rank-badge flex-shrink-0 fw-bold" :title="`Ranked by downloads in the ${info.latest}`">
             #{{ pkg.displayRank }}<small> of {{ packages.length }}</small>
           </span>
-          <span class="spacer"></span>
-          <h3 class="title">{{ pkg.name }}</h3>
-          <div class="actions">
+          <span class="flex-grow-1"></span>
+          <h3 class="title order-3 m-0 font-monospace fw-semibold min-w-0">{{ pkg.name }}</h3>
+          <div class="actions d-flex gap-2">
             <a
               v-if="exploreUrl"
-              class="explore-btn"
+              class="explore-btn d-inline-flex align-items-center rounded-pill bg-transparent fw-semibold text-decoration-none"
               :href="exploreUrl"
               target="_blank"
               rel="noopener noreferrer"
               :aria-label="`Explore ${pkg.name} on ${language.registry} (opens in a new tab)`"
             >
-              Explore <span class="explore-arrow" aria-hidden="true">↗</span>
+              Explore <span class="explore-arrow d-inline-block" aria-hidden="true">↗</span>
             </a>
             <button
               type="button"
-              class="compare-btn"
+              class="compare-btn rounded-pill fw-semibold"
               :class="{ added }"
               :aria-pressed="added"
               @click="$emit('add', pkg.name)"
@@ -175,10 +175,10 @@ const insight = computed(() => {
 
         <!-- Headline: the big number and its % change -->
         <div class="headline">
-          <span class="headline-number">{{ num(shownDownloads) }}</span>
-          <span class="headline-text">
+          <span class="headline-number d-block fw-bold lh-1">{{ num(shownDownloads) }}</span>
+          <span class="headline-text d-block text-muted-github">
             downloads, {{ info.latest }}
-            <span class="change" :class="trendClass(change)"
+            <span class="change fw-bold text-nowrap" :class="trendClass(change)"
               >{{ trendArrow(change) }} {{ pct(change) }}</span
             >
             vs {{ info.previous }}
@@ -197,19 +197,19 @@ const insight = computed(() => {
         />
 
         <!-- Fact cards (only those with data) -->
-        <dl class="facts">
+        <dl class="facts d-grid m-0 mt-1">
           <div v-for="fact in facts" :key="fact.label" class="fact">
-            <dt>{{ fact.label }}</dt>
-            <dd :class="{ code: fact.code }">
-              {{ fact.value }}<small v-if="fact.small"> {{ fact.small }}</small>
+            <dt class="text-muted-github fw-normal">{{ fact.label }}</dt>
+            <dd class="fw-semibold" :class="{ code: fact.code }">
+              {{ fact.value }}<small v-if="fact.small" class="ms-1 text-muted-github fw-normal"> {{ fact.small }}</small>
             </dd>
           </div>
         </dl>
 
         <!-- Insight sentence and description -->
-        <p class="insight">{{ insight }}</p>
+        <p class="insight m-0">{{ insight }}</p>
 
-        <p v-if="pkg.description" class="description">{{ pkg.description }}</p>
+        <p v-if="pkg.description" class="m-0 text-muted-github lh-base">{{ pkg.description }}</p>
       </section>
     </Transition>
   </aside>
@@ -239,28 +239,21 @@ const insight = computed(() => {
 
 .detail,
 .empty {
-  display: flex;
-  flex-direction: column;
   gap: 14px;
 }
 
 /* ---------- Components: header ---------- */
 .head {
-  display: flex;
-  align-items: center;
   gap: 12px;
-  flex-wrap: wrap;
 }
 
 .rank-badge {
-  flex: none;
   padding: 4px 10px;
   border-radius: 10px;
   background: color-mix(in srgb, var(--accent) 16%, transparent);
   border: 1px solid color-mix(in srgb, var(--accent-line) 50%, transparent);
   color: var(--ink);
   font-size: 1.05rem;
-  font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
 
@@ -275,19 +268,10 @@ const insight = computed(() => {
   font-weight: 400;
 }
 
-.head .spacer {
-  flex: 1;
-}
-
-/* the name gets its own line under the rank badge and the Compare button */
+/* the name gets its own line (order-3) under the rank badge and the Compare button */
 .title {
-  order: 3;
   flex: 1 1 100%;
-  min-width: 0;
-  margin: 0;
-  font-family: var(--font-code);
   font-size: clamp(1.4rem, 2.4vw, 2rem);
-  font-weight: 600;
   letter-spacing: -0.02em;
   line-height: 1.1;
   color: var(--ink);
@@ -298,11 +282,9 @@ const insight = computed(() => {
   flex: none;
   padding: 7px 14px;
   border: 1px solid color-mix(in srgb, var(--accent-line) 60%, transparent);
-  border-radius: 999px;
   background: color-mix(in srgb, var(--accent) 12%, transparent);
   color: var(--ink);
   font-size: 0.85rem;
-  font-weight: 600;
   cursor: pointer;
   transition:
     background-color 200ms var(--ease),
@@ -340,25 +322,17 @@ const insight = computed(() => {
 /* Explore + Compare stay together, so they wrap as one group */
 .actions {
   flex: none;
-  display: flex;
-  gap: 8px;
 }
 
 /* Explore: outline version of the Compare pill, so Compare stays the main action */
 .explore-btn {
   flex: none;
-  display: inline-flex;
-  align-items: center;
   gap: 5px;
   padding: 7px 14px;
   border: 1px solid color-mix(in srgb, var(--accent-line) 45%, transparent);
-  border-radius: 999px;
-  background: transparent;
   color: var(--ink-2);
   font-size: 0.85rem;
-  font-weight: 600;
   line-height: normal;
-  text-decoration: none;
   transition:
     border-color 200ms var(--ease),
     color 200ms var(--ease),
@@ -366,7 +340,6 @@ const insight = computed(() => {
 }
 
 .explore-arrow {
-  display: inline-block;
   transition: transform 200ms var(--ease);
 }
 
@@ -386,25 +359,18 @@ const insight = computed(() => {
 
 /* ---------- Components: headline ---------- */
 .headline-number {
-  display: block;
   color: var(--ink);
   font-size: clamp(2.1rem, 3.4vw, 3rem);
-  font-weight: 700;
   letter-spacing: -0.03em;
-  line-height: 1;
   font-variant-numeric: tabular-nums;
 }
 
 .headline-text {
-  display: block;
   margin-top: 6px;
-  color: var(--ink-2);
   font-size: 0.92rem;
 }
 
 .change {
-  font-weight: 700;
-  white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
 
@@ -426,10 +392,8 @@ const insight = computed(() => {
 
 /* ---------- Components: fact cards, insight, description ---------- */
 .facts {
-  display: grid;
   grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
   gap: 10px;
-  margin: 4px 0 0;
 }
 
 .fact {
@@ -440,24 +404,18 @@ const insight = computed(() => {
 }
 
 .fact dt {
-  color: var(--ink-2);
   font-size: 0.75rem;
-  font-weight: 400;
 }
 
 .fact dd {
   margin: 6px 0 0;
   color: var(--ink);
   font-size: 1.08rem;
-  font-weight: 600;
   font-variant-numeric: tabular-nums;
   overflow-wrap: anywhere;
 }
 
 .fact dd small {
-  margin-left: 4px;
-  color: var(--ink-2);
-  font-weight: 400;
   font-size: 0.78rem;
 }
 
@@ -467,7 +425,6 @@ const insight = computed(() => {
 }
 
 .insight {
-  margin: 0;
   padding: 12px 16px;
   border-left: 3px solid var(--accent-line);
   border-radius: 0 10px 10px 0;
@@ -475,12 +432,6 @@ const insight = computed(() => {
   color: var(--ink);
   font-size: 0.9rem;
   line-height: 1.55;
-}
-
-.description {
-  margin: 0;
-  color: var(--ink-2);
-  line-height: 1.5;
 }
 
 /* ---------- Animations ----------

@@ -7,7 +7,7 @@ const experience = ref('Newcomer')
 </script>
 
 <template>
-    <main class="setup-stage d-flex flex-column justify-content-center">
+    <main class="setup-stage position-relative min-vh-100 py-5 d-flex flex-column justify-content-center">
         <Setup :experience="experience" />
         <ExperienceForm v-model:experience="experience" />
     </main>
@@ -15,10 +15,7 @@ const experience = ref('Newcomer')
 
 <style scoped>
 .setup-stage {
-    position: relative;
     isolation: isolate;
-    min-height: 100vh;
     overflow-x: clip;
-    padding-block: 3rem;
 }
 </style>

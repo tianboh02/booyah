@@ -45,18 +45,19 @@ function onKey(event) {
 <template>
   <!-- The pill: a sliding thumb behind one button per option -->
   <div
-    class="segmented"
+    class="segmented position-relative d-grid rounded-pill"
     role="radiogroup"
     :aria-label="ariaLabel"
     :style="{ '--count': periods.length, '--index': index }"
     @keydown="onKey"
   >
-    <span class="thumb"></span>
+    <span class="thumb position-absolute rounded-pill"></span>
     <button
       v-for="p in periods"
       :key="p"
       type="button"
       role="radio"
+      class="position-relative border-0 bg-transparent fw-semibold text-nowrap"
       :aria-checked="modelValue === p"
       :tabindex="modelValue === p ? 0 : -1"
       :class="{ active: modelValue === p }"
@@ -71,11 +72,8 @@ function onKey(event) {
 /* ---------- Layout ---------- */
 /* equal-width columns, one per option (--count is set in the template) */
 .segmented {
-  position: relative;
-  display: grid;
   grid-template-columns: repeat(var(--count), 1fr);
   padding: 3px;
-  border-radius: 999px;
   background: color-mix(in srgb, var(--ink) 4%, transparent);
   border: 1px solid var(--edge);
 }
@@ -83,12 +81,10 @@ function onKey(event) {
 /* ---------- Components ---------- */
 /* the thumb is one column wide and slides --index columns to the right */
 .thumb {
-  position: absolute;
   top: 3px;
   bottom: 3px;
   left: 3px;
   width: calc((100% - 6px) / var(--count));
-  border-radius: 999px;
   background: color-mix(in srgb, var(--accent) 22%, color-mix(in srgb, var(--ink) 4%, transparent));
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent-line) 55%, transparent);
   transform: translateX(calc(var(--index) * 100%));
@@ -103,14 +99,9 @@ function onKey(event) {
 }
 
 button {
-  position: relative;
   padding: 7px 16px;
-  border: 0;
-  background: none;
   color: var(--ink-2);
   font-size: 0.86rem;
-  font-weight: 600;
-  white-space: nowrap;
   cursor: pointer;
   transition: color 250ms var(--ease);
 }

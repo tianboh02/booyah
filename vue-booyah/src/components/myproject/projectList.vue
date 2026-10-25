@@ -108,7 +108,7 @@ const pad = (n) => String(n).padStart(2, '0')
     <div id="repo-list" class="mb-4">
         <!-- Repo card, written once and used by both the carousel and the list -->
         <DefineRepoCard v-slot="{ repo, index, inRing }">
-            <div v-spotlight class="repo-card card p-3 rounded-3 shadow-sm" :class="inRing ? 'h-100' : 'mb-3'"
+            <div v-spotlight class="repo-card card overflow-hidden p-3 rounded-3 shadow-sm" :class="inRing ? 'h-100' : 'mb-3'"
                 :style="{ '--lang': getLangColor(langOf(repo)), '--i': Math.min(index, 10) }">
                 <div class="d-flex align-items-center gap-2 mb-2">
                     <h5 class="card-title h6 fw-bold mb-0 text-truncate min-w-0" :title="repo.name">
@@ -134,7 +134,7 @@ const pad = (n) => String(n).padStart(2, '0')
 
                 <!-- Metadata Row -->
                 <div class="d-flex align-items-center gap-3 text-muted-github small flex-wrap">
-                    <button type="button" class="lang-link d-flex align-items-center gap-1 rounded-2"
+                    <button type="button" class="lang-link d-flex align-items-center gap-1 rounded-2 position-relative z-2"
                         :class="{ 'is-selected': selectedLang === langOf(repo) }"
                         :title="selectedLang === langOf(repo) ? 'Clear filter' : 'Filter by ' + langOf(repo)"
                         @click="toggleLang(langOf(repo))">
@@ -358,8 +358,6 @@ const pad = (n) => String(n).padStart(2, '0')
 
 /* --- Repo cards ----------------------------------------------------------- */
 .repo-card {
-    position: relative;
-    overflow: hidden;
     isolation: isolate;
     transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.25s ease, box-shadow 0.25s ease;
 }
@@ -440,8 +438,6 @@ const pad = (n) => String(n).padStart(2, '0')
     border: 1px solid transparent;
     padding: 0.1rem 0.4rem;
     margin-left: -0.4rem;
-    position: relative;
-    z-index: 2;
     cursor: pointer;
     transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }

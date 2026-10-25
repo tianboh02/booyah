@@ -103,9 +103,9 @@ watch(
 
                 <!-- Saved count -->
                 <div class="col">
-                    <div v-tilt="5" v-spotlight class="card stat-card p-3 h-100 rounded-3 shadow-sm"
+                    <div v-tilt="5" v-spotlight class="card stat-card overflow-hidden p-3 h-100 rounded-3 shadow-sm"
                         :class="{ 'is-in': ready, 'is-focused': focused }" :style="{ '--i': 0, '--accent': accent }">
-                        <span class="stat-top h3 fw-bold stat-value mb-1 font-monospace">{{ countUp }}</span>
+                        <span class="stat-top d-flex align-items-center h3 fw-bold stat-value mb-1 font-monospace">{{ countUp }}</span>
                         <span class="stat-label fw-semibold small">
                             {{ focused ? 'Matching projects' : 'Saved projects' }}
                         </span>
@@ -117,12 +117,14 @@ watch(
 
                 <!-- Top / selected category -->
                 <div class="col">
-                    <div v-tilt="5" v-spotlight class="card stat-card p-3 h-100 rounded-3 shadow-sm"
+                    <div v-tilt="5" v-spotlight class="card stat-card overflow-hidden p-3 h-100 rounded-3 shadow-sm"
                         :class="{ 'is-in': ready, 'is-focused': selectedCategory }"
                         :style="{ '--i': 1, '--accent': headlineColor }">
-                        <span class="stat-top stat-lang fw-bold mb-1 d-flex align-items-center gap-2 font-monospace">
-                            <span class="accent-dot flex-shrink-0"></span>
-                            <span class="stat-name stat-value" :title="headline.name">{{ headline.name }}</span>
+                        <!-- min-w-0 lets a long name shrink to "…" (on the name only). The row itself does not hide
+                             overflow, so the dot's glow is never cut off. -->
+                        <span class="stat-top min-w-0 fw-bold mb-1 d-flex align-items-center gap-2 font-monospace">
+                            <span class="accent-dot d-inline-block rounded-circle flex-shrink-0"></span>
+                            <span class="stat-name stat-value line-clamp-2" :title="headline.name">{{ headline.name }}</span>
                         </span>
                         <span class="stat-label fw-semibold small">
                             {{ selectedCategory ? 'Selected category' : 'Top category' }}
@@ -135,10 +137,10 @@ watch(
 
                 <!-- Stars -->
                 <div class="col">
-                    <div v-tilt="5" v-spotlight class="card stat-card p-3 h-100 rounded-3 shadow-sm"
+                    <div v-tilt="5" v-spotlight class="card stat-card overflow-hidden p-3 h-100 rounded-3 shadow-sm"
                         :class="{ 'is-in': ready, 'is-focused': focused }"
                         :style="{ '--i': 2, '--accent': focused ? accent : '#e3b341' }">
-                        <span class="stat-top h3 fw-bold stat-value mb-1 font-monospace">{{ starsUp.toLocaleString('en-US')
+                        <span class="stat-top d-flex align-items-center h3 fw-bold stat-value mb-1 font-monospace">{{ starsUp.toLocaleString('en-US')
                         }}</span>
                         <span class="stat-label fw-semibold small">Combined stars</span>
                         <span class="text-muted-github small">
@@ -175,8 +177,6 @@ watch(
 }
 
 .stat-card {
-    position: relative;
-    overflow: hidden;
     isolation: isolate;
     transform: perspective(700px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
     transition: transform 0.2s ease-out, border-color 0.3s ease, box-shadow 0.3s ease,
@@ -233,17 +233,9 @@ watch(
     transform: scaleX(1);
 }
 
-/* min-width: 0 lets a long name shrink to "…" (on the name only). The row itself does not hide
-   overflow, so the dot's glow is never cut off. */
-.stat-lang {
-    min-width: 0;
-}
-
 .accent-dot {
-    display: inline-block;
     width: 12px;
     height: 12px;
-    border-radius: 50%;
     background-color: var(--accent);
     /* two layers: a tight core and a wide soft halo, so the glow fades out smoothly */
     box-shadow: 0 0 6px color-mix(in srgb, var(--accent) 70%, transparent),
@@ -254,8 +246,6 @@ watch(
 /* All three top rows share one height (two lines of the category name), so the labels line up
    whatever the length of the name. */
 .stat-top {
-    display: flex;
-    align-items: center;
     min-height: 2.9rem;
 }
 
@@ -263,11 +253,6 @@ watch(
     font-size: 1.05rem;
     line-height: 1.3;
     text-wrap: balance;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
     overflow-wrap: anywhere;
 }
 

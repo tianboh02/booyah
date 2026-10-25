@@ -62,22 +62,24 @@ onBeforeUnmount(() => clearTimeout(savedTimer))
 </script>
 
 <template>
-    <section class="settings-card card rounded-4 p-4">
+    <section class="card overflow-hidden rounded-4 p-4">
         <h2 class="h5 fw-bold card-heading mb-1">Experience level</h2>
         <p class="text-muted-github mb-4">Decides which tab you land on after signing in.</p>
 
         <div class="row g-3" role="radiogroup" aria-label="Experience level">
             <div v-for="opt in options" :key="opt.value" class="col-sm-6 d-flex">
-                <label v-spotlight class="option-card w-100 p-3 rounded-4 border position-relative"
+                <label v-spotlight
+                    class="option-card d-flex flex-column overflow-hidden w-100 p-3 rounded-4 border position-relative"
                     :class="{ selected: draft === opt.value }"
                     :style="{ '--accent': opt.accent, '--accent2': opt.accent2 }">
 
-                    <span class="glow-border" aria-hidden="true"></span>
+                    <span class="glow-border position-absolute top-0 bottom-0 start-0 end-0 pe-none"
+                        aria-hidden="true"></span>
 
                     <div class="d-flex align-items-center gap-3 mb-2">
-                        <input class="radio-input" type="radio" name="settings-experience"
+                        <input class="radio-input position-absolute opacity-0" type="radio" name="settings-experience"
                             :id="'settings-exp-' + opt.value" :value="opt.value" v-model="draft">
-                        <span class="radio-dot flex-shrink-0" aria-hidden="true"></span>
+                        <span class="radio-dot position-relative rounded-circle flex-shrink-0" aria-hidden="true"></span>
                         <div class="fw-semibold option-title fs-5">{{ opt.title }}</div>
                     </div>
 
@@ -90,7 +92,7 @@ onBeforeUnmount(() => clearTimeout(savedTimer))
         <!-- What happens next, updates as you pick -->
         <Transition name="swap" mode="out-in">
             <p :key="current.lands" class="landing-note small d-flex align-items-start gap-2 mt-3 mb-0">
-                <span class="note-dot rounded-circle" :style="{ backgroundColor: current.accent }"></span>
+                <span class="note-dot rounded-circle flex-shrink-0" :style="{ backgroundColor: current.accent }"></span>
                 <span>Next time you sign in, you'll land on <strong>{{ current.lands }}</strong>.</span>
             </p>
         </Transition>
@@ -106,13 +108,6 @@ onBeforeUnmount(() => clearTimeout(savedTimer))
     initial-value: 0deg;
 }
 
-.settings-card {
-    position: relative;
-    overflow: hidden;
-    background-color: var(--card-bg);
-    border: 1px solid var(--card-border);
-}
-
 .card-heading,
 .option-title {
     color: var(--app-text);
@@ -120,10 +115,7 @@ onBeforeUnmount(() => clearTimeout(savedTimer))
 
 /* --- Option cards (same look as the setup page) ----------------------------- */
 .option-card {
-    display: flex;
-    flex-direction: column;
     cursor: pointer;
-    overflow: hidden;
     isolation: isolate;
     background-color: color-mix(in srgb, var(--card-bg) 80%, transparent);
     border-color: var(--card-border) !important;
@@ -160,8 +152,6 @@ onBeforeUnmount(() => clearTimeout(savedTimer))
 }
 
 .glow-border {
-    position: absolute;
-    inset: 0;
     border-radius: inherit;
     padding: 2px;
     background: conic-gradient(from var(--angle), var(--accent), transparent 30%, var(--accent2) 55%, transparent 80%, var(--accent));
@@ -171,7 +161,6 @@ onBeforeUnmount(() => clearTimeout(savedTimer))
     opacity: 0;
     transition: opacity 0.4s ease;
     animation: spin-angle 5s linear infinite;
-    pointer-events: none;
 }
 
 .option-card.selected .glow-border {
@@ -186,17 +175,13 @@ onBeforeUnmount(() => clearTimeout(savedTimer))
 
 /* --- Custom radio ------------------------------------------------------------ */
 .radio-input {
-    position: absolute;
-    opacity: 0;
     width: 1px;
     height: 1px;
 }
 
 .radio-dot {
-    position: relative;
     width: 24px;
     height: 24px;
-    border-radius: 50%;
     border: 2px solid var(--card-border);
     transition: border-color 0.25s ease, box-shadow 0.25s ease;
 }
@@ -256,7 +241,6 @@ onBeforeUnmount(() => clearTimeout(savedTimer))
 .note-dot {
     width: 8px;
     height: 8px;
-    flex-shrink: 0;
     /* centre the dot on the first line of text, even when the sentence wraps */
     margin-top: calc((1.5em - 8px) / 2);
     transition: background-color 0.3s ease;

@@ -85,37 +85,38 @@ onBeforeUnmount(() => observer && observer.disconnect())
 </script>
 
 <template>
-  <div class="bar card rounded-4 mb-3">
+  <div
+    class="bar card flex-row align-items-center justify-content-between flex-wrap column-gap-3 rounded-4 mb-3">
     <!-- Language tabs -->
-    <div ref="tabsEl" class="tabs" role="tablist" aria-label="Languages" @keydown="onTabKey">
+    <div ref="tabsEl" class="tabs position-relative d-flex gap-1" role="tablist" aria-label="Languages" @keydown="onTabKey">
       <button
         v-for="lang in languages"
         :key="lang.id"
         :ref="(el) => (tabEls[lang.id] = el)"
         type="button"
         role="tab"
-        class="tab"
+        class="tab d-flex align-items-baseline justify-content-center justify-content-sm-start gap-2 border-0"
         :class="{ active: lang.id === languageId }"
         :aria-selected="lang.id === languageId"
         :tabindex="lang.id === languageId ? 0 : -1"
         :style="{ '--tab-accent': lineAccent(lang, theme) }"
         @click="$emit('update:languageId', lang.id)"
       >
-        <span class="tab-dot"></span>
-        <span class="tab-name">{{ lang.name }}</span>
-        <span class="tab-registry">{{ lang.registry }}</span>
+        <span class="tab-dot align-self-center rounded-circle"></span>
+        <span class="fw-semibold">{{ lang.name }}</span>
+        <span class="tab-registry d-none d-sm-inline">{{ lang.registry }}</span>
       </button>
       <!-- The glowing line under the open tab -->
-      <span class="indicator" :style="indicatorStyle"></span>
+      <span class="indicator position-absolute start-0" :style="indicatorStyle"></span>
     </div>
 
     <!-- Data status + period toggle -->
-    <div class="right">
-      <p class="status" aria-live="polite">
+    <div class="right d-flex align-items-center flex-wrap column-gap-3 justify-content-between justify-content-sm-start">
+      <p class="status d-flex align-items-center gap-2 m-0 text-muted-github" aria-live="polite">
         <template v-if="status === 'loading'">Loading from {{ current.registry }}…</template>
         <template v-else-if="status === 'error'">Couldn't reach {{ current.registry }}</template>
         <template v-else-if="dataUpTo">
-          <span class="live-dot"></span>Latest Update: {{ longDate(dataUpTo) }}
+          <span class="live-dot rounded-circle"></span>Latest Update: {{ longDate(dataUpTo) }}
         </template>
       </p>
       <PeriodToggle
@@ -131,27 +132,13 @@ onBeforeUnmount(() => observer && observer.disconnect())
 <style scoped>
 /* ---------- Layout ---------- */
 .bar {
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px 16px;
-  flex-wrap: wrap;
+  row-gap: 12px;
   padding: 6px 8px 6px 6px;
 }
 
 /* ---------- Components: tabs ---------- */
-.tabs {
-  position: relative;
-  display: flex;
-  gap: 4px;
-}
-
 .tab {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
   padding: 10px 16px 12px;
-  border: 0;
   border-radius: 11px;
   background: none;
   color: var(--ink-2);
@@ -171,10 +158,8 @@ onBeforeUnmount(() => observer && observer.disconnect())
 }
 
 .tab-dot {
-  align-self: center;
   width: 9px;
   height: 9px;
-  border-radius: 50%;
   background: var(--tab-accent);
   transition: box-shadow 300ms var(--ease);
 }
@@ -190,10 +175,6 @@ onBeforeUnmount(() => observer && observer.disconnect())
   box-shadow: none;
 }
 
-.tab-name {
-  font-weight: 600;
-}
-
 .tab-registry {
   font-size: 0.78rem;
   color: var(--ink-3);
@@ -201,8 +182,6 @@ onBeforeUnmount(() => observer && observer.disconnect())
 
 /* the sliding line; its position comes from indicatorStyle in the script */
 .indicator {
-  position: absolute;
-  left: 0;
   bottom: 2px;
   height: 2px;
   border-radius: 2px;
@@ -216,25 +195,16 @@ onBeforeUnmount(() => observer && observer.disconnect())
 
 /* ---------- Components: status + toggle ---------- */
 .right {
-  display: flex;
-  align-items: center;
-  gap: 12px 16px;
-  flex-wrap: wrap;
+  row-gap: 12px;
 }
 
 .status {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 0;
-  color: var(--ink-2);
   font-size: 0.8rem;
 }
 
 .live-dot {
   width: 7px;
   height: 7px;
-  border-radius: 50%;
   background: var(--up);
   animation: pulse 2.4s ease-in-out infinite;
 }
@@ -266,17 +236,11 @@ button:focus-visible {
 
   .tab {
     flex: 1;
-    justify-content: center;
     padding: 10px 6px 12px;
-  }
-
-  .tab-registry {
-    display: none;
   }
 
   .right {
     width: 100%;
-    justify-content: space-between;
   }
 }
 

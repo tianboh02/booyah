@@ -53,27 +53,29 @@ const itemAccent = (item) => {
 
 <template>
   <Transition name="tray">
-    <div v-if="items.length" class="tray" role="region" aria-label="Compare tray">
+    <div v-if="items.length" class="tray position-fixed d-flex flex-column align-items-center pe-none" role="region"
+      aria-label="Compare tray">
       <!-- Short warning above the bar, e.g. "Compare holds 2 packages…" -->
       <Transition name="msg">
-        <p v-if="message" class="tray-msg" role="status">{{ message }}</p>
+        <p v-if="message" class="tray-msg m-0 mb-2 pe-auto mw-100 text-center" role="status">{{ message }}</p>
       </Transition>
 
-      <div class="tray-inner">
+      <div class="tray-inner d-flex align-items-center flex-wrap justify-content-center pe-auto mw-100">
         <!-- The picked packages ("vs" between them), or a hint to pick one more -->
-        <TransitionGroup name="item" tag="ul" class="tray-items">
-          <li v-for="(item, i) in items" :key="item.id" class="entry">
-            <span v-if="i > 0" class="vs">vs</span>
+        <TransitionGroup name="item" tag="ul"
+          class="tray-items d-flex align-items-center flex-wrap m-0 list-unstyled min-w-0">
+          <li v-for="(item, i) in items" :key="item.id" class="entry d-flex align-items-center min-w-0">
+            <span v-if="i > 0" class="vs text-muted-github fw-semibold">vs</span>
             <span
-              class="item"
+              class="item d-flex align-items-center min-w-0 rounded-pill"
               :style="{ '--item-accent': itemAccent(item), '--item-fill': item.accent }"
             >
-              <span class="item-dot"></span>
-              <span class="item-name">{{ item.name }}</span>
-              <span class="item-lang">({{ languageName(item.languageId) }})</span>
+              <span class="item-dot flex-shrink-0 rounded-circle"></span>
+              <span class="item-name text-truncate font-monospace">{{ item.name }}</span>
+              <span class="item-lang text-muted-github text-nowrap">({{ languageName(item.languageId) }})</span>
               <button
                 type="button"
-                class="remove"
+                class="remove d-grid p-0 border-0 rounded-circle fs-6 lh-1"
                 :aria-label="`Remove ${item.name} from compare`"
                 @click="$emit('remove', item.id)"
               >
@@ -82,20 +84,20 @@ const itemAccent = (item) => {
             </span>
           </li>
           <!-- The 2nd slot, filled from the wheel: changes as you scroll, "+" locks it in -->
-          <li v-if="showSuggestion" key="suggestion" class="entry">
-            <span class="vs">vs</span>
+          <li v-if="showSuggestion" key="suggestion" class="entry d-flex align-items-center min-w-0">
+            <span class="vs text-muted-github fw-semibold">vs</span>
             <span
-              class="item suggested"
+              class="item suggested d-flex align-items-center min-w-0 rounded-pill"
               :style="{ '--item-accent': itemAccent(suggestion), '--item-fill': suggestion.accent }"
               title="Follows the package selected in the wheel"
             >
-              <span class="item-dot"></span>
-              <span class="item-name" aria-live="polite">{{ suggestion.name }}</span>
-              <span class="item-lang">({{ languageName(suggestion.languageId) }})</span>
-              <span class="item-hint" aria-hidden="true">↕ scroll to change</span>
+              <span class="item-dot flex-shrink-0 rounded-circle"></span>
+              <span class="item-name text-truncate font-monospace" aria-live="polite">{{ suggestion.name }}</span>
+              <span class="item-lang text-muted-github text-nowrap">({{ languageName(suggestion.languageId) }})</span>
+              <span class="item-hint d-none d-sm-inline text-nowrap" aria-hidden="true">↕ scroll to change</span>
               <button
                 type="button"
-                class="remove pin"
+                class="remove d-grid p-0 border-0 rounded-circle fs-6 fw-bold lh-1"
                 :aria-label="`Keep ${suggestion.name} as the second package`"
                 title="Keep this one"
                 @click="$emit('pin', suggestion.name)"
@@ -104,22 +106,22 @@ const itemAccent = (item) => {
               </button>
             </span>
           </li>
-          <li v-else-if="!ready" key="hint" class="hint">
+          <li v-else-if="!ready" key="hint" class="hint text-muted-github">
             Scroll the wheel to pick a second package
           </li>
         </TransitionGroup>
 
         <!-- Clear + Compare buttons -->
-        <div class="tray-actions">
+        <div class="tray-actions d-flex gap-2">
           <button
             type="button"
-            class="clear"
+            class="clear fw-semibold"
             aria-label="Clear all packages from compare"
             @click="$emit('clear')"
           >
             Clear
           </button>
-          <button type="button" class="go" :disabled="!canCompare" @click="$emit('compare')">
+          <button type="button" class="go border-0 fw-bold" :disabled="!canCompare" @click="$emit('compare')">
             Compare
           </button>
         </div>
@@ -133,25 +135,14 @@ const itemAccent = (item) => {
    The outer .tray is fixed to the bottom of the window and lets clicks pass through;
    only the bar itself (.tray-inner) takes clicks. */
 .tray {
-  position: fixed;
   left: 16px;
   right: 16px;
   bottom: 16px;
   z-index: 1040;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  pointer-events: none; /* only the bar itself takes clicks */
 }
 
 .tray-inner {
-  pointer-events: auto;
-  max-width: 100%;
-  display: flex;
-  align-items: center;
   gap: 10px 14px;
-  flex-wrap: wrap;
-  justify-content: center;
   padding: 10px 10px 10px 16px;
   border: 1px solid var(--edge);
   border-radius: 18px;
@@ -164,39 +155,23 @@ const itemAccent = (item) => {
 
 /* ---------- Components: picked packages ---------- */
 .tray-items {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
   gap: 8px 10px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  min-width: 0;
 }
 
 .entry {
-  display: flex;
-  align-items: center;
   gap: 10px;
-  min-width: 0;
 }
 
 .item {
-  display: flex;
-  align-items: center;
   gap: 6px;
-  min-width: 0;
   padding: 4px 4px 4px 10px;
   border: 1px solid color-mix(in srgb, var(--item-accent) 45%, transparent);
-  border-radius: 999px;
   background: color-mix(in srgb, var(--item-accent) 10%, transparent);
 }
 
 .item-dot {
-  flex: none;
   width: 8px;
   height: 8px;
-  border-radius: 50%;
   background: var(--item-accent);
   box-shadow: 0 0 8px var(--item-accent);
 }
@@ -207,33 +182,21 @@ const itemAccent = (item) => {
 }
 
 .item-name {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
   max-width: 22ch;
   color: var(--ink);
-  font-family: var(--font-code);
   font-size: 0.88rem;
 }
 
 .item-lang {
-  color: var(--ink-2);
   font-size: 0.8rem;
-  white-space: nowrap;
 }
 
 .remove {
-  display: grid;
   place-items: center;
   width: 24px;
   height: 24px;
-  padding: 0;
-  border: 0;
-  border-radius: 50%;
   background: color-mix(in srgb, var(--ink) 6%, transparent);
   color: var(--ink-2);
-  font-size: 1rem;
-  line-height: 1;
   cursor: pointer;
   transition:
     background-color 200ms var(--ease),
@@ -264,37 +227,23 @@ const itemAccent = (item) => {
 .item-hint {
   color: var(--ink-3);
   font-size: 0.72rem;
-  white-space: nowrap;
-}
-
-.pin {
-  font-weight: 700;
 }
 
 .vs {
-  color: var(--ink-2);
   font-size: 0.8rem;
-  font-weight: 600;
 }
 
 .hint {
-  color: var(--ink-2);
   font-size: 0.82rem;
 }
 
 /* ---------- Components: buttons and message ---------- */
-.tray-actions {
-  display: flex;
-  gap: 8px;
-}
-
 .clear {
   padding: 8px 14px;
   border: 1px solid var(--edge);
   border-radius: 12px;
   background: transparent;
   color: var(--ink-2);
-  font-weight: 600;
   cursor: pointer;
   transition:
     background-color 200ms var(--ease),
@@ -308,11 +257,9 @@ const itemAccent = (item) => {
 
 .go {
   padding: 8px 18px;
-  border: 0;
   border-radius: 12px;
   background: var(--ink);
   color: var(--bg);
-  font-weight: 700;
   cursor: pointer;
   transition:
     opacity 200ms var(--ease),
@@ -329,17 +276,13 @@ const itemAccent = (item) => {
 }
 
 .tray-msg {
-  margin: 0 0 8px;
-  pointer-events: auto;
   width: fit-content;
-  max-width: 100%;
   padding: 6px 12px;
   border: 1px solid color-mix(in srgb, var(--down) 45%, transparent);
   border-radius: 10px;
   background: var(--error-bg);
   color: var(--error-ink);
   font-size: 0.82rem;
-  text-align: center;
 }
 
 /* ---------- Animations (Vue <Transition> classes) ----------
@@ -412,10 +355,6 @@ button:focus-visible {
 
   .item-name {
     max-width: 14ch;
-  }
-
-  .item-hint {
-    display: none;
   }
 
   .tray-actions {

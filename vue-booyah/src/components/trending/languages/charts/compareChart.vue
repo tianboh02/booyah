@@ -354,21 +354,21 @@ onBeforeUnmount(() => observer && observer.disconnect())
 </script>
 
 <template>
-  <div ref="root" class="compare-chart">
+  <div ref="root" class="compare-chart position-relative">
     <!-- The chart: D3 fills this <svg> (see setup and render in the script) -->
-    <svg ref="svgEl" role="img" :aria-label="ariaLabel"></svg>
+    <svg ref="svgEl" class="d-block overflow-visible" role="img" :aria-label="ariaLabel"></svg>
 
     <!-- Hover box: the date, then one row per package -->
     <div
       v-show="tip.show"
-      class="tip"
+      class="tip position-absolute text-nowrap pe-none z-2"
       :class="{ below: tip.below }"
       :style="{ left: tip.x + 'px', top: tip.y + 'px' }"
     >
-      <span class="tip-label">{{ tip.label }}</span>
-      <span v-for="row in tip.rows" :key="row.name" class="tip-row">
-        <span class="tip-dot" :style="{ background: row.color }"></span>
-        <span class="tip-name">{{ row.name }}</span>
+      <span class="tip-label text-muted-github">{{ tip.label }}</span>
+      <span v-for="row in tip.rows" :key="row.name" class="tip-row d-flex align-items-center">
+        <span class="tip-dot rounded-circle" :style="{ background: row.color }"></span>
+        <span class="text-muted-github font-monospace">{{ row.name }}</span>
         <strong>{{ row.text }}</strong>
       </span>
     </div>
@@ -378,14 +378,9 @@ onBeforeUnmount(() => observer && observer.disconnect())
 <style scoped>
 /* ---------- Layout ---------- */
 .compare-chart {
-  position: relative;
   height: var(--chart-height, 280px);
 }
 
-svg {
-  display: block;
-  overflow: visible;
-}
 
 /* ---------- Colours & theme: the chart parts D3 draws (reached with :deep) ---------- */
 .compare-chart :deep(.axis text) {
@@ -435,7 +430,6 @@ svg {
 
 /* ---------- Components: hover box ---------- */
 .tip {
-  position: absolute;
   transform: translate(-50%, calc(-100% - 14px));
   display: grid;
   gap: 3px;
@@ -444,9 +438,6 @@ svg {
   background: var(--float-bg);
   border: 1px solid var(--edge);
   box-shadow: 0 10px 30px color-mix(in srgb, var(--shadow) 45%, transparent);
-  white-space: nowrap;
-  pointer-events: none;
-  z-index: 2;
 }
 
 .tip.below {
@@ -454,13 +445,10 @@ svg {
 }
 
 .tip-label {
-  color: var(--ink-2);
   font-size: 0.72rem;
 }
 
 .tip-row {
-  display: flex;
-  align-items: center;
   gap: 6px;
   font-size: 0.8rem;
   font-variant-numeric: tabular-nums;
@@ -469,12 +457,6 @@ svg {
 .tip-dot {
   width: 8px;
   height: 8px;
-  border-radius: 50%;
-}
-
-.tip-name {
-  color: var(--ink-2);
-  font-family: var(--font-code);
 }
 
 .tip-row strong {

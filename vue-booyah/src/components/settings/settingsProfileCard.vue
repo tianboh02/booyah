@@ -59,15 +59,15 @@ onBeforeUnmount(() => clearTimeout(savedTimer))
 </script>
 
 <template>
-    <section v-spotlight class="settings-card card rounded-4 p-4">
+    <section v-spotlight class="settings-card card overflow-hidden rounded-4 p-4">
         <h2 class="h5 fw-bold card-heading mb-1">Profile</h2>
         <p class="text-muted-github mb-4">How your name appears in Booyah.</p>
 
         <!-- Live preview, so people see what they are changing -->
         <div class="preview d-flex align-items-center gap-3 rounded-3 p-3 mb-4">
             <SettingsAvatar :src="avatarUrl" :initial="previewInitial" :size="48" />
-            <p class="preview-text mb-0">
-                Hi <Transition name="name" mode="out-in"><strong :key="previewName" class="preview-name">{{ previewName
+            <p class="preview-text min-w-0 mb-0">
+                Hi <Transition name="name" mode="out-in"><strong :key="previewName" class="preview-name d-inline-block">{{ previewName
                         }}</strong></Transition>, welcome to Booyah
             </p>
         </div>
@@ -98,11 +98,7 @@ onBeforeUnmount(() => clearTimeout(savedTimer))
 
 <style scoped>
 .settings-card {
-    position: relative;
-    overflow: hidden;
     isolation: isolate;
-    background-color: var(--card-bg);
-    border: 1px solid var(--card-border);
     transition: border-color 0.3s ease;
 }
 
@@ -135,12 +131,7 @@ onBeforeUnmount(() => clearTimeout(savedTimer))
 
 .preview-text {
     color: var(--app-text);
-    min-width: 0;
     overflow-wrap: anywhere;
-}
-
-.preview-name {
-    display: inline-block;
 }
 
 .name-enter-active,

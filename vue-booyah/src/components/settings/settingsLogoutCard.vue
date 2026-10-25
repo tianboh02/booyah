@@ -33,40 +33,33 @@ onBeforeUnmount(() => clearTimeout(timer))
 </script>
 
 <template>
-    <section class="settings-card card rounded-4 p-4">
+    <section class="card rounded-4 p-4">
         <div class="d-flex align-items-center justify-content-between gap-3 flex-wrap">
             <div>
                 <h2 class="h5 fw-bold card-heading mb-1">Log out</h2>
                 <p class="text-muted-github mb-0">Your saved projects stay on your account.</p>
             </div>
 
-            <button type="button" class="logout-btn btn px-3" :class="{ 'is-confirming': confirming }"
-                :disabled="leaving" @click="onClick">
-                <span class="label-swap">
+            <button type="button" class="logout-btn btn position-relative overflow-hidden px-3"
+                :class="{ 'is-confirming': confirming }" :disabled="leaving" @click="onClick">
+                <span class="d-inline-block">
                     <Transition name="label" mode="out-in">
                         <span :key="confirming ? 'confirm' : 'idle'">{{ confirming ? 'Confirm log out' : 'Log out' }}</span>
                     </Transition>
                 </span>
                 <!-- Countdown that shrinks while waiting for the second click -->
-                <span v-if="confirming" class="countdown" aria-hidden="true"></span>
+                <span v-if="confirming" class="countdown position-absolute start-0 bottom-0 w-100" aria-hidden="true"></span>
             </button>
         </div>
     </section>
 </template>
 
 <style scoped>
-.settings-card {
-    background-color: var(--card-bg);
-    border: 1px solid var(--card-border);
-}
-
 .card-heading {
     color: var(--app-text);
 }
 
 .logout-btn {
-    position: relative;
-    overflow: hidden;
     color: var(--app-text);
     background: transparent;
     border: 1px solid var(--card-border);
@@ -95,11 +88,7 @@ onBeforeUnmount(() => clearTimeout(timer))
 }
 
 .countdown {
-    position: absolute;
-    left: 0;
-    bottom: 0;
     height: 2px;
-    width: 100%;
     background-color: #f85149;
     transform-origin: left;
     animation: countdown 3s linear forwards;
@@ -129,10 +118,6 @@ onBeforeUnmount(() => clearTimeout(timer))
     75% {
         transform: translateX(3px);
     }
-}
-
-.label-swap {
-    display: inline-block;
 }
 
 .label-enter-active,

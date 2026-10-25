@@ -61,13 +61,12 @@ const option = computed(() => {
 </script>
 
 <template>
-    <VChart class="trend-chart" :option="option" autoresize aria-label="Demand trend by month" />
+    <VChart class="trend-chart w-100" :option="option" autoresize aria-label="Demand trend by month" />
 </template>
 
 <style scoped>
 .trend-chart {
     /* grows to fill its card when the salary card beside it is taller */
     min-height: var(--jobs-chart-h, 200px);
-    width: 100%;
 }
 </style>

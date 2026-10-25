@@ -78,12 +78,13 @@ const joinedYear = (iso) => (iso ? new Date(iso).getUTCFullYear() : '–')
 </script>
 
 <template>
-  <section v-spotlight class="dev-card card p-3 p-md-4 rounded-3 shadow-sm" aria-label="Top developers">
+  <section v-spotlight class="dev-card card overflow-hidden p-3 p-md-4 rounded-3 shadow-sm" aria-label="Top developers">
     <!-- ===================== Header ===================== -->
     <header class="card-head d-flex flex-wrap align-items-center justify-content-between gap-2 pb-3 mb-2">
       <div class="d-flex align-items-center gap-2 flex-wrap min-w-0">
         <h2 class="h5 fw-bold section-title mb-0">Most followed on GitHub</h2>
-        <span class="count-badge badge badge-github rounded-pill fw-normal px-2 py-1">
+        <!-- "8,710 developers with 1,000+ followers" may take two lines on a very narrow screen -->
+        <span class="badge badge-github rounded-pill fw-normal text-wrap text-start px-2 py-1">
           <span class="font-monospace">{{ countBadge.toLocaleString('en-US') }}</span>
           developers with 1,000+ followers
         </span>
@@ -106,14 +107,16 @@ const joinedYear = (iso) => (iso ? new Date(iso).getUTCFullYear() : '–')
     <!-- ===================== Column labels =====================
          Same grid as the rows (--dev-cols), so every column lines up exactly.
          Hidden on phones, where each row spells out its own labels. -->
-    <div class="dev-grid head-row px-2 pb-2 text-muted-github small text-uppercase text-nowrap" aria-hidden="true">
+    <div class="dev-grid head-row d-none d-md-grid px-2 pb-2 text-muted-github small text-uppercase text-nowrap"
+      aria-hidden="true">
       <span>#</span>
       <span>Developer</span>
       <span class="cell-lang">Language</span>
       <span class="cell-followers text-end">Followers</span>
       <span class="cell-repos text-end">Repos</span>
-      <span class="cell-joined text-end">Joined</span>
-      <span class="cell-arrow"></span>
+      <!-- "Joined" only appears once there is room for it -->
+      <span class="cell-joined d-md-none d-lg-block text-end">Joined</span>
+      <span class="cell-arrow d-none d-md-inline"></span>
     </div>
 
     <!-- ===================== The developers ===================== -->
@@ -135,10 +138,10 @@ const joinedYear = (iso) => (iso ? new Date(iso).getUTCFullYear() : '–')
             loading="lazy" />
           <span class="d-flex flex-column min-w-0">
             <a :href="dev.htmlUrl" target="_blank" rel="noopener noreferrer"
-              class="dev-link stretched-link fw-semibold font-monospace">
+              class="dev-link stretched-link d-block lh-sm fw-semibold font-monospace">
               {{ dev.login }}<span class="visually-hidden"> (opens their GitHub profile)</span>
             </a>
-            <span class="dev-bio text-muted-github small">
+            <span class="dev-bio line-clamp-2 text-muted-github small">
               <template v-if="dev.name">{{ dev.name }}</template>
               <template v-if="dev.name && (dev.bio || dev.company)"> · </template>
               {{ dev.bio || dev.company || (dev.name ? '' : dev.location) }}
@@ -156,7 +159,7 @@ const joinedYear = (iso) => (iso ? new Date(iso).getUTCFullYear() : '–')
               @click="toggleLang(langOf(dev))" />
           </span>
 
-          <span class="cell-followers stat text-md-end" title="Followers">
+          <span class="cell-followers font-monospace small text-nowrap text-md-end" title="Followers">
             <svg class="me-1 text-muted-github" width="13" height="13" viewBox="0 0 16 16" fill="none"
               stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
               <circle cx="8" cy="5.5" r="2.5" />
@@ -164,7 +167,7 @@ const joinedYear = (iso) => (iso ? new Date(iso).getUTCFullYear() : '–')
             </svg>{{ shortCount(dev.followers) }}<span class="d-md-none text-muted-github"> followers</span>
           </span>
 
-          <span class="cell-repos stat text-md-end" title="Public repositories">
+          <span class="cell-repos font-monospace small text-nowrap text-md-end" title="Public repositories">
             <svg class="me-1 text-muted-github" width="13" height="13" viewBox="0 0 16 16" fill="none"
               stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true">
               <path d="M3 2.5h8.5a1 1 0 0 1 1 1V12H4.2A1.2 1.2 0 0 0 3 13.2z" />
@@ -172,12 +175,13 @@ const joinedYear = (iso) => (iso ? new Date(iso).getUTCFullYear() : '–')
             </svg>{{ shortCount(dev.publicRepos) }}<span class="d-md-none text-muted-github"> repos</span>
           </span>
 
-          <span class="cell-joined stat text-md-end text-muted-github" title="Joined GitHub">
+          <span class="cell-joined d-md-none d-lg-block font-monospace small text-nowrap text-md-end text-muted-github"
+            title="Joined GitHub">
             <span class="d-md-none">Joined </span>{{ joinedYear(dev.joined) }}
           </span>
         </span>
 
-        <span class="cell-arrow">
+        <span class="cell-arrow d-none d-md-inline">
           <svg class="row-arrow" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor"
             stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M5 11L11 5M6 5h5v5" />
@@ -205,10 +209,6 @@ const joinedYear = (iso) => (iso ? new Date(iso).getUTCFullYear() : '–')
   smaller screens. This CSS is only what Bootstrap can't do: main.css's theme colours, the cursor
   spotlight, the hover effects and the row animations (styled after Discovery's category card).
 */
-.min-w-0 {
-  min-width: 0;
-}
-
 .section-title,
 .dev-link {
   color: var(--app-text);
@@ -216,8 +216,6 @@ const joinedYear = (iso) => (iso ? new Date(iso).getUTCFullYear() : '–')
 
 /* ---------- The card ---------- */
 .dev-card {
-  position: relative;
-  overflow: hidden;
   isolation: isolate;
 }
 
@@ -263,12 +261,6 @@ const joinedYear = (iso) => (iso ? new Date(iso).getUTCFullYear() : '–')
   column-gap: 0.5rem;
 }
 
-.stat {
-  font-family: var(--bs-font-monospace);
-  font-size: 0.875em;
-  white-space: nowrap;
-}
-
 /* Desktop and tablets: rank | developer | language | followers | repos | (joined) | arrow.
    The labels and the rows use the same template, so the columns cannot drift apart. */
 @media (min-width: 768px) {
@@ -290,20 +282,9 @@ const joinedYear = (iso) => (iso ? new Date(iso).getUTCFullYear() : '–')
   }
 }
 
-/* "Joined" only appears once there is room for it */
-@media (min-width: 768px) and (max-width: 991.98px) {
-  .cell-joined {
-    display: none;
-  }
-}
-
 @media (min-width: 992px) {
   .dev-card {
     --dev-cols: 3.25rem minmax(0, 1fr) 9.5rem 5.5rem 5rem 4rem 1.75rem;
-  }
-
-  .cell-joined {
-    display: block;
   }
 }
 
@@ -379,17 +360,10 @@ const joinedYear = (iso) => (iso ? new Date(iso).getUTCFullYear() : '–')
 
 /* On a phone the name and bio may take more lines, so nothing is cut off with "…" */
 .dev-link {
-  display: block;
-  line-height: 1.25;
   overflow-wrap: anywhere;
 }
 
 .dev-bio {
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  overflow: hidden;
   overflow-wrap: anywhere;
   line-height: 1.35;
 }
@@ -407,12 +381,6 @@ const joinedYear = (iso) => (iso ? new Date(iso).getUTCFullYear() : '–')
     white-space: nowrap;
     text-overflow: ellipsis;
   }
-}
-
-/* "8,710 developers with 1,000+ followers" may take two lines on a very narrow screen */
-.count-badge {
-  white-space: normal;
-  text-align: left;
 }
 
 .row-arrow {
@@ -456,10 +424,6 @@ const joinedYear = (iso) => (iso ? new Date(iso).getUTCFullYear() : '–')
              name · bio (up to two lines)
              language   329k followers   12 repos   Joined 2011  */
 @media (max-width: 767.98px) {
-  .head-row {
-    display: none;
-  }
-
   .dev-row {
     grid-template-columns: auto minmax(0, 1fr);
     grid-template-areas:
@@ -487,10 +451,6 @@ const joinedYear = (iso) => (iso ? new Date(iso).getUTCFullYear() : '–')
     align-items: center;
     gap: 0.4rem 0.9rem;
     min-width: 0;
-  }
-
-  .cell-arrow {
-    display: none;
   }
 
   .rank {

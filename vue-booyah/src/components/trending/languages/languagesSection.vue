@@ -203,7 +203,7 @@ onBeforeUnmount(() => clearTimeout(messageTimer))
     />
 
     <!-- Only shown when some packages failed to load -->
-    <p v-if="failedCount" class="failed-note small mb-2" role="status">
+    <p v-if="failedCount" class="text-muted-github small mb-2" role="status">
       {{ failedCount }} package{{ failedCount > 1 ? 's' : '' }} couldn't load from
       {{ language.registry }}.
     </p>
@@ -216,8 +216,8 @@ onBeforeUnmount(() => clearTimeout(messageTimer))
     />
 
     <!-- Main area: the orb + package list (left) and the detail panel (right) -->
-    <div v-else class="stage">
-      <div class="orbit-area card rounded-4">
+    <div v-else class="stage d-grid gap-3 align-items-start">
+      <div class="orbit-area card overflow-hidden min-w-0 rounded-4">
         <PackageOrbit
           :language="language"
           :packages="ranked"
@@ -323,26 +323,17 @@ onBeforeUnmount(() => clearTimeout(messageTimer))
   --accent-line: var(--accent-ink);
 }
 
-.failed-note {
-  color: var(--ink-2);
-}
-
 /* ---------- Layout ---------- */
 .stage {
-  display: grid;
   grid-template-columns: minmax(0, 1fr) clamp(380px, 42%, 560px);
-  gap: 16px;
-  align-items: start;
 }
 
 /* desktop: a fixed-height card that stays in view while the detail panel scrolls */
 .orbit-area {
   position: sticky;
   top: 16px;
-  min-width: 0;
   height: min(640px, calc(100vh - 32px));
   min-height: 520px;
-  overflow: hidden;
   /* faint dot grid behind the orb */
   background:
     radial-gradient(

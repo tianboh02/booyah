@@ -79,10 +79,9 @@ const orbColors = computed(() => [0, 1, 2].map((i) => props.colors[i] || FALLBAC
 }
 
 /* --- Aurora ------------------------------------------------------------ */
+/* blur and opacity come from main.css (.hero .aurora), per theme */
 .aurora {
     z-index: -2;
-    filter: blur(60px) saturate(1.2);
-    opacity: 0.55;
 }
 
 .orb {

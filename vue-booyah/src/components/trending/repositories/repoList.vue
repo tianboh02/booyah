@@ -99,7 +99,7 @@ function toggleLang(name) {
     <DefineRepoCard v-slot="{ repo, index, inRing }">
       <div
         v-spotlight
-        class="repo-card card p-3 rounded-3 shadow-sm"
+        class="repo-card card overflow-hidden p-3 rounded-3 shadow-sm"
         :class="inRing ? 'h-100' : 'mb-3'"
         :style="{ '--lang': getLangColor(langOf(repo)), '--i': Math.min(index, 10) }"
       >
@@ -159,7 +159,8 @@ function toggleLang(name) {
           />
         </div>
 
-        <p class="card-text text-muted-github small mb-2 description">
+        <!-- descriptions are clamped to 2 lines so every card stays a similar height -->
+        <p class="card-text text-muted-github small mb-2 line-clamp-2">
           {{ repo.description || 'No description' }}
         </p>
 
@@ -207,7 +208,7 @@ function toggleLang(name) {
         <div class="d-flex align-items-center gap-3 text-muted-github small flex-wrap mt-auto">
           <button
             type="button"
-            class="lang-link d-flex align-items-center gap-1 rounded-2"
+            class="lang-link d-flex align-items-center gap-1 rounded-2 position-relative z-2"
             :class="{ 'is-selected': selectedLang === langOf(repo) }"
             :aria-pressed="selectedLang === langOf(repo)"
             :title="selectedLang === langOf(repo) ? 'Clear filter' : 'Filter by ' + langOf(repo)"
@@ -377,10 +378,6 @@ function toggleLang(name) {
   d-flex, gap, text-truncate…). This CSS is only what Bootstrap can't do: main.css's theme colours,
   hover effects and animations, matching My Projects' projectList.vue.
 */
-.min-w-0 {
-  min-width: 0;
-}
-
 .section-title,
 .card-title {
   color: var(--app-text);
@@ -454,8 +451,6 @@ function toggleLang(name) {
 
 /* ---------- Repo cards ---------- */
 .repo-card {
-  position: relative;
-  overflow: hidden;
   isolation: isolate;
   transition:
     transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
@@ -548,15 +543,6 @@ function toggleLang(name) {
   box-shadow: 0 0 0 3px rgba(56, 139, 253, 0.4) !important;
 }
 
-/* descriptions are clamped to 2 lines so every card stays a similar height */
-.description {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
 .topic {
   color: var(--brand-blue, #58a6ff);
   background-color: color-mix(in srgb, var(--brand-blue, #58a6ff) 12%, transparent);
@@ -594,9 +580,7 @@ function toggleLang(name) {
   background: transparent;
   border: 1px solid transparent;
   padding: 0.1rem 0.4rem;
-  margin-left: -0.4rem;
-  position: relative;
-  z-index: 2; /* above the card's stretched link, so it filters instead of opening GitHub */
+  margin-left: -0.4rem; /* position-relative z-2 lifts it above the card's stretched link */
   cursor: pointer;
   transition:
     background-color 0.2s ease,

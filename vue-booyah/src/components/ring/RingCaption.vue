@@ -69,8 +69,8 @@ const metaStep = computed(() => stagger(props.meta, 18))
         <div class="cap-head d-inline-flex align-items-start gap-2 mw-100">
             <span v-if="index" class="cap-index font-monospace text-muted-github" aria-hidden="true">{{ index }}</span>
 
-            <div class="cap-title-wrap">
-                <p class="cap-title font-monospace fw-bold mb-0" :title="title">
+            <div class="min-w-0">
+                <p class="cap-title font-monospace fw-bold text-uppercase line-clamp-2 mb-0" :title="title">
                     <span class="visually-hidden">{{ title }}</span>
                     <span aria-hidden="true"><span v-for="(ch, i) in shown" :key="i"
                             :class="{ 'is-noise': ch !== target[i] }">{{ titleChar(ch) }}</span></span>
@@ -82,15 +82,15 @@ const metaStep = computed(() => stagger(props.meta, 18))
         <p v-if="subtitle" class="cap-sub font-monospace mt-2 mb-0">
             <span class="visually-hidden">{{ subtitle }}</span>
             <span aria-hidden="true">
-                <span v-for="(ch, i) in subtitleChars" :key="i" class="cap-mask"><span class="cap-ch"
+                <span v-for="(ch, i) in subtitleChars" :key="i" class="cap-mask d-inline-block align-top"><span class="cap-ch d-inline-block"
                         :style="{ '--d': `${420 + i * subtitleStep}ms` }">{{ ch }}</span></span>
             </span>
         </p>
 
-        <p v-if="meta" class="cap-meta text-muted-github font-monospace mt-2 mb-0">
+        <p v-if="meta" class="cap-meta text-muted-github font-monospace text-uppercase mt-2 mb-0">
             <span class="visually-hidden">{{ meta }}</span>
             <span aria-hidden="true">
-                <span v-for="(ch, i) in metaChars" :key="i" class="cap-type"
+                <span v-for="(ch, i) in metaChars" :key="i" class="cap-type d-inline-block"
                     :style="{ '--d': `${560 + i * metaStep}ms` }">{{ ch }}</span>
             </span>
         </p>
@@ -99,24 +99,14 @@ const metaStep = computed(() => stagger(props.meta, 18))
 
 <style scoped>
 /* --- Title: decoding glyphs over an accent rule ------------------------------ */
-.cap-title-wrap {
-    min-width: 0;
-}
-
 .cap-title {
     font-size: clamp(1.4rem, 3.4vw, 2.6rem);
     line-height: 1.05;
     letter-spacing: 0.06em;
-    text-transform: uppercase;
     color: var(--app-text);
     /* Wraps between words, balanced; only a very long name reaches the two-line ellipsis */
     text-wrap: balance;
     overflow-wrap: anywhere;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
-    line-clamp: 2;
-    overflow: hidden;
 }
 
 /* Characters still decoding take the accent colour. */
@@ -146,13 +136,10 @@ const metaStep = computed(() => stagger(props.meta, 18))
 }
 
 .cap-mask {
-    display: inline-block;
     overflow: clip;
-    vertical-align: top;
 }
 
 .cap-ch {
-    display: inline-block;
     animation: cap-rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
     animation-delay: var(--d);
 }
@@ -161,11 +148,9 @@ const metaStep = computed(() => stagger(props.meta, 18))
 .cap-meta {
     font-size: 0.65rem;
     letter-spacing: 0.2em;
-    text-transform: uppercase;
 }
 
 .cap-type {
-    display: inline-block;
     animation: cap-type 0.01s steps(1) both;
     animation-delay: var(--d);
 }

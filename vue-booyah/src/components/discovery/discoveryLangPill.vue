@@ -15,7 +15,7 @@ defineProps({
 
 <template>
     <component :is="static ? 'span' : 'button'" :type="static ? undefined : 'button'"
-        class="lang-pill d-inline-flex align-items-center gap-1 rounded-pill small"
+        class="lang-pill d-inline-flex align-items-center gap-1 rounded-pill small mw-100"
         :class="{ 'is-active': active, 'is-outlined': outlined, 'is-static': static }"
         :style="{ '--lang': getLangColor(lang) }" :aria-pressed="static ? undefined : active">
         <span v-if="dot" class="lang-dot rounded-circle d-inline-block flex-shrink-0"></span>
@@ -25,7 +25,6 @@ defineProps({
 
 <style scoped>
 .lang-pill {
-    max-width: 100%;
     color: var(--text-muted-github);
     background: transparent;
     border: 1px solid transparent;

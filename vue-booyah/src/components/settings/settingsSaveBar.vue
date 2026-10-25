@@ -22,8 +22,8 @@ const open = computed(() => props.dirty || props.status === 'saved')
         <div v-if="error" class="alert alert-danger py-2 small mt-3 mb-0" role="alert">{{ error }}</div>
 
         <!-- Slides open (grid-rows trick, so the card grows smoothly) -->
-        <div class="bar-wrap" :class="{ open }" :inert="!open || undefined">
-            <div class="bar-inner">
+        <div class="bar-wrap d-grid" :class="{ open }" :inert="!open || undefined">
+            <div class="bar-inner overflow-hidden">
                 <div class="save-bar d-flex align-items-center justify-content-between gap-3 flex-wrap">
                     <span class="small d-inline-flex align-items-center gap-2" :class="status === 'saved' ? 'text-saved' : 'text-muted-github'">
                         <template v-if="status === 'saved'">
@@ -34,7 +34,7 @@ const open = computed(() => props.dirty || props.status === 'saved')
                             Saved
                         </template>
                         <template v-else>
-                            <span class="dirty-dot"></span>
+                            <span class="dirty-dot rounded-circle"></span>
                             You have unsaved changes
                         </template>
                     </span>
@@ -60,7 +60,6 @@ const open = computed(() => props.dirty || props.status === 'saved')
 
 <style scoped>
 .bar-wrap {
-    display: grid;
     grid-template-rows: 0fr;
     opacity: 0;
     transition: grid-template-rows 0.4s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s ease;
@@ -73,7 +72,6 @@ const open = computed(() => props.dirty || props.status === 'saved')
 
 .bar-inner {
     min-height: 0;
-    overflow: hidden;
 }
 
 .save-bar {
@@ -85,7 +83,6 @@ const open = computed(() => props.dirty || props.status === 'saved')
 .dirty-dot {
     width: 8px;
     height: 8px;
-    border-radius: 50%;
     background-color: #e3b341;
     animation: dirty-pulse 1.6s ease-in-out infinite;
 }

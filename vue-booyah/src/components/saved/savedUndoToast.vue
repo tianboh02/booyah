@@ -10,13 +10,15 @@ defineEmits(['undo', 'dismiss'])
 
 <template>
     <Transition name="toast-slide">
-        <div v-if="removed" :key="removed._id" class="undo-toast shadow-lg rounded-3" role="status" aria-live="polite">
+        <div v-if="removed" :key="removed._id"
+            class="undo-toast position-fixed start-50 overflow-hidden shadow-lg rounded-3" role="status"
+            aria-live="polite">
             <div class="d-flex align-items-center gap-3 px-3 py-2">
                 <svg class="flex-shrink-0 toast-mark" width="16" height="16" viewBox="0 0 16 16" fill="none"
                     stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true">
                     <path d="M3.5 2.5h9v11.2L8 10.6l-4.5 3.1z" />
                 </svg>
-                <span class="small toast-text text-truncate">
+                <span class="small toast-text text-truncate min-w-0">
                     Removed <span class="font-monospace">{{ removed.name }}</span>
                 </span>
                 <button type="button" class="btn btn-sm undo-btn rounded-pill px-3 fw-semibold" @click="$emit('undo')">Undo</button>
@@ -32,13 +34,10 @@ defineEmits(['undo', 'dismiss'])
 
 <style scoped>
 .undo-toast {
-    position: fixed;
-    left: 50%;
     bottom: 1.5rem;
     z-index: 1080;
     width: min(420px, calc(100vw - 2rem));
     translate: -50% 0;
-    overflow: hidden;
     background-color: var(--card-bg);
     border: 1px solid var(--card-border);
     color: var(--app-text);
@@ -49,7 +48,6 @@ defineEmits(['undo', 'dismiss'])
 }
 
 .toast-text {
-    min-width: 0;
     flex: 1;
 }
 

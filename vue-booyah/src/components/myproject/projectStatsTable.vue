@@ -207,7 +207,7 @@ const focusedCount = computed(() => scopedRepos.value.length)
         <!-- Top Stats Cards Grid -->
         <div v-else-if="hasData" class="row row-cols-1 row-cols-md-3 g-3 mb-4">
             <div class="col">
-                <div v-tilt="5" v-spotlight class="card stat-card p-3 h-100 rounded-3 shadow-sm"
+                <div v-tilt="5" v-spotlight class="card stat-card overflow-hidden p-3 h-100 rounded-3 shadow-sm"
                     :class="{ 'is-in': ready, 'is-focused': selectedLang }"
                     :style="{ '--i': 0, '--accent': cardAccent }">
                     <span class="h3 fw-bold stat-value mb-1 font-monospace">{{ repoCount }}</span>
@@ -221,10 +221,12 @@ const focusedCount = computed(() => scopedRepos.value.length)
             </div>
 
             <div class="col">
-                <div v-tilt="5" v-spotlight class="card stat-card p-3 h-100 rounded-3 shadow-sm"
+                <div v-tilt="5" v-spotlight class="card stat-card overflow-hidden p-3 h-100 rounded-3 shadow-sm"
                     :class="{ 'is-in': ready, 'is-focused': selectedLang }"
                     :style="{ '--i': 1, '--accent': topLangColor }">
-                    <span class="stat-lang h3 fw-bold stat-value mb-1 font-monospace d-flex align-items-center gap-2">
+                    <!-- min-w-0 lets a long name shrink to "…" (on the name only). The row itself does not hide
+                         overflow, so the dot's glow is never cut off. -->
+                    <span class="min-w-0 h3 fw-bold stat-value mb-1 font-monospace d-flex align-items-center gap-2">
                         <span class="lang-dot rounded-circle d-inline-block flex-shrink-0"></span>
                         <span class="text-truncate">{{ stats.mostUsedLang }}</span>
                     </span>
@@ -238,7 +240,7 @@ const focusedCount = computed(() => scopedRepos.value.length)
             </div>
 
             <div class="col">
-                <div v-tilt="5" v-spotlight class="card stat-card p-3 h-100 rounded-3 shadow-sm"
+                <div v-tilt="5" v-spotlight class="card stat-card overflow-hidden p-3 h-100 rounded-3 shadow-sm"
                     :class="{ 'is-in': ready, 'is-focused': selectedLang }"
                     :style="{ '--i': 2, '--accent': selectedLang ? topLangColor : '#e3b341' }">
                     <span class="h3 fw-bold stat-value mb-1 font-monospace">{{ starCount }}</span>
@@ -261,7 +263,7 @@ const focusedCount = computed(() => scopedRepos.value.length)
         <div class="row g-4">
             <!-- Language Share Chart Card -->
             <div class="col-lg-6">
-                <div v-spotlight class="card panel p-4 h-100 rounded-3 shadow-sm">
+                <div v-spotlight class="card panel overflow-hidden p-4 h-100 rounded-3 shadow-sm">
                     <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap mb-4">
                         <div>
                             <h2 class="h5 fw-bold section-title mb-1">Language share</h2>
@@ -276,11 +278,11 @@ const focusedCount = computed(() => scopedRepos.value.length)
                                 :style="{ '--c': topLangColor }">
                                 <span class="chip-dot rounded-circle d-inline-block"></span>
                                 <span class="small fw-semibold stat-label">{{ selectedLang }}</span>
-                                <button type="button" class="chip-btn btn btn-sm rounded-pill px-2"
+                                <button type="button" class="chip-btn btn btn-sm border-0 rounded-pill px-2"
                                     @click="scrollToList">
                                     Show {{ focusedCount }} ↓
                                 </button>
-                                <button type="button" class="chip-close btn btn-sm rounded-circle p-0"
+                                <button type="button" class="chip-close btn btn-sm lh-1 border-0 rounded-circle p-0"
                                     aria-label="Clear language filter" @click="clearLang">
                                     ✕
                                 </button>
@@ -294,9 +296,9 @@ const focusedCount = computed(() => scopedRepos.value.length)
                         <div class="donut position-relative d-flex align-items-center justify-content-center flex-shrink-0 mx-auto mx-sm-0"
                             :class="{ 'is-in': ready, 'has-focus': activeLang }"
                             :style="{ width: '150px', height: '150px', '--glow': glowColor }">
-                            <svg viewBox="-2 -2 46 46" class="donut-svg w-100 h-100" role="group"
+                            <svg viewBox="-2 -2 46 46" class="donut-svg w-100 h-100 overflow-visible" role="group"
                                 aria-label="Language share chart">
-                                <circle class="donut-track" cx="21" cy="21" r="16.5" fill="none" stroke-width="8" />
+                                <circle class="donut-track opacity-50" cx="21" cy="21" r="16.5" fill="none" stroke-width="8" />
                                 <path v-for="seg in donutSegments" :key="seg.name" class="donut-seg" :class="{
                                     'is-active': activeLang === seg.name,
                                     'is-selected': selectedLang === seg.name,
@@ -326,14 +328,16 @@ const focusedCount = computed(() => scopedRepos.value.length)
                             <div v-for="(item, idx) in langShareList" :key="item.name" class="legend-item col-6"
                                 :class="{ 'is-in': ready }" :style="{ '--i': idx }">
                                 <button type="button"
-                                    class="legend-btn d-flex align-items-center justify-content-between w-100 text-start rounded-2"
+                                    class="legend-btn d-flex align-items-center justify-content-between w-100 text-start text-reset rounded-2"
                                     :class="{
                                         'is-selected': selectedLang === item.name,
                                         'is-dim': selectedLang && selectedLang !== item.name
                                     }" :style="{ '--c': item.color }" :aria-pressed="selectedLang === item.name"
                                     @click="toggleLang(item.name)" @mouseenter="hoveredLang = item.name"
                                     @mouseleave="hoveredLang = null">
-                                    <span class="legend-label d-flex align-items-center gap-2">
+                                    <!-- min-w-0 lets a long language name shrink and show "…" (on the name only), while the
+                                         wrapper stays unclipped so the enlarged, glowing dot is never cut off -->
+                                    <span class="min-w-0 d-flex align-items-center gap-2">
                                         <span class="legend-dot rounded-circle d-inline-block flex-shrink-0"
                                             :style="{ backgroundColor: item.color, width: '10px', height: '10px' }"></span>
                                         <span class="stat-label small text-truncate">{{ item.name }}</span>
@@ -357,12 +361,12 @@ const focusedCount = computed(() => scopedRepos.value.length)
 
             <!-- Repos by Primary Language Card -->
             <div class="col-lg-6">
-                <div v-spotlight class="card panel p-4 h-100 rounded-3 shadow-sm">
+                <div v-spotlight class="card panel overflow-hidden p-4 h-100 rounded-3 shadow-sm">
                     <h2 class="h5 fw-bold section-title mb-4">Repos by primary language</h2>
 
                     <div v-if="reposByLangList.length > 0" class="d-flex flex-column gap-2">
                         <button v-for="(lang, idx) in reposByLangList" :key="lang.name" type="button"
-                            class="bar-row d-flex align-items-center gap-3 w-100 text-start rounded-2" :class="{
+                            class="bar-row d-flex align-items-center gap-3 w-100 text-start text-reset rounded-2" :class="{
                                 'is-selected': selectedLang === lang.name,
                                 'is-dim': selectedLang && selectedLang !== lang.name
                             }" :style="{ '--c': lang.color }" :aria-pressed="selectedLang === lang.name"
@@ -373,7 +377,7 @@ const focusedCount = computed(() => scopedRepos.value.length)
                             </span>
 
                             <div class="progress flex-grow-1 rounded-pill progress-track" style="height: 12px;">
-                                <div class="progress-bar bar-fill rounded-pill" role="progressbar" :style="{
+                                <div class="progress-bar bar-fill position-relative rounded-pill" role="progressbar" :style="{
                                     width: ready ? lang.barWidth + '%' : '0%',
                                     backgroundColor: lang.color,
                                     transitionDelay: idx * 90 + 'ms'
@@ -405,12 +409,6 @@ const focusedCount = computed(() => scopedRepos.value.length)
 }
 
 /* --- Spotlight ------------------------------------------------------------- */
-.stat-card,
-.panel {
-    position: relative;
-    overflow: hidden;
-}
-
 .stat-card::before,
 .panel::before {
     content: '';
@@ -473,12 +471,6 @@ const focusedCount = computed(() => scopedRepos.value.length)
     transform: scaleX(1);
 }
 
-/* min-width: 0 lets a long name shrink to "…" (on the name only). The row itself does not hide
-   overflow, so the dot's glow is never cut off. */
-.stat-lang {
-    min-width: 0;
-}
-
 .lang-dot {
     width: 12px;
     height: 12px;
@@ -505,7 +497,6 @@ const focusedCount = computed(() => scopedRepos.value.length)
 .chip-btn {
     color: var(--app-text);
     font-size: 0.75rem;
-    border: 0;
     background-color: color-mix(in srgb, var(--c) 22%, transparent);
 }
 
@@ -517,10 +508,8 @@ const focusedCount = computed(() => scopedRepos.value.length)
 .chip-close {
     width: 24px;
     height: 24px;
-    line-height: 1;
     font-size: 0.7rem;
     color: var(--app-text);
-    border: 0;
 }
 
 .chip-close:hover {
@@ -541,14 +530,12 @@ const focusedCount = computed(() => scopedRepos.value.length)
 
 /* --- Donut Chart ----------------------------------------------------------- */
 .donut-svg {
-    overflow: visible;
     filter: drop-shadow(0 0 10px color-mix(in srgb, var(--glow) 35%, transparent));
     transition: filter 0.4s ease;
 }
 
 .donut-track {
     stroke: var(--card-border);
-    opacity: 0.5;
 }
 
 .donut-seg {
@@ -590,7 +577,6 @@ const focusedCount = computed(() => scopedRepos.value.length)
     background: transparent;
     border: 1px solid transparent;
     padding: 0.3rem 0.5rem;
-    color: inherit;
     cursor: pointer;
     transition: background-color 0.25s ease, border-color 0.25s ease, opacity 0.25s ease;
 }
@@ -622,12 +608,6 @@ const focusedCount = computed(() => scopedRepos.value.length)
     opacity: 0.85;
 }
 
-/* min-width: 0 lets a long language name shrink and show "…" (on the name only),
-   while the wrapper stays unclipped so the enlarged, glowing dot is never cut off */
-.legend-label {
-    min-width: 0;
-}
-
 .legend-dot {
     transition: box-shadow 0.25s ease, transform 0.25s ease;
 }
@@ -645,8 +625,6 @@ const focusedCount = computed(() => scopedRepos.value.length)
 }
 
 .bar-fill {
-    position: relative;
-    overflow: hidden;
     transition: width 1.1s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s ease;
 }
 

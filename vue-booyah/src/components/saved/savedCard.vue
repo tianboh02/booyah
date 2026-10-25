@@ -32,38 +32,43 @@ function timeAgo(isoString) {
 </script>
 
 <template>
-    <article v-spotlight class="saved-card card mb-3 p-3 rounded-3 shadow-sm"
+    <article v-spotlight class="saved-card card overflow-hidden mb-3 p-3 rounded-3 shadow-sm"
         :style="{ '--lang': getLangColor(itemLang(item)) }">
 
-        <div class="card-head d-flex flex-wrap align-items-center gap-2 mb-2">
+        <!-- Phones and small tablets: name + bookmark on the first line, category underneath -->
+        <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
             <!-- The name wraps onto more lines if it has to, instead of being cut off with "…" -->
-            <h5 class="repo-name card-title h6 fw-bold font-monospace mb-0">
+            <h5 class="repo-name card-title h6 fw-bold font-monospace mb-0 min-w-0 order-1 order-md-0">
                 <a :href="item.link" target="_blank" rel="noopener noreferrer" class="repo-link stretched-link">
                     <span v-if="item.owner" class="text-muted-github">{{ item.owner }}/</span><wbr>{{ item.name }}<span
                         class="visually-hidden"> (opens on GitHub)</span>
                 </a>
             </h5>
 
-            <!-- Category: click to filter -->
-            <button type="button" class="cat-badge badge rounded-pill fw-normal px-2 py-1"
+            <!-- Category: click to filter. It shrinks and shows "…" only if it is longer than the whole
+                 card; the full name is in the tooltip. -->
+            <button type="button"
+                class="cat-badge badge rounded-pill fw-normal px-2 py-1 position-relative z-2 min-w-0 mw-100 order-4 order-md-0"
                 :class="{ 'is-selected': selectedCategory === itemCategory(item) }"
                 :style="{ '--c': categoryColor(itemCategory(item)) }"
                 :title="selectedCategory === itemCategory(item) ? 'Clear filter: ' + itemCategory(item) : 'Filter by ' + itemCategory(item)"
                 @click="$emit('toggle-category', itemCategory(item))">
-                <span class="cat-text">{{ itemCategory(item) }}</span>
+                <span class="d-block text-truncate">{{ itemCategory(item) }}</span>
             </button>
 
             <!-- phones only: forces the category onto its own line under the name -->
-            <span class="head-break" aria-hidden="true"></span>
+            <span class="head-break d-block d-md-none order-3" aria-hidden="true"></span>
 
-            <svg class="repo-arrow flex-shrink-0 ms-auto" width="16" height="16" viewBox="0 0 16 16" fill="none"
-                stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"
+            <!-- the hover arrow does nothing on a touch screen, so it is hidden there -->
+            <svg class="repo-arrow flex-shrink-0 ms-auto d-none d-md-inline" width="16" height="16" viewBox="0 0 16 16"
+                fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"
                 aria-hidden="true">
                 <path d="M5 11L11 5M6 5h5v5" />
             </svg>
 
             <!-- The bookmark is checked because it is saved. Clicking it removes the save. -->
-            <button type="button" class="bookmark-btn btn btn-sm btn-link p-0 flex-shrink-0"
+            <button type="button"
+                class="bookmark-btn btn btn-sm btn-link p-0 flex-shrink-0 position-relative z-2 order-2 order-md-0"
                 :aria-label="`Remove ${item.name} from saved`" title="Saved. Click to remove"
                 @click="$emit('remove', item)">
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"
@@ -89,7 +94,7 @@ function timeAgo(isoString) {
             </p>
 
             <div v-if="item.status === 'ok'" class="d-flex align-items-center gap-3 text-muted-github small flex-wrap">
-                <button type="button" class="lang-link d-flex align-items-center gap-1 rounded-2"
+                <button type="button" class="lang-link d-flex align-items-center gap-1 rounded-2 position-relative z-2"
                     :class="{ 'is-selected': selectedLang === itemLang(item) }"
                     :title="selectedLang === itemLang(item) ? 'Clear filter' : 'Filter by ' + itemLang(item)"
                     @click="$emit('toggle-lang', itemLang(item))">
@@ -128,8 +133,6 @@ function timeAgo(isoString) {
 }
 
 .saved-card {
-    position: relative;
-    overflow: hidden;
     isolation: isolate;
     transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.25s ease,
         box-shadow 0.25s ease;
@@ -177,7 +180,8 @@ function timeAgo(isoString) {
     transform: scaleY(1);
 }
 
-/* Repo name is the card's link (Bootstrap stretched-link covers the whole card) */
+/* Repo name is the card's link (Bootstrap stretched-link covers the whole card).
+   Everything else clickable sits above it with position-relative z-2. */
 .repo-link {
     color: var(--app-text);
     text-decoration: none;
@@ -201,71 +205,22 @@ function timeAgo(isoString) {
     box-shadow: 0 0 0 3px rgba(56, 139, 253, 0.4) !important;
 }
 
-/* Everything clickable must sit above the stretched link */
-.card-head {
-    row-gap: 0.4rem;
-}
-
 /* The repo name is the most important text on the card: it may wrap, it is never cut with "…" */
 .repo-name {
-    flex: 0 1 auto;
-    min-width: 0;
     line-height: 1.35;
     overflow-wrap: anywhere;
 }
 
 .head-break {
-    display: none;
+    flex-basis: 100%;
+    height: 0;
 }
 
-/* The category can shrink and shows "…" only if it is longer than the whole card.
-   The full name is in the tooltip. */
-.cat-badge {
-    flex: 0 1 auto;
-    min-width: 0;
-    max-width: 100%;
-}
-
-.cat-text {
-    display: block;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-/* Phones and small tablets: name + bookmark on the first line, category underneath */
+/* Phones and small tablets: the name takes the first line beside the bookmark */
 @media (max-width: 767.98px) {
     .repo-name {
         flex: 1 1 0;
-        order: 1;
     }
-
-    .bookmark-btn {
-        order: 2;
-    }
-
-    .head-break {
-        display: block;
-        flex-basis: 100%;
-        height: 0;
-        order: 3;
-    }
-
-    .cat-badge {
-        order: 4;
-    }
-
-    /* the hover arrow does nothing on a touch screen */
-    .repo-arrow {
-        display: none;
-    }
-}
-
-.cat-badge,
-.lang-link,
-.bookmark-btn {
-    position: relative;
-    z-index: 2;
 }
 
 .cat-badge {

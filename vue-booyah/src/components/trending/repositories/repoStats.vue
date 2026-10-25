@@ -80,7 +80,7 @@ function toggleTopLang() {
         <div
           v-tilt="5"
           v-spotlight
-          class="card stat-card d-flex flex-column p-3 h-100 rounded-3 shadow-sm"
+          class="card stat-card overflow-hidden d-flex flex-column p-3 h-100 rounded-3 shadow-sm"
           :class="{ 'is-in': ready, 'is-focused': selectedLang }"
           :style="{ '--i': 0, '--accent': selectedLang ? topLangColor : '#58a6ff' }"
         >
@@ -100,7 +100,7 @@ function toggleTopLang() {
           v-tilt="5"
           v-spotlight
           type="button"
-          class="card stat-card d-flex flex-column stat-button p-3 h-100 w-100 rounded-3 shadow-sm text-start"
+          class="card stat-card overflow-hidden d-flex flex-column stat-button p-3 h-100 w-100 rounded-3 shadow-sm text-start"
           :class="{ 'is-in': ready, 'is-focused': selectedLang }"
           :style="{ '--i': 1, '--accent': topLangColor }"
           :aria-pressed="!!selectedLang"
@@ -125,7 +125,7 @@ function toggleTopLang() {
         <div
           v-tilt="5"
           v-spotlight
-          class="card stat-card d-flex flex-column p-3 h-100 rounded-3 shadow-sm"
+          class="card stat-card overflow-hidden d-flex flex-column p-3 h-100 rounded-3 shadow-sm"
           :class="{ 'is-in': ready, 'is-focused': selectedLang }"
           :style="{ '--i': 2, '--accent': selectedLang ? topLangColor : '#e3b341' }"
         >
@@ -152,8 +152,6 @@ function toggleTopLang() {
 }
 
 .stat-card {
-  position: relative;
-  overflow: hidden;
   transform: perspective(700px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
   transition:
     transform 0.2s ease-out,

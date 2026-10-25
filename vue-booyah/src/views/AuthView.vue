@@ -209,7 +209,7 @@ onBeforeUnmount(() => {
 
 <template>
     <div class="auth-stage position-fixed top-0 start-0 w-100 h-100 overflow-hidden">
-        <canvas ref="canvasEl" class="position-absolute top-0 start-0 w-100 h-100" aria-hidden="true"></canvas>
+        <canvas ref="canvasEl" class="position-absolute top-0 start-0 w-100 h-100 d-block" aria-hidden="true"></canvas>
 
         <!-- Status line under the globe -->
         <Transition name="fade">
@@ -218,9 +218,9 @@ onBeforeUnmount(() => {
                     {{ status }}<span class="caret">_</span>
                 </p>
                 <div class="legend d-flex justify-content-center flex-wrap gap-3 small font-monospace">
-                    <span><i class="legend-dot" style="--c: #3fb950"></i>GitHub</span>
-                    <span><i class="legend-dot" style="--c: #ff8a3d"></i>Hacker News</span>
-                    <span><i class="legend-dot" style="--c: #a371f7"></i>Registries</span>
+                    <span><i class="legend-dot d-inline-block rounded-circle align-middle" style="--c: #3fb950"></i>GitHub</span>
+                    <span><i class="legend-dot d-inline-block rounded-circle align-middle" style="--c: #ff8a3d"></i>Hacker News</span>
+                    <span><i class="legend-dot d-inline-block rounded-circle align-middle" style="--c: #a371f7"></i>Registries</span>
                 </div>
             </div>
         </Transition>
@@ -279,7 +279,7 @@ onBeforeUnmount(() => {
                             Try again
                         </button>
                         <GitHubSSO v-else />
-                        <RouterLink to="/" class="btn btn-link back-link">Back to home</RouterLink>
+                        <RouterLink to="/" class="btn btn-link back-link text-decoration-none">Back to home</RouterLink>
                     </div>
                 </section>
             </div>
@@ -297,10 +297,6 @@ onBeforeUnmount(() => {
     z-index: 1090;
     background: radial-gradient(ellipse at 50% 45%, #0d1220 0%, #07080c 55%, #040507 100%);
     color: #e6edf3;
-}
-
-canvas {
-    display: block;
 }
 
 .hud {
@@ -322,12 +318,9 @@ canvas {
 }
 
 .legend-dot {
-    display: inline-block;
     width: 8px;
     height: 8px;
     margin-right: 6px;
-    border-radius: 50%;
-    vertical-align: middle;
     background: var(--c);
     box-shadow: 0 0 8px var(--c);
 }
@@ -373,7 +366,6 @@ canvas {
 
 .back-link {
     color: #8b949e;
-    text-decoration: none;
 }
 
 .back-link:hover {

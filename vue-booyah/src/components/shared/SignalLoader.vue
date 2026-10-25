@@ -72,13 +72,13 @@ onBeforeUnmount(() => scene?.destroy())
                 :style="{ '--c': accent }">
                 <span v-for="n in total" :key="n" class="pip" :class="{ 'pip-on': n <= done }"></span>
             </div>
-            <div v-else-if="total" class="meter mx-auto mb-2" aria-hidden="true" :style="{ '--c': accent }">
+            <div v-else-if="total" class="meter overflow-hidden mx-auto mb-2" aria-hidden="true" :style="{ '--c': accent }">
                 <span class="meter-fill d-block h-100" :style="{ width: `${(done / total) * 100}%` }"></span>
             </div>
 
             <div v-if="legend.length" class="legend d-flex justify-content-center flex-wrap gap-3 small font-monospace">
                 <span v-for="l in legend" :key="l.label">
-                    <i class="legend-dot" :style="{ '--c': css(l.colour) }"></i>{{ l.label }}
+                    <i class="legend-dot d-inline-block rounded-circle align-middle" :style="{ '--c': css(l.colour) }"></i>{{ l.label }}
                 </span>
             </div>
         </div>
@@ -117,10 +117,6 @@ onBeforeUnmount(() => scene?.destroy())
     box-shadow: none;
 }
 
-canvas {
-    display: block;
-}
-
 .hud-status {
     color: #8fa7ff;
     letter-spacing: 0.02em;
@@ -148,7 +144,6 @@ canvas {
     width: min(220px, 60%);
     height: 4px;
     border-radius: 2px;
-    overflow: hidden;
     background: var(--track);
 }
 
@@ -163,12 +158,9 @@ canvas {
 }
 
 .legend-dot {
-    display: inline-block;
     width: 8px;
     height: 8px;
     margin-right: 6px;
-    border-radius: 50%;
-    vertical-align: middle;
     background: var(--c);
     box-shadow: 0 0 8px var(--c);
 }

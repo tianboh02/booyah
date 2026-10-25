@@ -210,33 +210,34 @@ onUpdated(() => {
         :style="{ '--card-w': cardWidth }">
         <div class="ring-body position-relative">
             <!-- Stage: drag, Shift + wheel or arrow keys spin the ring -->
-            <div class="ring-stage" :class="{ 'is-dragging': dragging }" tabindex="0"
+            <div class="ring-stage position-relative user-select-none" :class="{ 'is-dragging': dragging }" tabindex="0"
                 @pointerdown="handlers.onPointerDown" @pointermove="handlers.onPointerMove"
                 @pointerup="handlers.onPointerUp" @pointercancel="handlers.onPointerUp"
                 @pointerleave="handlers.onPointerLeave" @click.capture="handlers.onClickCapture"
                 @wheel="handlers.onWheel" @keydown="handlers.onKeydown" @dragstart.prevent>
-                <div ref="platform" class="ring-platform">
+                <div ref="platform" class="ring-platform position-relative d-grid">
                     <!-- Platform disc the cards stand on -->
-                    <div class="ring-floor" aria-hidden="true"></div>
+                    <div class="ring-floor position-absolute start-50 translate-middle-x rounded-circle overflow-hidden pe-none"
+                        aria-hidden="true"></div>
 
-                    <div v-for="i in visible" :key="keyOf(items[i])" class="ring-slot"
+                    <div v-for="i in visible" :key="keyOf(items[i])" class="ring-slot position-relative mw-100"
                         :class="{ 'is-front': i === active }" :data-index="i" role="group"
                         aria-roledescription="slide" :aria-label="`${i + 1} of ${items.length}`"
                         @click="i !== active && goTo(i)">
                         <!-- Hover callout on back cards: leader line + number + name -->
-                        <div class="ring-callout" aria-hidden="true">
-                            <svg class="co-line" width="160" height="56" viewBox="0 0 160 56" fill="none">
+                        <div class="ring-callout position-absolute pe-none" aria-hidden="true">
+                            <svg class="co-line position-absolute start-0 bottom-0 overflow-visible" width="160" height="56" viewBox="0 0 160 56" fill="none">
                                 <polyline points="0,56 60,0 160,0" stroke="currentColor" stroke-width="1.5" />
                                 <circle cx="0" cy="56" r="4" fill="currentColor" />
                             </svg>
-                            <span class="co-text font-monospace text-end">
-                                <span class="co-num d-block">{{ pad(i + 1) }}</span>
+                            <span class="co-text position-absolute end-0 font-monospace text-end text-uppercase">
+                                <span class="co-num d-block fw-bold">{{ pad(i + 1) }}</span>
                                 <span class="co-name d-block text-truncate">{{ labelOf(items[i]) }}</span>
                             </span>
                         </div>
 
                         <!-- Only the front card can be clicked or focused. -->
-                        <div class="ring-card h-100" :inert="i !== active">
+                        <div class="ring-card h-100 rounded-3" :inert="i !== active">
                             <slot name="card" :item="items[i]" :index="i" :front="i === active" />
                         </div>
                     </div>
@@ -245,7 +246,7 @@ onUpdated(() => {
 
             <!-- Arrows pinned to the ring's sides -->
             <button type="button"
-                class="ring-arrow is-prev d-none d-sm-inline-flex align-items-center justify-content-center rounded-circle"
+                class="ring-arrow position-absolute start-0 z-2 d-none d-sm-inline-flex align-items-center justify-content-center rounded-circle"
                 aria-label="Previous card" :disabled="items.length < 2" @click="prev">
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"
                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -253,7 +254,7 @@ onUpdated(() => {
                 </svg>
             </button>
             <button type="button"
-                class="ring-arrow is-next d-none d-sm-inline-flex align-items-center justify-content-center rounded-circle"
+                class="ring-arrow position-absolute end-0 z-2 d-none d-sm-inline-flex align-items-center justify-content-center rounded-circle"
                 aria-label="Next card" :disabled="items.length < 2" @click="next">
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"
                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -272,14 +273,14 @@ onUpdated(() => {
         <!-- Pager -->
         <div class="ring-controls d-flex align-items-center justify-content-center mt-3">
             <div v-if="items.length <= 12" class="d-flex gap-2">
-                <button v-for="(item, i) in items" :key="keyOf(item)" type="button" class="pager-bar"
+                <button v-for="(item, i) in items" :key="keyOf(item)" type="button" class="pager-bar position-relative p-0 border-0 bg-transparent"
                     :class="{ 'is-active': i === active }" :aria-label="`Show ${i + 1} of ${items.length}`"
                     :aria-current="i === active" @click="goTo(i)"></button>
             </div>
 
             <div v-else class="d-flex align-items-center gap-2">
-                <span class="pager-track d-block">
-                    <span class="pager-thumb d-block"
+                <span class="pager-track d-block overflow-hidden">
+                    <span class="pager-thumb d-block h-100"
                         :style="{ width: `${100 / items.length}%`, transform: `translateX(${active * 100}%)` }"></span>
                 </span>
                 <span class="text-muted-github small font-monospace">{{ pad(active + 1) }} / {{ pad(items.length) }}</span>
@@ -321,11 +322,9 @@ onUpdated(() => {
 .ring-stage {
     /* how much of each side fades out; none on phones, where the front card spans the screen */
     --edge-fade: 7%;
-    position: relative;
     padding: var(--pad-top, 8rem) 0 3rem;
     overflow-x: clip;
     touch-action: pan-y;
-    user-select: none;
     cursor: grab;
     outline: none;
     /* Sides fade out, and so does the top, where the highest back cards are clipped. */
@@ -356,8 +355,6 @@ onUpdated(() => {
 
 /* All slots share one grid cell, so the stage is as tall as the tallest card. */
 .ring-platform {
-    position: relative;
-    display: grid;
     grid-template-columns: minmax(0, 1fr); /* the column never grows past the stage, so max-width below works */
     justify-items: center;
     perspective: 1600px;
@@ -366,11 +363,9 @@ onUpdated(() => {
 /* --vis / --blur / --fade come from place(); hovering a back card brings most of it back. */
 .ring-slot {
     --v: max(var(--vis, 1), var(--hover, 0) * 0.85);
-    position: relative;
     grid-area: 1 / 1;
+    /* --card-w is usually in vw, which is wider than the container on small phones (mw-100 caps it) */
     width: var(--card-w);
-    /* --card-w is usually in vw, which is wider than the container on small phones */
-    max-width: 100%;
     opacity: calc((var(--ring-min-op) + (1 - var(--ring-min-op)) * var(--v)) * var(--fade, 1));
     filter: blur(calc(var(--blur, 0) * (1 - var(--hover, 0)) * 1px)) grayscale(calc((1 - var(--v)) * var(--ring-gray))) brightness(calc(1 - (1 - var(--v)) * var(--ring-dim)));
     will-change: transform, opacity, filter;
@@ -391,7 +386,6 @@ onUpdated(() => {
 
 /* Front card: accent ring + glow (dark) or lifted shadow (light). */
 .ring-card {
-    border-radius: var(--bs-border-radius-lg);
     transition: box-shadow 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -401,15 +395,9 @@ onUpdated(() => {
 
 /* --- Platform disc ---------------------------------------------------------- */
 .ring-floor {
-    position: absolute;
-    left: 50%;
     top: var(--floor-top, 60%);
     width: var(--floor-w, 100%);
     height: var(--floor-h, 40%);
-    transform: translateX(-50%);
-    border-radius: 50%;
-    overflow: hidden;
-    pointer-events: none;
     /* A pool of light under the front card, then the rim shading, then the disc colour. */
     background:
         radial-gradient(ellipse 30% 42% at 50% 82%, var(--ring-pool), transparent 70%),
@@ -441,22 +429,13 @@ onUpdated(() => {
 
 /* --- Hover callout on back cards ------------------------------------------- */
 .ring-callout {
-    position: absolute;
     left: 28%;
     bottom: calc(100% - 22px);
     width: 160px;
     height: 56px;
     color: var(--app-text);
-    pointer-events: none;
     opacity: 0;
     transition: opacity 0.25s ease;
-}
-
-.co-line {
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    overflow: visible;
 }
 
 .co-line polyline {
@@ -466,12 +445,9 @@ onUpdated(() => {
 }
 
 .co-text {
-    position: absolute;
-    right: 0;
     bottom: calc(100% + 6px);
     max-width: 220px;
     line-height: 1.1;
-    text-transform: uppercase;
     opacity: 0;
     transform: translateY(6px);
     transition: opacity 0.3s ease 0.15s, transform 0.35s cubic-bezier(0.22, 1, 0.36, 1) 0.15s;
@@ -479,7 +455,6 @@ onUpdated(() => {
 
 .co-num {
     font-size: 1.35rem;
-    font-weight: 700;
 }
 
 .co-name {
@@ -507,9 +482,7 @@ onUpdated(() => {
 
 /* --- Side arrows ------------------------------------------------------------ */
 .ring-arrow {
-    position: absolute;
     top: var(--front-mid, 50%);
-    z-index: 2;
     width: 44px;
     height: 44px;
     transform: translateY(-50%);
@@ -518,14 +491,6 @@ onUpdated(() => {
     border: 1px solid var(--card-border);
     box-shadow: 0 8px 20px -12px rgba(0, 0, 0, 0.5);
     transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
-}
-
-.ring-arrow.is-prev {
-    left: 0;
-}
-
-.ring-arrow.is-next {
-    right: 0;
 }
 
 .ring-arrow:hover:not(:disabled) {
@@ -545,11 +510,6 @@ onUpdated(() => {
     .ring-stage {
         --edge-fade: 0%;
     }
-
-    .ring-arrow {
-        width: 36px;
-        height: 36px;
-    }
 }
 
 /* --- Caption -------------------------------------------------------------- */
@@ -559,12 +519,8 @@ onUpdated(() => {
 
 /* --- Pager: Amber's thin bars, the active one filled ------------------------ */
 .pager-bar {
-    position: relative;
     width: 20px;
     height: 16px;
-    padding: 0;
-    border: 0;
-    background: transparent;
     cursor: pointer;
 }
 
@@ -591,11 +547,9 @@ onUpdated(() => {
     width: 140px;
     height: 2px;
     background-color: var(--card-border);
-    overflow: hidden;
 }
 
 .pager-thumb {
-    height: 100%;
     background-color: var(--app-text);
     transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }

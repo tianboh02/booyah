@@ -303,11 +303,16 @@ onBeforeUnmount(() => clearTimeout(settleTimer))
 </script>
 
 <template>
-  <div ref="root" class="orbit" :class="{ compact: isCompact }">
+  <div ref="root" class="orbit position-relative w-100" :class="{ compact: isCompact }">
     <!-- ===================== Desktop / tablet: orb + arc ===================== -->
     <template v-if="!isCompact && width > 0">
       <!-- Lines from the orb to each visible package (behind everything) -->
-      <svg class="links" :width="width" :height="height" aria-hidden="true">
+      <svg
+        class="position-absolute top-0 start-0 end-0 bottom-0 pe-none"
+        :width="width"
+        :height="height"
+        aria-hidden="true"
+      >
         <g v-if="status === 'ready'" :key="drawKey">
           <path
             v-for="node in nodes.filter((n) => n.visible)"
@@ -329,19 +334,21 @@ onBeforeUnmount(() => clearTimeout(settleTimer))
 
       <!-- The language orb -->
       <div
-        class="orb"
+        class="orb position-absolute translate-middle z-2"
         :style="{
           left: layout.orb.x + 'px',
           top: layout.orb.y + 'px',
           '--size': layout.orb.r * 2 + 'px',
         }"
       >
-        <span class="orb-ring"></span>
-        <span class="orb-core"></span>
-        <span class="orb-label">
+        <span class="orb-ring position-absolute rounded-circle"></span>
+        <span class="orb-core position-absolute top-0 start-0 end-0 bottom-0 rounded-circle"></span>
+        <span
+          class="orb-label position-absolute start-50 translate-middle-x d-grid text-center text-muted-github"
+        >
           <strong>{{ language.name }}</strong>
           <template v-if="status === 'ready'">
-            <span class="orb-total">{{ compact(shownTotal) }}</span>
+            <span class="orb-total fw-bold">{{ compact(shownTotal) }}</span>
             <span
               >downloads by the top {{ packages.length }}, {{ PERIOD_INFO[period].latest }}</span
             >
@@ -353,13 +360,13 @@ onBeforeUnmount(() => clearTimeout(settleTimer))
       <div
         v-if="status === 'ready'"
         ref="scroller"
-        class="scroller"
+        class="scroller position-absolute top-0 bottom-0 overflow-y-auto overflow-x-hidden z-1"
         :style="{ left: layout.fanLeft + 'px' }"
         @scroll="onScroll"
       >
         <div
           :key="drawKey"
-          class="track"
+          class="position-relative"
           role="list"
           :aria-label="`${language.name} packages ranked by downloads, ${PERIOD_INFO[period].latest}`"
           :style="{ height: layout.trackHeight + 'px' }"
@@ -368,7 +375,7 @@ onBeforeUnmount(() => clearTimeout(settleTimer))
           <div
             v-for="node in nodes"
             :key="node.name"
-            class="node"
+            class="node position-absolute d-flex align-items-center"
             role="listitem"
             :class="{ active: node.name === selectedName }"
             :style="{
@@ -384,19 +391,22 @@ onBeforeUnmount(() => clearTimeout(settleTimer))
             <button
               :ref="(el) => (mainButtons[node.name] = el)"
               type="button"
-              class="node-main"
+              class="node-main d-flex align-items-center border-0 bg-transparent text-start text-nowrap min-w-0"
               :aria-current="node.name === selectedName ? 'true' : undefined"
               :tabindex="node.name === selectedName ? 0 : -1"
               :title="node.name"
               @click="choose(node.name)"
             >
-              <span class="node-dot"></span>
-              <span class="node-rank">#{{ node.displayRank }}</span>
-              <span class="node-body">
-                <span class="node-name">{{ node.name }}</span>
-                <span class="node-meta">
+              <span class="node-dot flex-shrink-0 rounded-circle"></span>
+              <span class="node-rank flex-shrink-0 rounded-3 fw-bold text-center">#{{ node.displayRank }}</span>
+              <span class="node-body d-grid min-w-0">
+                <span class="node-name text-truncate font-monospace">{{ node.name }}</span>
+                <span class="node-meta d-flex align-items-center text-muted-github">
                   <strong>{{ compact(node.latest[period]) }}</strong>
-                  <span class="pill" :class="trendClass(node.changePercent[period])">
+                  <span
+                    class="pill d-inline-flex rounded-pill fw-bold"
+                    :class="trendClass(node.changePercent[period])"
+                  >
                     {{ pct(node.changePercent[period]) }}
                   </span>
                 </span>
@@ -404,7 +414,7 @@ onBeforeUnmount(() => clearTimeout(settleTimer))
             </button>
             <button
               type="button"
-              class="add"
+              class="add flex-shrink-0 d-grid p-0 rounded-circle fs-6 fw-bold lh-1"
               :class="{ added: isAdded(node.name) }"
               :tabindex="node.name === selectedName ? 0 : -1"
               :aria-label="
@@ -421,12 +431,16 @@ onBeforeUnmount(() => clearTimeout(settleTimer))
       </div>
 
       <!-- Position rail on the right: one tick per rank (the long one is in the middle) -->
-      <div v-if="status === 'ready'" class="rail" aria-hidden="true">
+      <div
+        v-if="status === 'ready'"
+        class="rail position-absolute top-50 translate-middle-y d-grid z-2"
+        aria-hidden="true"
+      >
         <button
           v-for="node in nodes"
           :key="node.name"
           type="button"
-          class="tick"
+          class="tick p-0 border-0"
           :class="{ current: node.index === centreIndex, active: node.name === selectedName }"
           tabindex="-1"
           :title="`#${node.displayRank} ${node.name}`"
@@ -437,27 +451,28 @@ onBeforeUnmount(() => clearTimeout(settleTimer))
       <!-- Error message with "Try again" -->
       <div
         v-if="status === 'error'"
-        class="message"
+        class="message position-absolute top-50 translate-middle-y"
         :style="{ left: layout.fanLeft + 'px' }"
         role="alert"
       >
-        <p>
+        <p class="m-0 mb-2">
           <strong>Couldn't load {{ language.name }} packages.</strong>
         </p>
-        <p class="muted">
+        <p class="m-0 mb-2 text-muted-github">
           {{ language.registry }} didn't answer ({{ errorMessage }}). Check your connection and try
           again.
         </p>
-        <button type="button" class="btn-accent" @click="$emit('retry')">Try again</button>
+        <button type="button" class="btn-accent fw-semibold" @click="$emit('retry')">Try again</button>
       </div>
     </template>
 
     <!-- ===================== Phone: a small orb branching out to a list ===================== -->
-    <div v-if="isCompact" ref="tree" class="tree">
+    <!-- position-relative: the lines and offsetIn() measure from here -->
+    <div v-if="isCompact" ref="tree" class="position-relative pb-1">
       <!-- Lines from the orb down to each package (behind everything) -->
       <svg
         v-if="status === 'ready' && treeGeo"
-        class="links"
+        class="position-absolute top-0 start-0 end-0 bottom-0 pe-none"
         :width="treeGeo.w"
         :height="treeGeo.h"
         aria-hidden="true"
@@ -477,10 +492,10 @@ onBeforeUnmount(() => clearTimeout(settleTimer))
       </svg>
 
       <!-- The language's name and total, above everything -->
-      <p class="tree-label">
+      <p class="tree-label position-relative z-2 d-grid text-center text-muted-github">
         <strong>{{ language.name }}</strong>
         <template v-if="status === 'ready'">
-          <span class="orb-total">{{ compact(shownTotal) }}</span>
+          <span class="orb-total fw-bold">{{ compact(shownTotal) }}</span>
           <span>downloads by the top {{ packages.length }}, {{ PERIOD_INFO[period].latest }}</span>
         </template>
       </p>
@@ -488,27 +503,27 @@ onBeforeUnmount(() => clearTimeout(settleTimer))
       <!-- The language orb (small, on the left, level with the middle of the top 5 rows) -->
       <div
         ref="treeOrb"
-        class="tree-orb"
+        class="tree-orb position-absolute start-0 z-2 translate-middle-y"
         :style="treeGeo && treeGeo.orbY ? { top: treeGeo.orbY + 'px' } : null"
       >
-        <div class="orb">
-          <span class="orb-ring"></span>
-          <span class="orb-core"></span>
+        <div class="orb position-absolute start-50 top-50 translate-middle z-2">
+          <span class="orb-ring position-absolute rounded-circle"></span>
+          <span class="orb-core position-absolute top-0 start-0 end-0 bottom-0 rounded-circle"></span>
         </div>
       </div>
 
       <!-- Error message with "Try again" -->
-      <div v-if="status === 'error'" class="compact-msg" role="alert">
-        <p>
+      <div v-if="status === 'error'" class="compact-msg text-muted-github" role="alert">
+        <p class="m-0 mb-2">
           <strong>Couldn't load {{ language.name }} packages.</strong> {{ errorMessage }}
         </p>
-        <button type="button" class="btn-accent" @click="$emit('retry')">Try again</button>
+        <button type="button" class="btn-accent fw-semibold" @click="$emit('retry')">Try again</button>
       </div>
       <!-- The packages (each row: main button + "+" add-to-compare button) -->
       <template v-else>
         <div
           :key="drawKey"
-          class="tree-list"
+          class="tree-list position-relative z-1 d-grid gap-1"
           role="list"
           :aria-label="`${language.name} packages ranked by downloads, ${PERIOD_INFO[period].latest}`"
           @keydown="onKeydown"
@@ -516,7 +531,7 @@ onBeforeUnmount(() => clearTimeout(settleTimer))
           <div
             v-for="(pkg, i) in treePackages"
             :key="pkg.name"
-            class="node tree-node"
+            class="node tree-node position-relative d-flex align-items-center min-w-0"
             role="listitem"
             :class="{ active: pkg.name === selectedName }"
             :style="{ '--delay': 100 + i * 40 + 'ms' }"
@@ -526,19 +541,25 @@ onBeforeUnmount(() => clearTimeout(settleTimer))
             <button
               :ref="(el) => (mainButtons[pkg.name] = el)"
               type="button"
-              class="node-main"
+              class="node-main d-flex align-items-center border-0 bg-transparent text-start text-nowrap overflow-hidden min-w-0"
               :aria-current="pkg.name === selectedName ? 'true' : undefined"
               :tabindex="pkg.name === selectedName ? 0 : -1"
               :title="pkg.name"
               @click="choose(pkg.name)"
             >
-              <span :ref="(el) => (treeDots[pkg.name] = el)" class="node-dot"></span>
-              <span class="node-rank">#{{ pkg.displayRank }}</span>
-              <span class="node-body">
-                <span class="node-name">{{ pkg.name }}</span>
-                <span class="node-meta">
+              <span
+                :ref="(el) => (treeDots[pkg.name] = el)"
+                class="node-dot flex-shrink-0 rounded-circle"
+              ></span>
+              <span class="node-rank flex-shrink-0 rounded-3 fw-bold text-center">#{{ pkg.displayRank }}</span>
+              <span class="node-body d-grid min-w-0">
+                <span class="node-name text-truncate font-monospace">{{ pkg.name }}</span>
+                <span class="node-meta d-flex flex-wrap align-items-center text-muted-github">
                   <strong>{{ compact(pkg.latest[period]) }}</strong>
-                  <span class="pill" :class="trendClass(pkg.changePercent[period])">
+                  <span
+                    class="pill d-inline-flex rounded-pill fw-bold"
+                    :class="trendClass(pkg.changePercent[period])"
+                  >
                     {{ pct(pkg.changePercent[period]) }}
                   </span>
                 </span>
@@ -546,7 +567,7 @@ onBeforeUnmount(() => clearTimeout(settleTimer))
             </button>
             <button
               type="button"
-              class="add"
+              class="add flex-shrink-0 d-grid p-0 me-1 rounded-circle fs-6 fw-bold lh-1"
               :class="{ added: isAdded(pkg.name) }"
               :tabindex="pkg.name === selectedName ? 0 : -1"
               :aria-label="
@@ -564,7 +585,7 @@ onBeforeUnmount(() => clearTimeout(settleTimer))
         <button
           v-if="packages.length > PHONE_TOP"
           type="button"
-          class="tree-more"
+          class="tree-more d-block rounded-pill bg-transparent fw-semibold"
           :aria-expanded="showAll"
           @click="showAll = !showAll"
         >
@@ -588,9 +609,7 @@ onBeforeUnmount(() => clearTimeout(settleTimer))
 /* ---------- Layout ---------- */
 /* fills the card it sits in (a Bootstrap card is a flex column) */
 .orbit {
-  position: relative;
   flex: 1 1 auto;
-  width: 100%;
 }
 
 .orbit.compact {
@@ -598,12 +617,6 @@ onBeforeUnmount(() => clearTimeout(settleTimer))
 }
 
 /* ---------- Components: lines from the orb (drawn with D3's curve) ---------- */
-.links {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-
 .link {
   fill: none;
   stroke: var(--line);
@@ -639,17 +652,12 @@ onBeforeUnmount(() => clearTimeout(settleTimer))
 
 /* ---------- Components: orb ---------- */
 .orb {
-  position: absolute;
   width: var(--size);
   height: var(--size);
-  transform: translate(-50%, -50%);
-  z-index: 2;
 }
 
 .orb-ring {
-  position: absolute;
   inset: -12px;
-  border-radius: 50%;
   background: conic-gradient(
     from 0deg,
     var(--accent-line),
@@ -664,9 +672,6 @@ onBeforeUnmount(() => clearTimeout(settleTimer))
 }
 
 .orb-core {
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
   background:
     radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.45), transparent 42%),
     radial-gradient(circle at 50% 55%, var(--accent), var(--bg) 82%);
@@ -680,15 +685,9 @@ onBeforeUnmount(() => clearTimeout(settleTimer))
 }
 
 .orb-label {
-  position: absolute;
   top: calc(100% + 22px);
-  left: 50%;
-  transform: translateX(-50%);
-  display: grid;
   gap: 2px;
   width: 170px;
-  text-align: center;
-  color: var(--ink-2);
   font-size: 0.8rem;
   line-height: 1.35;
 }
@@ -701,22 +700,15 @@ onBeforeUnmount(() => clearTimeout(settleTimer))
 .orb-total {
   color: var(--ink);
   font-size: 1.55rem;
-  font-weight: 700;
   letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums;
 }
 
 /* ---------- Components: scrollable arc ---------- */
 .scroller {
-  position: absolute;
-  top: 0;
   right: 28px;
-  bottom: 0;
-  overflow-y: auto;
-  overflow-x: hidden;
   scroll-snap-type: y proximity;
   scrollbar-width: none;
-  z-index: 1;
   /* soft fade at the top and bottom edges */
   -webkit-mask: linear-gradient(transparent, #000 12%, #000 88%, transparent);
   mask: linear-gradient(transparent, #000 12%, #000 88%, transparent);
@@ -726,15 +718,8 @@ onBeforeUnmount(() => clearTimeout(settleTimer))
   display: none;
 }
 
-.track {
-  position: relative;
-}
-
 .node {
-  position: absolute;
   transform: translate(-8px, -50%);
-  display: flex;
-  align-items: center;
   gap: 6px;
   border-radius: 14px;
   scroll-snap-align: center;
@@ -751,25 +736,16 @@ onBeforeUnmount(() => clearTimeout(settleTimer))
 }
 
 .node-main {
-  display: flex;
-  align-items: center;
   gap: 12px;
-  min-width: 0;
   padding: 8px 4px 8px 0;
-  border: 0;
   border-radius: 14px;
-  background: none;
   color: var(--ink);
-  text-align: left;
-  white-space: nowrap;
   cursor: pointer;
 }
 
 .node-dot {
-  flex: none;
   width: 16px;
   height: 16px;
-  border-radius: 50%;
   background: var(--bg);
   border: 2px solid var(--accent-line);
   transition:
@@ -791,15 +767,11 @@ onBeforeUnmount(() => clearTimeout(settleTimer))
 }
 
 .node-rank {
-  flex: none;
   min-width: 2.6em;
   padding: 3px 7px;
-  border-radius: 8px;
   background: color-mix(in srgb, var(--ink) 6%, transparent);
   color: var(--ink-2);
   font-size: 0.8rem;
-  font-weight: 700;
-  text-align: center;
   font-variant-numeric: tabular-nums;
 }
 
@@ -809,16 +781,11 @@ onBeforeUnmount(() => clearTimeout(settleTimer))
 }
 
 .node-body {
-  display: grid;
   gap: 3px;
-  min-width: 0;
 }
 
+/* long names end in "…"; the full name shows on hover */
 .node-name {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  /* long names end in "…"; the full name shows on hover */
-  font-family: var(--font-code);
   font-size: 0.95rem;
   color: var(--ink-2);
   transition: color 250ms var(--ease);
@@ -830,11 +797,8 @@ onBeforeUnmount(() => clearTimeout(settleTimer))
 }
 
 .node-meta {
-  display: flex;
-  align-items: center;
   gap: 8px;
   font-size: 0.85rem;
-  color: var(--ink-2);
   font-variant-numeric: tabular-nums;
 }
 
@@ -844,20 +808,13 @@ onBeforeUnmount(() => clearTimeout(settleTimer))
 
 /* ---------- Components: "+" add to compare ---------- */
 .add {
-  flex: none;
-  display: grid;
   place-items: center;
   width: 28px;
   height: 28px;
   margin-right: 6px;
-  padding: 0;
   border: 1px solid var(--edge);
-  border-radius: 50%;
   background: color-mix(in srgb, var(--ink) 4%, transparent);
   color: var(--ink-2);
-  font-size: 1rem;
-  font-weight: 700;
-  line-height: 1;
   cursor: pointer;
   opacity: 0;
   transform: scale(0.85);
@@ -894,20 +851,13 @@ onBeforeUnmount(() => clearTimeout(settleTimer))
 
 /* ---------- Components: rail ---------- */
 .rail {
-  position: absolute;
   right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  display: grid;
   gap: 5px;
-  z-index: 2;
 }
 
 .tick {
   width: 6px;
   height: 6px;
-  padding: 0;
-  border: 0;
   border-radius: 3px;
   background: color-mix(in srgb, var(--ink) 18%, transparent);
   cursor: pointer;
@@ -927,21 +877,13 @@ onBeforeUnmount(() => clearTimeout(settleTimer))
 
 /* ---------- Components: messages ---------- */
 .message {
-  position: absolute;
-  top: 50%;
   right: 24px;
-  transform: translateY(-50%);
   max-width: 360px;
 }
 
 .message p,
 .compact-msg p {
-  margin: 0 0 8px;
   line-height: 1.45;
-}
-
-.muted {
-  color: var(--ink-2);
 }
 
 .btn-accent {
@@ -951,17 +893,13 @@ onBeforeUnmount(() => clearTimeout(settleTimer))
   border-radius: 10px;
   background: var(--accent);
   color: var(--on-accent);
-  font-weight: 600;
   cursor: pointer;
 }
 
 /* ---------- Components: % pills (green up, red down, grey flat) ---------- */
 .pill {
-  display: inline-flex;
   padding: 1px 7px;
-  border-radius: 999px;
   font-size: 0.74rem;
-  font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
 
@@ -985,22 +923,11 @@ onBeforeUnmount(() => clearTimeout(settleTimer))
    out from it to each row's dot. The rows reuse the arc's .node styles. */
 .compact-msg {
   padding: 4px 2px;
-  color: var(--ink-2);
-}
-
-.tree {
-  position: relative; /* the lines and offsetIn() measure from here */
-  padding-bottom: 4px;
 }
 
 .tree-label {
-  position: relative;
-  z-index: 2;
-  display: grid;
   gap: 2px;
   margin: 4px 0 12px;
-  text-align: center;
-  color: var(--ink-2);
   font-size: 0.8rem;
   line-height: 1.35;
 }
@@ -1013,33 +940,21 @@ onBeforeUnmount(() => clearTimeout(settleTimer))
 /* the small orb (44px) and its ring (12px each side). Its top is set from the script, level
    with the middle of the top 5 rows. */
 .tree-orb {
-  position: absolute;
-  left: 0;
   top: 180px; /* until the rows are measured */
-  z-index: 2;
   width: 68px;
   height: 68px;
-  transform: translateY(-50%);
 }
 
 .tree-orb .orb {
-  left: 50%;
-  top: 50%;
   --size: 44px;
 }
 
 .tree-list {
-  position: relative;
-  z-index: 1;
-  display: grid;
-  gap: 4px;
   padding-left: 80px; /* the orb's column */
 }
 
 .tree-node {
-  position: relative;
   transform: none;
-  min-width: 0;
   animation-name: fade-in;
 }
 
@@ -1047,9 +962,7 @@ onBeforeUnmount(() => clearTimeout(settleTimer))
 .tree-node .node-main {
   flex: 1;
   gap: 8px;
-  min-width: 0;
   padding: 6px 4px 6px 0;
-  overflow: hidden;
 }
 
 .tree-node .node-rank {
@@ -1061,26 +974,17 @@ onBeforeUnmount(() => clearTimeout(settleTimer))
   font-size: 0.9rem;
 }
 
-/* on the narrowest phones the % pill drops under the download count instead of being cut off */
+/* on the narrowest phones the % pill drops under the download count (flex-wrap) instead of being cut off */
 .tree-node .node-meta {
-  flex-wrap: wrap;
   row-gap: 3px;
 }
 
-.tree-node .add {
-  margin-right: 4px;
-}
-
 .tree-more {
-  display: block;
   margin: 10px 0 0 80px;
   padding: 6px 14px;
   border: 1px solid var(--edge);
-  border-radius: 999px;
-  background: transparent;
   color: var(--ink-2);
   font-size: 0.85rem;
-  font-weight: 600;
   cursor: pointer;
 }
 

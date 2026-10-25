@@ -136,32 +136,36 @@ const handleSubmit = async () => {
             <div class="row g-3" role="radiogroup" aria-label="Experience level">
 
                 <div v-for="(opt, idx) in options" :key="opt.value" class="col-md-6 d-flex">
-                    <label v-tilt="4" v-spotlight class="option-card w-100 p-3 rounded-4 border position-relative"
+                    <label v-tilt="4" v-spotlight
+                        class="option-card d-flex flex-column overflow-hidden w-100 p-3 rounded-4 border position-relative"
                         :class="{
                             selected: selectedExperience === opt.value,
                             dim: selectedExperience !== opt.value
                         }" :style="{ '--accent': opt.accent, '--accent2': opt.accent2, '--n': idx }">
 
                         <!-- Spinning gradient border, visible when selected -->
-                        <span class="glow-border" aria-hidden="true"></span>
+                        <span class="glow-border position-absolute top-0 bottom-0 start-0 end-0 pe-none"
+                            aria-hidden="true"></span>
 
                         <div class="d-flex align-items-center gap-3 mb-2">
-                            <input class="radio-input" type="radio" name="experience" :id="'exp' + opt.value"
+                            <input class="radio-input position-absolute opacity-0" type="radio" name="experience" :id="'exp' + opt.value"
                                 :value="opt.value" v-model="selectedExperience">
-                            <span class="radio-dot flex-shrink-0" aria-hidden="true"></span>
+                            <span class="radio-dot position-relative rounded-circle flex-shrink-0" aria-hidden="true"></span>
                             <div class="fw-semibold option-title fs-5">{{ opt.title }}</div>
                         </div>
 
-                        <p class="text-muted-github mb-3 option-blurb">{{ opt.blurb }}</p>
+                        <p class="text-muted-github lh-base mb-3">{{ opt.blurb }}</p>
 
                         <!-- Live preview of where this path leads -->
                         <div class="preview mb-3" aria-hidden="true">
                             <!-- Discovery: skills take turns "trending" -->
                             <div v-if="opt.value === 'Newcomer'" class="d-flex flex-wrap gap-2">
-                                <span v-for="c in trendChips" :key="c.name" class="trend-chip small"
+                                <span v-for="c in trendChips" :key="c.name"
+                                    class="trend-chip position-relative d-inline-flex align-items-center rounded-pill small"
                                     :style="{ '--c': c.color, '--k': c.i }">
-                                    <span class="chip-dot"></span>{{ c.name }}
-                                    <span class="chip-up">▲</span>
+                                    <span class="chip-dot rounded-circle"></span>{{ c.name }}
+                                    <span
+                                        class="chip-up position-absolute d-flex align-items-center justify-content-center rounded-circle lh-1 pe-none">▲</span>
                                 </span>
                             </div>
 
@@ -170,8 +174,8 @@ const handleSubmit = async () => {
                                 <div v-for="(b, bi) in previewBars" :key="b.name"
                                     class="d-flex align-items-center gap-2">
                                     <span class="text-muted-github small bar-name text-truncate">{{ b.name }}</span>
-                                    <div class="mini-track flex-grow-1 rounded-pill">
-                                        <div class="mini-fill rounded-pill"
+                                    <div class="mini-track flex-grow-1 overflow-hidden rounded-pill">
+                                        <div class="mini-fill h-100 rounded-pill"
                                             :style="{ '--w': b.w + '%', '--bc': b.color, '--k': bi }"></div>
                                     </div>
                                 </div>
@@ -198,7 +202,7 @@ const handleSubmit = async () => {
                 </Transition>
 
                 <!-- Submit Button -->
-                <button ref="submitBtn" type="submit" class="continue-btn btn btn-primary px-4 py-2 fw-semibold"
+                <button ref="submitBtn" type="submit" class="continue-btn btn btn-primary position-relative overflow-hidden px-4 py-2 fw-semibold"
                     :disabled="!selectedExperience || isLoading">
                     <span v-if="isLoading" class="spinner-border spinner-border-sm me-2" role="status"></span>
                     <span>{{ isLoading ? 'Saving...' : 'Continue' }}</span>
@@ -212,7 +216,8 @@ const handleSubmit = async () => {
         </form>
 
         <!-- Launch transition: a circle blooms out of the Continue button -->
-        <div class="warp" :class="{ on: launching }"
+        <div class="warp position-fixed top-0 bottom-0 start-0 end-0 d-flex align-items-center justify-content-center"
+            :class="{ on: launching }"
             :style="{ '--wx': wx + 'px', '--wy': wy + 'px', '--wc': current.accent }" aria-hidden="true">
             <span class="warp-text fw-bold">Opening {{ current.lands }}…</span>
         </div>
@@ -255,10 +260,7 @@ const handleSubmit = async () => {
 /* --- Option cards ------------------------------------------------------------ */
 .option-card {
     --s: 1;
-    display: flex;
-    flex-direction: column;
     cursor: pointer;
-    overflow: hidden;
     isolation: isolate;
     background-color: color-mix(in srgb, var(--card-bg) 80%, transparent);
     backdrop-filter: blur(10px);
@@ -319,8 +321,6 @@ const handleSubmit = async () => {
 
 /* Spinning gradient ring */
 .glow-border {
-    position: absolute;
-    inset: 0;
     border-radius: inherit;
     padding: 2px;
     background: conic-gradient(from var(--angle), var(--accent), transparent 30%, var(--accent2) 55%, transparent 80%, var(--accent));
@@ -330,7 +330,6 @@ const handleSubmit = async () => {
     opacity: 0;
     transition: opacity 0.4s ease;
     animation: spin-angle 5s linear infinite;
-    pointer-events: none;
 }
 
 .option-card.selected .glow-border {
@@ -345,17 +344,13 @@ const handleSubmit = async () => {
 
 /* --- Custom radio ------------------------------------------------------------ */
 .radio-input {
-    position: absolute;
-    opacity: 0;
     width: 1px;
     height: 1px;
 }
 
 .radio-dot {
-    position: relative;
     width: 24px;
     height: 24px;
-    border-radius: 50%;
     border: 2px solid var(--card-border);
     transition: border-color 0.25s ease, box-shadow 0.25s ease;
 }
@@ -407,10 +402,6 @@ const handleSubmit = async () => {
     }
 }
 
-.option-blurb {
-    line-height: 1.5;
-}
-
 /* --- Previews ----------------------------------------------------------------- */
 .preview {
     opacity: 0.55;
@@ -426,12 +417,8 @@ const handleSubmit = async () => {
 
 /* Discovery chips take turns lighting up as "trending" */
 .trend-chip {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
     gap: 0.4rem;
     padding: 0.2rem 0.6rem;
-    border-radius: 999px;
     color: var(--app-text);
     border: 1px solid var(--card-border);
     animation: lit 6s ease-in-out infinite;
@@ -441,31 +428,23 @@ const handleSubmit = async () => {
 .chip-dot {
     width: 8px;
     height: 8px;
-    border-radius: 50%;
     background-color: var(--c);
 }
 
 /* The "trending" arrow is a small badge on the chip's corner. It takes no space in the layout,
    so lighting a chip up never changes its width, and chips never jump to another row. */
 .chip-up {
-    position: absolute;
     top: -7px;
     right: -5px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     width: 14px;
     height: 14px;
-    border-radius: 50%;
     font-size: 0.45rem;
-    line-height: 1;
     color: #0d1117;
     background-color: #3fb950;
     opacity: 0;
     transform: scale(0.4);
     animation: lit-arrow 6s ease-in-out infinite;
     animation-delay: calc(var(--k) * 1.1s);
-    pointer-events: none;
 }
 
 @keyframes lit {
@@ -510,11 +489,9 @@ const handleSubmit = async () => {
 .mini-track {
     height: 8px;
     background-color: var(--card-border);
-    overflow: hidden;
 }
 
 .mini-fill {
-    height: 100%;
     width: var(--w);
     background-color: var(--bc);
     transform-origin: left;
@@ -580,8 +557,6 @@ const handleSubmit = async () => {
 
 /* Continue button: shine sweep + arrow nudge */
 .continue-btn {
-    position: relative;
-    overflow: hidden;
     border-radius: 0.85rem;
     transition: transform 0.2s ease, box-shadow 0.3s ease;
 }
@@ -626,12 +601,7 @@ const handleSubmit = async () => {
 
 /* --- Launch transition ------------------------------------------------------------ */
 .warp {
-    position: fixed;
-    inset: 0;
     z-index: 2000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     pointer-events: none;
     background-color: var(--wc);
     clip-path: circle(0px at var(--wx) var(--wy));

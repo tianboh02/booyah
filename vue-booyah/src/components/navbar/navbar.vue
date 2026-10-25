@@ -222,7 +222,6 @@ function logout() {
     background-color: var(--app-bg);
     border-color: var(--card-border) !important;
     transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.45s;
-    overflow: visible;
 }
 
 .app-header.is-landing {
@@ -242,10 +241,6 @@ function logout() {
 
 .header-user-name {
     color: var(--app-text);
-}
-
-.dropdown-toggle-no-caret::after {
-    display: none !important;
 }
 
 /* Avatar Button Styles */
@@ -341,7 +336,6 @@ function logout() {
 .custom-nav-link {
     color: var(--app-text);
     opacity: 0.75;
-    font-weight: 500;
     font-size: 0.925rem;
     border: 1px solid transparent;
     transition: all 0.2s ease;
@@ -358,10 +352,6 @@ function logout() {
     color: var(--app-text);
     background-color: var(--card-bg);
     border-color: var(--card-border);
-}
-
-.cursor-pointer {
-    cursor: pointer;
 }
 
 @media (max-width: 991.98px) {

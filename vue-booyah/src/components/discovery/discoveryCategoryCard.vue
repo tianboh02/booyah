@@ -38,7 +38,8 @@ const toggleLang = (lang) => {
 </script>
 
 <template>
-    <section v-spotlight class="cat-card card h-100 p-3 rounded-3 shadow-sm" :aria-label="category.name">
+    <section v-spotlight class="spot-card card h-100 p-3 rounded-3 shadow-sm" :style="{ '--accent': '#58a6ff' }"
+        :aria-label="category.name">
         <header class="d-flex flex-wrap align-items-center justify-content-between gap-2 pb-2 mb-2 card-head">
             <div class="d-flex align-items-baseline gap-2 min-w-0">
                 <span class="text-muted-github small font-monospace">
@@ -57,7 +58,7 @@ const toggleLang = (lang) => {
         </header>
 
         <ul v-if="rows.length" class="rows list-unstyled mb-0" :class="{ 'rows-scroll overflow-auto': inRing }">
-            <li v-for="project in rows" :key="project.id" class="project-row"
+            <li v-for="project in rows" :key="project.id" class="project-row position-relative d-grid align-items-center"
                 :style="{ '--lang': getLangColor(langOf(project)) }">
                 <span class="cell-name d-flex align-items-center gap-2 min-w-0">
                     <!-- The owner prefix gives way first, so the repo name stays readable; the title has the full name -->
@@ -77,7 +78,7 @@ const toggleLang = (lang) => {
 
                 <!-- Clicking a language filters every category by that language. -->
                 <span class="cell-lang min-w-0">
-                    <button type="button" class="lang-link d-inline-flex align-items-center gap-1 rounded-2 small"
+                    <button type="button" class="lang-link d-inline-flex align-items-center gap-1 rounded-2 small mw-100"
                         :class="{ 'is-selected': selectedLang === langOf(project) }"
                         :aria-pressed="selectedLang === langOf(project)" :title="selectedLang === langOf(project)
                                 ? 'Clear filter'
@@ -90,19 +91,23 @@ const toggleLang = (lang) => {
                     </button>
                 </span>
 
-                <span class="metric meta-hn text-muted-github small font-monospace" title="Show HN points">
-                    <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                <span
+                    class="metric meta-hn d-inline-flex align-items-center justify-content-start gap-1 text-nowrap text-muted-github small font-monospace"
+                    title="Show HN points">
+                    <svg class="flex-shrink-0" width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
                         <path d="M8 3l6 10H2z" />
                     </svg>
-                    <span>{{ project.hnPoints }}</span>
+                    <span class="text-end">{{ project.hnPoints }}</span>
                 </span>
 
-                <span class="metric meta-star text-muted-github small font-monospace" title="GitHub stars">
-                    <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                <span
+                    class="metric meta-star d-inline-flex align-items-center justify-content-start gap-1 text-nowrap text-muted-github small font-monospace"
+                    title="GitHub stars">
+                    <svg class="flex-shrink-0" width="13" height="13" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
                         <path
                             d="M8 .25l2.3 4.66 5.15.75-3.72 3.63.88 5.13L8 12.04l-4.61 2.38.88-5.13L.55 5.66l5.15-.75z" />
                     </svg>
-                    <span>{{ shortStars(project.stars) }}</span>
+                    <span class="text-end">{{ shortStars(project.stars) }}</span>
                 </span>
 
                 <button type="button" class="bookmark-btn btn btn-sm btn-link p-0 text-muted-github" :class="{
@@ -134,49 +139,7 @@ const toggleLang = (lang) => {
 </template>
 
 <style scoped>
-.min-w-0 {
-    min-width: 0;
-}
-
-/* Card spotlight and hover effect */
-.cat-card {
-    position: relative;
-    overflow: hidden;
-    isolation: isolate;
-    transition:
-        transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
-        border-color 0.25s ease,
-        box-shadow 0.25s ease;
-}
-
-.cat-card::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    background: radial-gradient(300px circle at var(--mx, 50%) var(--my, 50%),
-            color-mix(in srgb, #58a6ff 18%, transparent),
-            transparent 70%);
-}
-
-.cat-card>* {
-    position: relative;
-}
-
-.cat-card:hover {
-    transform: translateY(-3px);
-    border-color: color-mix(in srgb,
-            #58a6ff 50%,
-            var(--card-border)) !important;
-    box-shadow: 0 14px 30px -16px color-mix(in srgb, #58a6ff 55%, transparent) !important;
-}
-
-.cat-card:hover::before {
-    opacity: 1;
-}
-
+/* Card spotlight and hover lift come from main.css (.spot-card), tinted blue by --accent */
 .card-head {
     border-bottom: 1px solid var(--card-border);
 }
@@ -188,10 +151,7 @@ const toggleLang = (lang) => {
 
 /* Custom grid keeps project metadata aligned across all rows. */
 .project-row {
-    position: relative;
-    display: grid;
     grid-template-columns: minmax(0, 1fr) 7rem 3.5rem 3.5rem 1.5rem;
-    align-items: center;
     column-gap: 0.75rem;
     height: 44px;
     padding: 0 0.5rem;
@@ -280,11 +240,6 @@ const toggleLang = (lang) => {
     min-width: 3ch;
 }
 
-.repo-name {
-    flex: 0 1 auto;
-    min-width: 0;
-}
-
 .project-link {
     font-size: 0.9rem;
     text-decoration: underline;
@@ -313,7 +268,6 @@ const toggleLang = (lang) => {
 }
 
 .lang-link {
-    max-width: 100%;
     color: var(--text-muted-github);
     background: transparent;
     border: 1px solid transparent;
@@ -352,22 +306,9 @@ const toggleLang = (lang) => {
     background-color: var(--lang);
 }
 
-.metric {
-    display: inline-flex;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 0.25rem;
-    white-space: nowrap;
-}
-
 /* Fixed-width, right-aligned number keeps icons lined up while staying close to them. */
 .metric span {
     min-width: 4ch;
-    text-align: right;
-}
-
-.metric svg {
-    flex-shrink: 0;
 }
 
 /* HN triangle lights up orange, with a small lift and glow, only when hovered directly. */
@@ -452,8 +393,6 @@ const toggleLang = (lang) => {
 
 @media (prefers-reduced-motion: reduce) {
 
-    .cat-card,
-    .cat-card::before,
     .project-row,
     .project-row::after,
     .project-link,
@@ -468,7 +407,6 @@ const toggleLang = (lang) => {
         animation: none;
     }
 
-    .cat-card:hover,
     .meta-star svg:hover,
     .meta-hn svg:hover,
     .bookmark-btn:active {

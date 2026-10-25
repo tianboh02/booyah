@@ -38,7 +38,7 @@ onMounted(() => requestAnimationFrame(() => (ready.value = true)))
 <template>
     <div class="row row-cols-1 row-cols-md-3 g-3 mb-4">
         <div class="col">
-            <div v-tilt="5" v-spotlight class="card stat-card p-3 h-100 rounded-3 shadow-sm"
+            <div v-tilt="5" v-spotlight class="card stat-card overflow-hidden p-3 h-100 rounded-3 shadow-sm"
                 :class="{ 'is-in': ready, 'is-focused': selectedLang }" :style="{ '--i': 0, '--accent': '#58a6ff' }">
                 <span class="h3 fw-bold stat-value mb-1 font-monospace">{{ projectCount }}</span>
                 <span class="stat-label fw-semibold small text-truncate"
@@ -50,7 +50,7 @@ onMounted(() => requestAnimationFrame(() => (ready.value = true)))
         </div>
 
         <div class="col">
-            <div v-tilt="5" v-spotlight class="card stat-card p-3 h-100 rounded-3 shadow-sm"
+            <div v-tilt="5" v-spotlight class="card stat-card overflow-hidden p-3 h-100 rounded-3 shadow-sm"
                 :class="{ 'is-in': ready, 'is-focused': selectedLang }" :style="{ '--i': 1, '--accent': langColor }">
                 <span class="h3 fw-bold stat-value mb-1 font-monospace d-flex align-items-center gap-2 min-w-0">
                     <span class="lang-dot d-inline-block rounded-circle flex-shrink-0"></span>
@@ -66,7 +66,7 @@ onMounted(() => requestAnimationFrame(() => (ready.value = true)))
         </div>
 
         <div class="col">
-            <div v-tilt="5" v-spotlight class="card stat-card p-3 h-100 rounded-3 shadow-sm"
+            <div v-tilt="5" v-spotlight class="card stat-card overflow-hidden p-3 h-100 rounded-3 shadow-sm"
                 :class="{ 'is-in': ready, 'is-focused': selectedLang }"
                 :style="{ '--i': 2, '--accent': selectedLang ? langColor : '#e3b341' }">
                 <span class="h3 fw-bold stat-value mb-1 font-monospace">{{ starCount }}</span>
@@ -88,8 +88,6 @@ onMounted(() => requestAnimationFrame(() => (ready.value = true)))
 }
 
 .stat-card {
-    position: relative;
-    overflow: hidden;
     transform: perspective(700px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
     transition: transform 0.2s ease-out, border-color 0.3s ease, box-shadow 0.3s ease,
         opacity 0.6s ease, translate 0.7s cubic-bezier(0.22, 1, 0.36, 1);
@@ -156,10 +154,6 @@ onMounted(() => requestAnimationFrame(() => (ready.value = true)))
     box-shadow: 0 0 6px color-mix(in srgb, var(--accent) 70%, transparent),
         0 0 18px 4px color-mix(in srgb, var(--accent) 30%, transparent);
     transition: background-color 0.4s ease, box-shadow 0.4s ease;
-}
-
-.min-w-0 {
-    min-width: 0;
 }
 
 @media (prefers-reduced-motion: reduce) {

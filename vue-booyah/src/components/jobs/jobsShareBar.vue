@@ -12,10 +12,10 @@ defineProps({
             <span class="item-label text-truncate">{{ label }}</span>
             <span class="font-monospace text-nowrap">
                 <span v-if="count != null" class="row-meta text-muted-github">{{ count }} posts · </span>
-                <span class="item-value">{{ value }}%</span>
+                <span class="item-value fw-semibold">{{ value }}%</span>
             </span>
         </div>
-        <div class="bar-track mt-1" role="progressbar" :aria-valuenow="value" aria-valuemin="0" aria-valuemax="100"
+        <div class="bar-track overflow-hidden mt-1" role="progressbar" :aria-valuenow="value" aria-valuemin="0" aria-valuemax="100"
             :aria-label="label">
             <div class="bar-fill h-100" :style="{ width: `${value}%` }"></div>
         </div>
@@ -38,10 +38,6 @@ defineProps({
     transition: color 0.2s ease;
 }
 
-.item-value {
-    font-weight: 600;
-}
-
 .row-meta {
     opacity: 0;
     transition: opacity 0.2s ease;
@@ -55,7 +51,6 @@ defineProps({
     height: 7px;
     border-radius: 4px;
     background-color: var(--badge-bg);
-    overflow: hidden;
 }
 
 .bar-fill {
