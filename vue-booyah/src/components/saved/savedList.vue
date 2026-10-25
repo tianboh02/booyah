@@ -129,21 +129,11 @@ const pad = (n) => String(n).padStart(2, '0')
     margin-bottom: 0 !important;
 }
 
-/* --- Switching between carousel and list ------------------------------------- */
-.view-swap-enter-active,
-.view-swap-leave-active {
-    transition: opacity 0.25s ease, transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.view-swap-enter-from,
-.view-swap-leave-to {
-    opacity: 0;
-    transform: translateY(8px);
-}
+/* Carousel <-> list switch: view-swap, and the rise-in keyframes, live in main.css */
 
 /* --- List transitions: staggered entrance, smooth re-ordering, fly-out removal --- */
 .saved-enter-active {
-    animation: saved-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation: rise-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
     animation-delay: calc(var(--i) * 50ms);
 }
 
@@ -163,22 +153,8 @@ const pad = (n) => String(n).padStart(2, '0')
     transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-@keyframes saved-in {
-    from {
-        opacity: 0;
-        transform: translateY(18px) scale(0.98);
-    }
-
-    to {
-        opacity: 1;
-        transform: none;
-    }
-}
-
 @media (prefers-reduced-motion: reduce) {
 
-    .view-swap-enter-active,
-    .view-swap-leave-active,
     .saved-enter-active,
     .saved-leave-active,
     .saved-move,

@@ -7,17 +7,20 @@ defineProps({
     active: { type: Boolean, default: false },
     // Draw a resting border (filter row). Card rows stay borderless until hover.
     outlined: { type: Boolean, default: false },
-    dot: { type: Boolean, default: true }
+    dot: { type: Boolean, default: true },
+    // A plain label instead of a button, for places where the language isn't clickable.
+    static: { type: Boolean, default: false }
 })
 </script>
 
 <template>
-    <button type="button" class="lang-pill d-inline-flex align-items-center gap-1 rounded-pill small"
-        :class="{ 'is-active': active, 'is-outlined': outlined }" :style="{ '--lang': getLangColor(lang) }"
-        :aria-pressed="active">
+    <component :is="static ? 'span' : 'button'" :type="static ? undefined : 'button'"
+        class="lang-pill d-inline-flex align-items-center gap-1 rounded-pill small"
+        :class="{ 'is-active': active, 'is-outlined': outlined, 'is-static': static }"
+        :style="{ '--lang': getLangColor(lang) }" :aria-pressed="static ? undefined : active">
         <span v-if="dot" class="lang-dot rounded-circle d-inline-block flex-shrink-0"></span>
         <span class="text-truncate">{{ lang }}</span>
-    </button>
+    </component>
 </template>
 
 <style scoped>
@@ -38,7 +41,11 @@ defineProps({
     border-color: var(--card-border);
 }
 
-.lang-pill:hover {
+.lang-pill.is-static {
+    cursor: default;
+}
+
+.lang-pill:not(.is-static):hover {
     color: var(--app-text);
     background-color: color-mix(in srgb, var(--lang) 14%, transparent);
     border-color: color-mix(in srgb, var(--lang) 50%, transparent);

@@ -165,3 +165,99 @@ html[data-bs-theme="light"] .text-saved,
 html[data-bs-theme="light"] .connected {
     color: #1a7f37 !important;
 }
+
+/* ==========================================================================
+   6. SHARED MOTION & UTILITIES
+   Used across pages so each component doesn't carry its own copy.
+   ========================================================================== */
+
+/* Carousel <-> list switch (<Transition name="view-swap">) */
+.view-swap-enter-active,
+.view-swap-leave-active {
+    transition: opacity 0.25s ease, transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.view-swap-enter-from,
+.view-swap-leave-to {
+    opacity: 0;
+    transform: translateY(8px);
+}
+
+/* Cards and rows rising into place. Lists use it from their *-enter-active rule;
+   anything shown with v-if can take .rise-in, staggered by --i. */
+@keyframes rise-in {
+    from {
+        opacity: 0;
+        transform: translateY(18px) scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+.rise-in {
+    animation: rise-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: calc(var(--i, 0) * 60ms);
+}
+
+/* Lift + cursor spotlight (pair with v-spotlight). Tint with --accent. */
+.spot-card {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.spot-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    background: radial-gradient(300px circle at var(--mx, 50%) var(--my, 50%),
+            color-mix(in srgb, var(--accent, #58a6ff) 18%, transparent),
+            transparent 70%);
+}
+
+.spot-card>* {
+    position: relative;
+}
+
+.spot-card:hover {
+    transform: translateY(-3px);
+    border-color: color-mix(in srgb, var(--accent, #58a6ff) 50%, var(--card-border)) !important;
+    box-shadow: 0 14px 30px -16px color-mix(in srgb, var(--accent, #58a6ff) 55%, transparent) !important;
+}
+
+.spot-card:hover::before {
+    opacity: 1;
+}
+
+/* Two lines, then an ellipsis */
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .view-swap-enter-active,
+    .view-swap-leave-active,
+    .spot-card,
+    .spot-card::before {
+        transition: none !important;
+    }
+
+    .rise-in {
+        animation: none !important;
+    }
+
+    .spot-card:hover {
+        transform: none;
+    }
+}

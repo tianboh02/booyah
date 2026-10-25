@@ -126,14 +126,19 @@ function isNotSoftware(repo) {
     return !repo.language && DOCSY_DESC_RX.test(repo.description ?? '')
 }
 
-// True when a GitHub repo response is fit to show.
-export function passesHardChecks(repo) {
-    return !repo.fork
-        && !repo.archived
-        && !BLOCKLIST_RX.test([repo.name, repo.description, ...(repo.topics ?? [])].join(' '))
-        && !isNotSoftware(repo)
-        && (repo.stargazers_count ?? 0) >= MIN_STARS
+// Why a GitHub repo response is not fit to show: [] when it passes. Learn reuses these to coach the user's own repos.
+export function hardCheckFailures(repo) {
+    const failures = []
+    if (repo.fork) failures.push('fork')
+    if (repo.archived) failures.push('archived')
+    if (BLOCKLIST_RX.test([repo.name, repo.description, ...(repo.topics ?? [])].join(' '))) failures.push('blocked')
+    if (isNotSoftware(repo)) failures.push('not-software')
+    if ((repo.stargazers_count ?? 0) < MIN_STARS) failures.push('stars')
+    return failures
 }
+
+// True when a GitHub repo response is fit to show.
+export const passesHardChecks = (repo) => hardCheckFailures(repo).length === 0
 
 
 // ---------- Display helpers (shared by the Discovery components) ----------
