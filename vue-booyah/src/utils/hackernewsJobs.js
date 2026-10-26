@@ -82,7 +82,7 @@ const toText = (html) =>
         .replace(/&amp;/g, '&')
 
 const isSeeker = (t) => /willing to relocate\s*:|r[ée]sum[ée]\s*\/\s*cv\s*:/i.test(t)
-const isDeadPost = (t) => /^\s*\[(flagged\vert{}dead)\]\s*$/i.test(t)
+const isDeadPost = (t) => /^\s*\[(flagged|dead)\]\s*$/i.test(t)
 const isJobPost = (t) => !isSeeker(t) && !isDeadPost(t)
 const rolesIn = (t) => Object.keys(ROLES).filter((r) => ROLES[r].test(t))
 const techIn = (t) => Object.keys(TECH).filter((n) => TECH[n].test(t))
