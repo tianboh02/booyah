@@ -31,12 +31,27 @@ async function getRepos() {
     }
 
     try {
-        const { data } = await axios.get(
-            'https://api.github.com/user/repos',
-            { headers },
-        )
+        let page = 1
+        let allRepos = []
+        let hasMore = true
 
-        repoList.value = data
+        // Loop through all pages until all repositories are retrieved
+        while (hasMore) {
+            const { data } = await axios.get(
+                `https://api.github.com/user/repos?per_page=100&page=${page}&sort=updated`,
+                { headers },
+            )
+
+            allRepos = allRepos.concat(data)
+
+            if (data.length < 100) {
+                hasMore = false
+            } else {
+                page++
+            }
+        }
+
+        repoList.value = allRepos
     } catch (error) {
         console.error('Failed to fetch repositories:', error)
     } finally {
@@ -51,8 +66,8 @@ onMounted(() => {
 
 <template>
     <div class="container my-4">
-        <PageHeader title="My Projects" subtitle="Your GitHub repositories, loaded when you sign in."
-            :status="status" :live="synced" :colors="headerColors" />
+        <PageHeader title="My Projects" subtitle="Your GitHub repositories, loaded when you sign in." :status="status"
+            :live="synced" :colors="headerColors" />
 
         <ProjectStatsTable v-model:selected-lang="selectedLang" :repo-list="repoList" :loading="loading" />
 
