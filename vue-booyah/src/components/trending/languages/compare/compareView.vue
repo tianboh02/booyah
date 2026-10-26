@@ -152,53 +152,34 @@ onBeforeUnmount(() => {
 
 <template>
   <!-- the open/close animation (.backdrop-*) is run by the <Transition> around this component -->
-  <div
-    class="backdrop position-fixed top-0 start-0 end-0 bottom-0 d-grid p-0 p-sm-4"
-    @click.self="$emit('close')"
-  >
-    <div
-      ref="panel"
-      class="compare position-relative d-flex flex-column overflow-hidden"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="compare-title"
-      :style="{
+  <div class="backdrop position-fixed top-0 start-0 end-0 bottom-0 d-grid p-0 p-sm-4" @click.self="$emit('close')">
+    <div ref="panel" class="compare position-relative d-flex flex-column overflow-hidden" role="dialog"
+      aria-modal="true" aria-labelledby="compare-title" :style="{
         '--accent': 'var(--brand-blue)',
         '--accent-line': 'var(--brand-blue)',
         '--glow-a': a.language.accent,
         '--glow-b': b.language.accent,
-      }"
-    >
+      }">
       <!-- ===================== Header: names, date range, period toggle, Clear, × ===================== -->
-      <header class="compare-head d-flex align-items-start justify-content-between">
+      <header class="compare-head border-bottom d-flex align-items-start justify-content-between">
         <div class="title-block flex-fill min-w-0">
           <h4 id="compare-title" class="names d-flex align-items-center flex-wrap fw-bold">
             <span class="d-inline-flex align-items-center gap-2 min-w-0" :style="{ '--side': colors[0] }">
-              <span class="name-text font-monospace"
-                ><template v-for="(part, i) in nameParts(a.name)" :key="i"
-                  ><wbr v-if="i" />{{ part }}</template
-                ></span
-              >
-              <span
-                class="badge-lang rounded-pill fw-semibold"
-                :style="{ '--lang': lineAccent(a.language, theme) }"
-                >{{
-                a.language.name
-              }}</span>
+              <span class="name-text border-bottom border-3 font-monospace"><template
+                  v-for="(part, i) in nameParts(a.name)" :key="i"><wbr v-if="i" />{{ part }}</template></span>
+              <span class="badge-lang border rounded-pill fw-semibold"
+                :style="{ '--lang': lineAccent(a.language, theme) }">{{
+                  a.language.name
+                }}</span>
             </span>
             <span class="vs text-muted-github fw-semibold">vs</span>
             <span class="d-inline-flex align-items-center gap-2 min-w-0" :style="{ '--side': colors[1] }">
-              <span class="name-text font-monospace"
-                ><template v-for="(part, i) in nameParts(b.name)" :key="i"
-                  ><wbr v-if="i" />{{ part }}</template
-                ></span
-              >
-              <span
-                class="badge-lang rounded-pill fw-semibold"
-                :style="{ '--lang': lineAccent(b.language, theme) }"
-                >{{
-                b.language.name
-              }}</span>
+              <span class="name-text border-bottom border-3 font-monospace"><template
+                  v-for="(part, i) in nameParts(b.name)" :key="i"><wbr v-if="i" />{{ part }}</template></span>
+              <span class="badge-lang border rounded-pill fw-semibold"
+                :style="{ '--lang': lineAccent(b.language, theme) }">{{
+                  b.language.name
+                }}</span>
             </span>
           </h4>
           <p class="range m-0 text-muted-github">
@@ -206,29 +187,16 @@ onBeforeUnmount(() => {
           </p>
         </div>
         <div class="head-actions flex-shrink-0 d-flex align-items-center">
-          <PeriodToggle
-            :model-value="period"
-            :periods="PERIODS"
-            :labels="PERIOD_INFO"
-            @update:model-value="$emit('update:period', $event)"
-          />
-          <button
-            type="button"
-            class="clear flex-shrink-0 rounded-pill fw-semibold"
-            aria-label="Clear compared packages and close"
-            @click="$emit('clear')"
-          >
+          <PeriodToggle :model-value="period" :periods="PERIODS" :labels="PERIOD_INFO"
+            @update:model-value="$emit('update:period', $event)" />
+          <button type="button" class="clear border flex-shrink-0 rounded-pill fw-semibold"
+            aria-label="Clear compared packages and close" @click="$emit('clear')">
             Clear
           </button>
         </div>
         <!-- pinned to the popup's top-right corner -->
-        <button
-          ref="closeBtn"
-          type="button"
-          class="close position-absolute z-1 d-grid p-0 rounded-circle lh-1"
-          aria-label="Close compare"
-          @click="$emit('close')"
-        >
+        <button ref="closeBtn" type="button" class="close border position-absolute z-1 d-grid p-0 rounded-circle lh-1"
+          aria-label="Close compare" @click="$emit('close')">
           ×
         </button>
       </header>
@@ -236,55 +204,43 @@ onBeforeUnmount(() => {
       <div class="compare-body d-grid overflow-y-auto">
         <!-- ===================== The six rows (a small table; ✓ marks the better side) ===================== -->
         <div class="rows d-grid align-content-start" role="table" :aria-label="`${a.name} compared with ${b.name}`">
-          <div class="row-line head-line d-none d-sm-grid align-items-center gap-2" role="row">
+          <div class="row-line head-line border pt-0 bg-transparent d-none d-sm-grid align-items-center gap-2"
+            role="row">
             <!-- An empty slot over the row labels. The "Measure" text inside is for screen readers only.
                  (Putting .visually-hidden on the slot itself made it position:absolute, so it left
                  the grid and both names slid one column left, out of line with their values.) -->
             <span role="columnheader" class="col-blank"><span class="visually-hidden">Measure</span></span>
-            <span
-              role="columnheader"
-              class="col-name text-truncate font-monospace fw-semibold pb-1"
-              :style="{ '--side': colors[0] }"
-              >{{
-              a.name
-            }}</span>
-            <span
-              role="columnheader"
-              class="col-name text-truncate font-monospace fw-semibold pb-1"
-              :style="{ '--side': colors[1] }"
-              >{{
-              b.name
-            }}</span>
+            <span role="columnheader"
+              class="col-name border-bottom border-2 text-truncate font-monospace fw-semibold pb-1"
+              :style="{ '--side': colors[0] }">{{
+                a.name
+              }}</span>
+            <span role="columnheader"
+              class="col-name border-bottom border-2 text-truncate font-monospace fw-semibold pb-1"
+              :style="{ '--side': colors[1] }">{{
+                b.name
+              }}</span>
           </div>
-          <div
-            v-for="(row, i) in comparison.rows"
-            :key="period + row.key"
-            class="row-line d-grid align-items-center gap-2"
-            role="row"
-            :style="{ '--i': i }"
-          >
+          <div v-for="(row, i) in comparison.rows" :key="period + row.key"
+            class="row-line border d-grid align-items-start align-items-sm-center gap-2" role="row"
+            :style="{ '--i': i }">
             <span class="row-label text-muted-github" role="rowheader">{{ row.label }}</span>
-            <span
-              v-for="side in ['a', 'b']"
-              :key="side"
-              class="cell d-flex align-items-center flex-wrap flex-sm-nowrap min-w-0"
-              role="cell"
-              :class="{ win: row.win === side }"
-            >
-              <span
-                class="cell-name d-block d-sm-none text-truncate font-monospace text-muted-github"
-                aria-hidden="true"
-                >{{ side === 'a' ? a.name : b.name }}</span>
+            <span v-for="side in ['a', 'b']" :key="side"
+              class="cell d-flex align-items-center flex-wrap flex-sm-nowrap min-w-0" role="cell"
+              :class="{ win: row.win === side }">
+              <span class="cell-name d-block d-sm-none text-truncate font-monospace text-muted-github"
+                aria-hidden="true">{{
+                  side === 'a' ? a.name : b.name }}</span>
               <!-- the trend's % is its own span, so narrow columns can put it on a second line (see .trend-pct) -->
-              <span v-if="row.key === 'trend' && row[side] !== null" class="cell-value fw-semibold" :class="tone(row, side)"
-                >{{ row[side + 'Label'] }} <span class="trend-pct">({{ pct(row[side]) }})</span></span
-              >
-              <span v-else class="cell-value fw-semibold" :class="tone(row, side)">{{ format(row, side) }}</span>
-              <span
-                v-if="row.win === side"
-                class="check d-inline-grid flex-shrink-0 rounded-circle fw-bold"
-                :style="{ '--side': colors[side === 'a' ? 0 : 1] }"
-              >
+              <span v-if="row.key === 'trend' && row[side] !== null" class="cell-value order-2 order-sm-0 fw-semibold"
+                :class="tone(row, side)">{{ row[side + 'Label'] }} <span class="trend-pct">({{ pct(row[side])
+                  }})</span></span>
+              <span v-else class="cell-value order-2 order-sm-0 fw-semibold" :class="tone(row, side)">{{ format(row,
+                side)
+                }}</span>
+              <span v-if="row.win === side"
+                class="check order-1 order-sm-0 d-inline-grid flex-shrink-0 rounded-circle fw-bold"
+                :style="{ '--side': colors[side === 'a' ? 0 : 1] }">
                 ✓<span class="visually-hidden"> higher</span>
               </span>
             </span>
@@ -292,56 +248,37 @@ onBeforeUnmount(() => {
         </div>
 
         <!-- ===================== Chart: legend, Downloads / Growth toggle, help line, D3 chart ===================== -->
-        <section class="chart-card rounded-4 min-w-0" aria-label="Comparison chart">
+        <section class="chart-card border rounded-4 min-w-0" aria-label="Comparison chart">
           <div class="chart-head d-flex align-items-center justify-content-between">
             <ul class="legend flex-fill d-flex flex-wrap m-0 list-unstyled min-w-0">
               <li class="d-flex align-items-center min-w-0 font-monospace" :style="{ '--side': colors[0] }">
                 <span class="swatch flex-shrink-0"></span>
-                <span
-                  ><template v-for="(part, i) in nameParts(a.name)" :key="i"
-                    ><wbr v-if="i" />{{ part }}</template
-                  ></span
-                >
+                <span><template v-for="(part, i) in nameParts(a.name)"
+                    :key="i"><wbr v-if="i" />{{ part }}</template></span>
               </li>
               <li class="d-flex align-items-center min-w-0 font-monospace" :style="{ '--side': colors[1] }">
                 <span class="swatch flex-shrink-0" :class="{ dashed: dashedB }"></span>
-                <span
-                  ><template v-for="(part, i) in nameParts(b.name)" :key="i"
-                    ><wbr v-if="i" />{{ part }}</template
-                  ></span
-                >
+                <span><template v-for="(part, i) in nameParts(b.name)"
+                    :key="i"><wbr v-if="i" />{{ part }}</template></span>
               </li>
             </ul>
-            <PeriodToggle
-              v-model="mode"
-              :periods="MODES"
-              :labels="MODE_LABELS"
-              aria-label="Chart mode"
-            />
+            <!-- long names wrap in the legend; the Downloads / Growth toggle never grows or shrinks -->
+            <PeriodToggle class="flex-grow-0 flex-shrink-0" v-model="mode" :periods="MODES" :labels="MODE_LABELS"
+              aria-label="Chart mode" />
           </div>
           <p class="chart-help mt-2 mx-0 mb-1 text-muted-github">
-            <template v-if="mode === 'growth'"
-              >Both lines start at 100, so 120 means 20% higher than at the start.</template
-            >
-            <template v-else
-              >Real download counts, {{ PERIOD_INFO[period].label.toLowerCase() }}.</template
-            >
+            <template v-if="mode === 'growth'">Both lines start at 100, so 120 means 20% higher than at the
+              start.</template>
+            <template v-else>Real download counts, {{ PERIOD_INFO[period].label.toLowerCase() }}.</template>
           </p>
-          <CompareChart
-            class="chart"
-            :series="comparison.series"
-            :mode="mode"
-            :period="period"
-            :names="[a.name, b.name]"
-            :colors="colors"
-            :dashed-b="dashedB"
-          />
+          <CompareChart class="chart" :series="comparison.series" :mode="mode" :period="period"
+            :names="[a.name, b.name]" :colors="colors" :dashed-b="dashedB" />
         </section>
 
         <!-- ===================== Verdict + notes (fade when the sentence changes) ===================== -->
         <Transition name="verdict" mode="out-in" appear>
           <div :key="comparison.verdict" class="verdict-block">
-            <p class="verdict fs-6">{{ comparison.verdict }}</p>
+            <p class="verdict border-start border-3 fs-6">{{ comparison.verdict }}</p>
             <p v-for="note in comparison.notes" :key="note" class="note mt-1 mx-0 mb-0 text-muted-github">{{ note }}</p>
           </div>
         </Transition>
@@ -355,6 +292,14 @@ onBeforeUnmount(() => {
   Sections, in order: layout (backdrop + panel) → header → body → rows → chart → verdict
   → animations → keyboard focus → responsive (tablet, phone) → reduced motion.
   (Rules are kept in their original order on purpose: a later CSS rule can override an earlier one.)
+
+  Bootstrap classes in the template do the rest: borders (.border, .border-bottom, .border-start with
+  .border-2 / .border-3), alignment (.align-items-start / .align-items-sm-center), ordering
+  (.order-1 / .order-2 / .order-sm-0), flex (.flex-grow-0 / .flex-shrink-0), .pt-0, .bg-transparent.
+  Bootstrap's border classes take their colour from --bs-border-color, so the rules below only set
+  that variable, never a border width or style. This file keeps what Bootstrap has no class for:
+  custom sizes, theme colours, grid layouts, animations and the 900px tablet breakpoint.
+  (Bootstrap utilities are !important, so anything that changes at a breakpoint or on hover stays here.)
 */
 
 /* ---------- Layout: the dimmed, blurred backdrop and the panel ---------- */
@@ -366,6 +311,8 @@ onBeforeUnmount(() => {
 }
 
 .compare {
+  /* the colour every Bootstrap border class inside the panel uses */
+  --bs-border-color: var(--edge);
   width: min(1040px, 100%);
   max-height: calc(100vh - 48px);
   border: 1px solid var(--edge);
@@ -374,16 +321,12 @@ onBeforeUnmount(() => {
      the right. Everything else in the frame (toggles, description) uses the fixed --accent, the
      site's blue, set in the template. */
   background:
-    radial-gradient(
-      60% 40% at 0% 0%,
+    radial-gradient(60% 40% at 0% 0%,
       color-mix(in srgb, var(--glow-a) 8%, transparent),
-      transparent 60%
-    ),
-    radial-gradient(
-      60% 40% at 100% 0%,
+      transparent 60%),
+    radial-gradient(60% 40% at 100% 0%,
       color-mix(in srgb, var(--glow-b) 8%, transparent),
-      transparent 60%
-    ),
+      transparent 60%),
     var(--card);
   box-shadow: 0 30px 80px color-mix(in srgb, var(--shadow) 60%, transparent);
 }
@@ -393,7 +336,6 @@ onBeforeUnmount(() => {
   gap: 12px 20px;
   /* the right padding leaves room for the × in the corner */
   padding: 20px 72px 16px 24px;
-  border-bottom: 1px solid var(--edge);
 }
 
 /* long names (e.g. PHP's vendor/package) wrap inside the title (.title-block), so the toggle never
@@ -406,12 +348,13 @@ onBeforeUnmount(() => {
 .name-text {
   color: var(--ink);
   overflow-wrap: break-word;
-  border-bottom: 3px solid var(--side);
+  --bs-border-color: var(--side);
+  /* the underline is .border-bottom.border-3 */
 }
 
 .badge-lang {
   padding: 2px 8px;
-  border: 1px solid color-mix(in srgb, var(--lang) 60%, transparent);
+  --bs-border-color: color-mix(in srgb, var(--lang) 60%, transparent);
   background: color-mix(in srgb, var(--lang) 16%, transparent);
   color: var(--ink);
   font-size: 0.72rem;
@@ -435,7 +378,6 @@ onBeforeUnmount(() => {
   place-items: center;
   width: 36px;
   height: 36px;
-  border: 1px solid var(--edge);
   background: color-mix(in srgb, var(--ink) 4%, transparent);
   color: var(--ink);
   font-size: 1.3rem;
@@ -450,7 +392,6 @@ onBeforeUnmount(() => {
 .clear {
   height: 36px;
   padding: 0 14px;
-  border: 1px solid var(--edge);
   background: transparent;
   color: var(--ink-2);
   font-size: 0.85rem;
@@ -486,23 +427,22 @@ onBeforeUnmount(() => {
   padding: 10px 12px;
   border-radius: 12px;
   background: color-mix(in srgb, var(--ink) 2.5%, transparent);
-  border: 1px solid var(--edge);
   animation: row-in 400ms var(--ease) calc(var(--i) * 60ms + 120ms) backwards;
 }
 
 .head-line {
-  padding-top: 0;
+  /* padding-top: 0 and background: none come from .pt-0 and .bg-transparent in the template */
   padding-bottom: 2px;
-  background: none;
   /* transparent (not 0) border, so the header columns sit exactly over the bordered rows below */
-  border-color: transparent;
+  --bs-border-color: transparent;
   animation: none;
 }
 
 .col-name {
   color: var(--ink);
   font-size: 0.82rem;
-  border-bottom: 2px solid var(--side);
+  --bs-border-color: var(--side);
+  /* the underline is .border-bottom.border-2 */
 }
 
 .row-label {
@@ -556,16 +496,10 @@ onBeforeUnmount(() => {
   grid-area: chart;
   padding: 14px 14px 10px;
   background: color-mix(in srgb, var(--ink) 2%, transparent);
-  border: 1px solid var(--edge);
 }
 
 .chart-head {
   gap: 10px;
-}
-
-/* same idea: long names wrap in the legend, the Downloads / Growth toggle stays on the right */
-.chart-head > :last-child {
-  flex: none;
 }
 
 .legend {
@@ -606,7 +540,8 @@ onBeforeUnmount(() => {
 .verdict {
   margin: 0 0 6px;
   padding: 14px 18px;
-  border-left: 3px solid var(--accent-line);
+  --bs-border-color: var(--accent-line);
+  /* the bar on the left is .border-start.border-3 */
   border-radius: 0 12px 12px 0;
   background: color-mix(in srgb, var(--accent) 7%, transparent);
   color: var(--ink);
@@ -686,6 +621,7 @@ button:focus-visible {
 
 /* ---------- Responsive (tablet): one column, controls under the names ---------- */
 @media (max-width: 899.98px) {
+
   /* narrower screens: the names get the full width (room left for the ×), then the toggle and
      Clear on their own row, then the date range. The title block is flattened (display: contents)
      so the names and the range can sit either side of the controls. */
@@ -745,7 +681,7 @@ button:focus-visible {
   }
 
   /* phones: the toggle stretches across the row, Clear at its end */
-  .head-actions > :first-child {
+  .head-actions> :first-child {
     flex: 1;
     min-width: 0;
   }
@@ -764,7 +700,7 @@ button:focus-visible {
      side down. */
   .row-line {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    align-items: start !important;
+    /* (align-items: start on phones is .align-items-start in the template) */
   }
 
   .row-label {
@@ -775,18 +711,13 @@ button:focus-visible {
      The ✓ sits next to the name, not the value, so a long value never pushes it onto a new line.
      The name line is as tall as the ✓, so both sides stay level with or without one. */
   .cell-name {
-    flex: 0 1 auto;
-    min-width: 0;
+    /* (flex: 0 1 auto and min-width: 0 are the defaults for a text-truncate flex item, so not repeated) */
     font-size: 0.72rem;
     line-height: 20px;
   }
 
-  .check {
-    order: 1;
-  }
-
+  /* (the ✓ goes before the value through .order-1 and .order-2 in the template) */
   .cell-value {
-    order: 2;
     flex-basis: 100%;
   }
 
@@ -797,6 +728,7 @@ button:focus-visible {
 
 /* ---------- Reduced motion ---------- */
 @media (prefers-reduced-motion: reduce) {
+
   .backdrop-enter-active,
   .backdrop-leave-active,
   .backdrop-enter-active .compare,
