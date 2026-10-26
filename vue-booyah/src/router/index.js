@@ -77,13 +77,8 @@ const router = createRouter({
   ],
 
   scrollBehavior(to, from, savedPosition) {
-    // Back and forward buttons: return to where the person was
     if (savedPosition) return savedPosition
-
-    // Links like /page#section: scroll to that element
     if (to.hash) return { el: to.hash, behavior: 'smooth' }
-
-    // Everything else: start at the top of the new page
     return { top: 0, left: 0 }
   }
 })
@@ -102,6 +97,8 @@ function getUserExperience() {
 function clearAuth() {
   localStorage.removeItem('auth_token')
   localStorage.removeItem('user')
+  // Notify navbar.vue instantly when session/token expires
+  window.dispatchEvent(new Event('booyah:user-updated'))
 }
 
 // Global Navigation Guard
@@ -132,7 +129,6 @@ router.beforeEach(async (to) => {
     console.warn('Auth token expired or invalid. Clearing session.', error)
     clearAuth()
 
-    // Alert user on the current page BEFORE navigating away
     alert('Session has expired, please login again.')
 
     if (!isPublicRoute) {
@@ -149,7 +145,7 @@ router.beforeEach(async (to) => {
     if (to.name !== 'setup') {
       return { name: 'setup' }
     }
-    return true // Allow remaining on setup page without looping
+    return true
   }
 
   // 4. Authenticated user with experience trying to access public or setup pages
