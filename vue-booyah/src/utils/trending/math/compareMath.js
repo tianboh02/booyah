@@ -120,6 +120,7 @@ function times(ratio) {
  * Returns the sentence as a string.
  */
 export function verdictSentence(A, B) {
+  if (!A.size && !B.size) return `There isn't enough data yet to compare ${A.name} and ${B.name}.`
   // Part 1: size
   const [big, small] = (A.size ?? 0) >= (B.size ?? 0) ? [A, B] : [B, A]
   const ratio = small.size ? big.size / small.size : Infinity
