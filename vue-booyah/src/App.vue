@@ -7,6 +7,8 @@ import SiteFooter from '@/components/footer/siteFooter.vue'
 const route = useRoute()
 const isLanding = computed(() => route.path === '/')
 
+const hiddenFooterPaths = ['/', '/authenticating', '/setup']
+const showFooter = computed(() => !hiddenFooterPaths.includes(route.path))
 </script>
 
 <template>
@@ -15,6 +17,6 @@ const isLanding = computed(() => route.path === '/')
     <main class="flex-grow-1" :class="{ 'px-4 px-md-5': !isLanding }">
       <RouterView />
     </main>
-    <SiteFooter />
+    <SiteFooter v-if="showFooter" />
   </div>
 </template>
