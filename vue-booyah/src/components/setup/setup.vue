@@ -2,16 +2,13 @@
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 
 const props = defineProps({
-    // Shared with the form via SetupView: 'Newcomer' | 'Practitioner'
     experience: {
         type: String,
         default: 'Newcomer'
     }
 })
 
-// --- Greeting ---------------------------------------------------------------
-// Reads the name from the same localStorage user object the form uses.
-// If your user object stores it under another key, add it to this list.
+
 const displayName = computed(() => {
     try {
         const u = JSON.parse(localStorage.getItem('user') || '{}')
@@ -28,11 +25,9 @@ const words = computed(() => {
     return ['Hi', ...nameWords, 'welcome', 'to', 'Booyah']
 })
 
-// --- Scene that morphs with the chosen path ---------------------------------
-const isDiscovery = computed(() => props.experience.toLowerCase() === 'new')
+const isDiscovery = computed(() => props.experience.toLowerCase() === 'newcomer')
 
-// Discovery = warm, exploratory palette. My Projects = cool, structured palette.
-// All colors come from your existing language/accent colors.
+
 const sceneVars = computed(() => {
     const palette = isDiscovery.value
         ? ['#41b883', '#58a6ff', '#f1e05a']
@@ -54,7 +49,6 @@ const motes = Array.from({ length: 26 }, (_, id) => ({
     drift: (Math.random() - 0.5) * 80
 }))
 
-// --- Cursor light --------------------------------------------------------------
 const scene = ref(null)
 let raf = 0
 function onMove(e) {
@@ -75,7 +69,6 @@ onBeforeUnmount(() => {
 <template>
     <section class="setup-hero">
 
-        <!-- Background scene (fixed, behind everything) -->
         <div ref="scene" class="position-fixed top-0 bottom-0 start-0 end-0 z-n1 overflow-hidden pe-none"
             :class="{ 'is-structured': !isDiscovery }" :style="sceneVars" aria-hidden="true">
             <span class="orb o1 position-absolute rounded-circle"></span>
@@ -93,7 +86,6 @@ onBeforeUnmount(() => {
             }"></span>
         </div>
 
-        <!-- Greeting -->
         <header class="hero-copy container pt-4 pb-2">
             <h1 class="hero-title display-5 fw-bold mb-3" :aria-label="words.join(' ')">
                 <span v-for="(w, i) in words" :key="i" class="word d-inline-block" aria-hidden="true" :style="{ '--i': i }">{{ w
@@ -117,7 +109,6 @@ onBeforeUnmount(() => {
     letter-spacing: -0.02em;
 }
 
-/* One orchestrated entrance: words resolve out of blur */
 .word {
     opacity: 0;
     filter: blur(14px);
@@ -152,7 +143,6 @@ onBeforeUnmount(() => {
     }
 }
 
-/* --- Scene (fixed, behind everything) ------------------------------------------ */
 .orb {
     width: 52vmax;
     aspect-ratio: 1;
@@ -202,7 +192,6 @@ onBeforeUnmount(() => {
     }
 }
 
-/* Grid only fades in for the structured (My Projects) path */
 .grid {
     background-image:
         linear-gradient(var(--card-border) 1px, transparent 1px),
