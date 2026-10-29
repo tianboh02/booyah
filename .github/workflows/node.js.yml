@@ -30,7 +30,7 @@ jobs:
         working-directory: vue-booyah
 
       - name: Run build
-        run: pnpm run build --if-present
+        run: pnpm run build
         working-directory: vue-booyah
 
       - name: Run test
