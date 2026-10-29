@@ -26,7 +26,7 @@ const {
     dismissUndo,
 } = useSavedLibrary()
 
-// Header: the aurora takes its colors from the languages of your saved projects.
+//for the aurora in the header cards
 const HEADER_FALLBACK = ['#58a6ff', '#6b8aff', '#e3b341']
 const headerColors = computed(() => {
     const top = topLangColors(items.value.filter(i => i.status === 'ok' && i.language).map(itemLang))
@@ -39,7 +39,6 @@ const pillText = computed(() => {
     return `${items.value.length} saved`
 })
 
-// Shared filters for the statistics, toolbar, and list.
 const selectedCategory = ref(null)
 const selectedLang = ref(null)
 const search = ref('')
@@ -55,7 +54,7 @@ const focusItems = computed(() =>
     ),
 )
 
-// Apply search and sorting to the focused items.
+// compute search and sorting to the focused items.
 const visibleItems = computed(() => {
     let list = [...focusItems.value]
 

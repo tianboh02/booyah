@@ -14,7 +14,6 @@ const status = ref('idle') // 'idle' | 'saving' | 'saved'
 const serverError = ref('')
 let savedTimer = null
 
-// if the name changes from somewhere else, follow it
 watch(displayName, (v) => (draft.value = v))
 
 const trimmed = computed(() => draft.value.trim())
@@ -72,7 +71,6 @@ onBeforeUnmount(() => clearTimeout(savedTimer))
             </p>
         </div>
 
-        <!-- Bootstrap floating label input -->
         <div class="form-floating">
             <input id="displayName" v-model="draft" type="text" class="form-control github-control"
                 :class="{ 'is-invalid': validation }" placeholder="Display name" autocomplete="nickname"

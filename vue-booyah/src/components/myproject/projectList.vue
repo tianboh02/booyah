@@ -9,10 +9,9 @@ import RingCaption from '@/components/ring/RingCaption.vue'
 import ViewToggle from '@/components/ring/ViewToggle.vue'
 import SortPills from '@/components/shared/SortPills.vue'
 
-// The repo card is defined once in the template and reused by both views.
 const [DefineRepoCard, ReuseRepoCard] = createReusableTemplate()
 
-// Carousel or the original list, remembered per page.
+// carousel or the original list, remembered by each indiv page
 const view = useViewMode('my-projects')
 
 const props = defineProps({
@@ -106,7 +105,6 @@ const pad = (n) => String(n).padStart(2, '0')
 
 <template>
     <div id="repo-list" class="mb-4">
-        <!-- Repo card, written once and used by both the carousel and the list -->
         <DefineRepoCard v-slot="{ repo, index, inRing }">
             <div v-spotlight class="repo-card card overflow-hidden p-3 rounded-3 shadow-sm" :class="inRing ? 'h-100' : 'mb-3'"
                 :style="{ '--lang': getLangColor(langOf(repo)), '--i': Math.min(index, 10) }">
@@ -132,7 +130,7 @@ const pad = (n) => String(n).padStart(2, '0')
                     {{ repo.description || "No description" }}
                 </p>
 
-                <!-- Metadata Row -->
+                <!-- metadata -->
                 <div class="d-flex align-items-center gap-3 text-muted-github small flex-wrap">
                     <button type="button" class="lang-link d-flex align-items-center gap-1 rounded-2 position-relative z-2"
                         :class="{ 'is-selected': selectedLang === langOf(repo) }"
@@ -189,7 +187,7 @@ const pad = (n) => String(n).padStart(2, '0')
             </div>
 
             <div class="d-flex align-items-center gap-3 flex-wrap">
-                <!-- Search Input -->
+                <!-- search bar -->
                 <div class="search-wrap position-relative">
                     <svg class="search-icon position-absolute top-50 start-0 translate-middle-y ms-2 pe-none" width="14"
                         height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"
@@ -203,14 +201,14 @@ const pad = (n) => String(n).padStart(2, '0')
                         aria-label="Search repositories" />
                 </div>
 
-                <!-- Sort Button Group -->
+                <!-- Sort buttons -->
                 <SortPills v-model="sortBy" :options="sortOptions" aria-label="Sort repositories" />
 
                 <ViewToggle v-model="view" />
             </div>
         </div>
 
-        <!-- Loading skeleton -->
+        <!-- loading... -->
         <div v-if="loading">
             <div v-for="n in 4" :key="n" class="card mb-3 p-3 rounded-3 shadow-sm placeholder-glow">
                 <span class="placeholder col-3 mb-2"></span>
@@ -240,7 +238,7 @@ const pad = (n) => String(n).padStart(2, '0')
             </TransitionGroup>
         </Transition>
 
-        <!-- Empty Filter/Repository Message -->
+        <!-- no repo found messages -->
         <div v-else class="text-center py-5 text-muted-github card p-4 rounded-3 shadow-sm">
             <span v-if="searchQuery.trim() && selectedLang">
                 No {{ selectedLang }} repositories match "{{ searchQuery }}".
@@ -267,7 +265,6 @@ const pad = (n) => String(n).padStart(2, '0')
     color: var(--app-text);
 }
 
-/* --- Filter chip ---------------------------------------------------------- */
 .filter-chip {
     color: var(--app-text);
     background-color: color-mix(in srgb, var(--c) 14%, var(--card-bg));
@@ -309,7 +306,6 @@ const pad = (n) => String(n).padStart(2, '0')
     transform: scale(0.85);
 }
 
-/* --- Controls ------------------------------------------------------------- */
 .search-wrap {
     width: 240px;
     transition: width 0.35s cubic-bezier(0.22, 1, 0.36, 1);
@@ -356,7 +352,6 @@ const pad = (n) => String(n).padStart(2, '0')
     box-shadow: 0 0 0 3px rgba(56, 139, 253, 0.4);
 }
 
-/* --- Repo cards ----------------------------------------------------------- */
 .repo-card {
     isolation: isolate;
     transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.25s ease, box-shadow 0.25s ease;

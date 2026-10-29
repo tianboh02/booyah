@@ -31,7 +31,7 @@ const loaderStatus = computed(() => {
 const categories = ref([])
 const selectedProject = ref(null)
 
-// Header: the aurora takes its colours from the three most common languages across the launches.
+//for the aurora in the header cards
 const headerColors = computed(() =>
     topLangColors(categories.value.flatMap(c => c.projects.map(p => p.language))),
 )
@@ -41,10 +41,8 @@ const status = computed(() => {
     return live.value ? 'Live from Hacker News · Last 30 days' : 'Not connected'
 })
 
-// Shared language selection for filters, statistics, and project labels.
 const selectedLang = ref(null)
 
-// Saved projects and bookmark state.
 const {
     saved,
     pending,
@@ -87,12 +85,10 @@ function openProject(category, project) {
     }
 }
 
-// Toggle a project's saved state from a category card.
 function saveFromCard(category, project) {
     toggleSave(project, category.name)
 }
 
-// Toggle a project's saved state from the detail dialog.
 function saveFromDetail(project) {
     toggleSave(project, project.categoryName)
 }
@@ -100,7 +96,6 @@ function saveFromDetail(project) {
 onMounted(() => {
     load()
     loadSaved().then(() => {
-        // loadSaved only sets an error when the saves request fails
         if (saveError.value) saveError.value = 'Could not load Discovery Page'
     })
 })

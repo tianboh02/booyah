@@ -1,13 +1,7 @@
 <script setup>
-// "Sort by" pill: a thumb slides behind the chosen option (same look as Trending's periodToggle.vue).
-//
-// The thumb is sized from the real buttons, so options with different label lengths line up.
-// If the control is wider than the screen it wraps under its label, and if it is still too wide
-// it scrolls sideways inside its own pill instead of spilling out of the page.
 import { computed, nextTick, onBeforeUnmount, onBeforeUpdate, onMounted, ref, watch } from 'vue'
 
 const props = defineProps({
-    // [{ value, label }]
     options: { type: Array, required: true },
     label: { type: String, default: 'Sort by' },
     ariaLabel: { type: String, default: 'Sort' }
@@ -15,12 +9,11 @@ const props = defineProps({
 
 const model = defineModel({ type: String })
 
-// Position of the chosen option in the list
 const index = computed(() => Math.max(0, props.options.findIndex((o) => o.value === model.value)))
 
 const scroller = ref(null)
-const buttons = [] // the real <button> elements, in the same order as options
-const ready = ref(false) // false until the first measurement, so the thumb does not slide in from the left
+const buttons = []
+const ready = ref(false) 
 const thumb = ref({ x: 0, w: 0 })
 const fadeLeft = ref(false)
 const fadeRight = ref(false)
@@ -40,7 +33,6 @@ function measure() {
     updateEdges()
 }
 
-// Soft fade on whichever side still has hidden options
 function updateEdges() {
     const s = scroller.value
     if (!s) return
@@ -49,7 +41,6 @@ function updateEdges() {
     fadeRight.value = hidden > 2 && hidden - s.scrollLeft > 2
 }
 
-// When the pill scrolls, keep the chosen option in view
 function revealActive(smooth = true) {
     const s = scroller.value
     const el = buttons[index.value]
@@ -58,7 +49,6 @@ function revealActive(smooth = true) {
     s.scrollTo({ left, behavior: smooth && !prefersReducedMotion() ? 'smooth' : 'auto' })
 }
 
-// Re-measure whenever the pill or any button changes size (rotation, font loading, new labels)
 let observer = null
 function observeAll() {
     if (!observer || !scroller.value) return
@@ -84,14 +74,12 @@ onMounted(async () => {
     observeAll()
     measure()
     revealActive(false)
-    // turn the slide animation on only after the first measurement is painted
     requestAnimationFrame(() => (ready.value = true))
     document.fonts?.ready.then(measure)
 })
 
 onBeforeUnmount(() => observer?.disconnect())
 
-// ← → move the choice and keep keyboard focus on it (standard radio-group behaviour)
 function onKey(event) {
     const count = props.options.length
     let next
@@ -105,7 +93,6 @@ function onKey(event) {
 </script>
 
 <template>
-    <!-- if the label and the pill do not fit side by side, the pill drops under the label -->
     <div class="d-flex flex-wrap align-items-center row-gap-1 column-gap-2 min-w-0 mw-100">
         <span class="text-muted-github small text-nowrap">{{ label }}</span>
 

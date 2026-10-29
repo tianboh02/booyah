@@ -1,11 +1,9 @@
 <script setup>
-
-const year = new Date().getFullYear()
 </script>
 
 <template>
     <footer class="site-footer mt-5">
-        <p class="footer-copy mb-0">&copy; {{ year }} Copyright. Booyah.</p>
+        <p class="footer-copy mb-0">&copy; 2026 Copyright. Booyah.</p>
     </footer>
 </template>
 

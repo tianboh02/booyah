@@ -1,14 +1,11 @@
 <script setup>
 import { getLangColor } from '@/utils/langColors'
 
-// Language dot + label, used in the filter row. The weight stays constant when active so the row doesn't reflow.
 defineProps({
     lang: { type: String, required: true },
     active: { type: Boolean, default: false },
-    // Draw a resting border (filter row). Card rows stay borderless until hover.
     outlined: { type: Boolean, default: false },
     dot: { type: Boolean, default: true },
-    // A plain label instead of a button, for places where the language isn't clickable.
     static: { type: Boolean, default: false }
 })
 </script>

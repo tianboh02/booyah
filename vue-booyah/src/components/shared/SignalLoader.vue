@@ -8,7 +8,6 @@ const props = defineProps({
     done: { type: Number, default: 0 },
     total: { type: Number, default: 0 },
     status: { type: String, default: 'Loading' },
-    // [{ label, colour: [r, g, b] }]; the colours double as the arc palette
     legend: { type: Array, default: () => [] },
     height: { type: String, default: '360px' }
 })

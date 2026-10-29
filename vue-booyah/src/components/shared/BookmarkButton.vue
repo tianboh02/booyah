@@ -1,9 +1,7 @@
 <script setup>
-// The save / unsave bookmark (same look as Discovery's category card). Filled when saved.
 defineProps({
   saved: { type: Boolean, default: false },
   pending: { type: Boolean, default: false },
-  // what is being saved, for screen readers ('vuejs/core')
   label: { type: String, required: true },
 })
 

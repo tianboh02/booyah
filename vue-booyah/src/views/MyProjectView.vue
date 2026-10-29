@@ -10,7 +10,7 @@ import ProjectStatsTable from '@/components/myproject/projectStatsTable.vue'
 const repoList = ref([])
 const loading = ref(true)
 
-// Header: the aurora takes its colours from the three most common languages in your repositories.
+//for the aurora in the header cards
 const headerColors = computed(() => topLangColors(repoList.value.map(r => r.language)))
 const synced = computed(() => !loading.value && repoList.value.length > 0)
 const status = computed(() => {
@@ -18,7 +18,6 @@ const status = computed(() => {
     return loading.value ? 'Connecting to GitHub' : 'Not connected'
 })
 
-// Shared language selection for the statistics and repository list.
 const selectedLang = ref(null)
 
 async function getRepos() {
@@ -35,7 +34,7 @@ async function getRepos() {
         let allRepos = []
         let hasMore = true
 
-        // Loop through all pages until all repositories are retrieved
+        // Loop through all pages until all repositories are retrieved, previously without this will only allow 30 repos max
         while (hasMore) {
             const { data } = await axios.get(
                 `https://api.github.com/user/repos?per_page=100&page=${page}&sort=updated`,

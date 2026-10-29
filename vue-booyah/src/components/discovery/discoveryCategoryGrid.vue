@@ -7,7 +7,6 @@ import { useViewMode, isSmallScreen } from '@/composables/useViewMode'
 
 defineProps({
     categories: { type: Array, default: () => [] },
-    // { [ghUrl]: saveId } and the set of ghUrls with a request in flight
     savedMap: { type: Object, default: () => ({}) },
     pendingLinks: { type: Object, default: () => new Set() }
 })
@@ -19,7 +18,7 @@ const selectedLang = defineModel('selectedLang', {
     default: null
 })
 
-// Carousel or the original 2-column grid; Discovery opens as the carousel.
+// carousel or the original 2-column grid; Discovery opens as the carousel.
 const view = useViewMode('discovery', 'carousel')
 
 const pad = (n) => String(n).padStart(2, '0')
@@ -32,7 +31,6 @@ const pad = (n) => String(n).padStart(2, '0')
         </div>
 
         <Transition name="view-swap" mode="out-in">
-            <!-- Category cards on a rotating ring; the front card is the one you can use. -->
             <CardRing v-if="view === 'carousel'" key="carousel" :items="categories" item-key="id" item-label="name"
                 card-width="min(560px, 90vw)" :radius="1.2" label="Top categories this month">
                 <template #card="{ item: category }">
@@ -61,9 +59,7 @@ const pad = (n) => String(n).padStart(2, '0')
 </template>
 
 <style scoped>
-/* Carousel <-> grid switch: view-swap, and the rise-in keyframes, live in main.css */
 
-/* Staggered entrance animation */
 .cat-enter-active {
     animation: rise-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
     animation-delay: calc(var(--i) * 80ms);

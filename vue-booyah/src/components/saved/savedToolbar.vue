@@ -21,7 +21,6 @@ const sortOptions = [
     { value: 'stars', label: 'Stars' }
 ]
 
-// Carousel or list; savedList reads the same remembered value.
 const view = useViewMode('saved')
 </script>
 
@@ -31,7 +30,7 @@ const view = useViewMode('saved')
             <h3 class="h3 fw-bold section-title mb-0">Your bookmarks</h3>
             <span class="text-muted-github small font-monospace">{{ shown }}/{{ total }}</span>
 
-            <!-- Active filters -->
+            <!-- filters -->
             <TransitionGroup name="chip">
                 <button v-if="selectedCategory" key="category" type="button"
                     class="filter-chip d-inline-flex align-items-center gap-2 rounded-pill ps-3 pe-2 py-1"
@@ -54,7 +53,7 @@ const view = useViewMode('saved')
         </div>
 
         <div class="d-flex align-items-center gap-3 flex-wrap">
-            <!-- Search (grows on focus) -->
+            <!-- search input -->
             <div class="search-wrap position-relative">
                 <svg class="search-icon position-absolute top-50 start-0 translate-middle-y ms-2 pe-none" width="14"
                     height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"
@@ -80,7 +79,6 @@ const view = useViewMode('saved')
     color: var(--app-text);
 }
 
-/* --- Filter chips ----------------------------------------------------------- */
 .filter-chip {
     color: var(--app-text);
     background-color: color-mix(in srgb, var(--c) 14%, var(--card-bg));
@@ -122,7 +120,6 @@ const view = useViewMode('saved')
     transform: scale(0.85);
 }
 
-/* --- Controls --------------------------------------------------------------- */
 .search-wrap {
     width: 240px;
     transition: width 0.35s cubic-bezier(0.22, 1, 0.36, 1);

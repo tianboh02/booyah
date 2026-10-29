@@ -6,9 +6,7 @@ import { categoryColor, itemCategory } from '@/utils/savedLibrary'
 import { useViewMode } from '@/composables/useViewMode'
 
 defineProps({
-    // already filtered and sorted
     items: { type: Array, default: () => [] },
-    // how many projects are saved in total, before any filter
     total: { type: Number, default: 0 },
     loading: { type: Boolean, default: false },
     selectedCategory: { type: String, default: null },
@@ -17,7 +15,6 @@ defineProps({
 
 defineEmits(['remove', 'toggle-category', 'toggle-lang', 'reset'])
 
-// Shared with the toolbar's toggle (same key), so the view lives in neither parent nor URL.
 const view = useViewMode('saved')
 
 const pad = (n) => String(n).padStart(2, '0')
@@ -26,7 +23,6 @@ const pad = (n) => String(n).padStart(2, '0')
 <template>
     <div id="saved-list">
 
-        <!-- Loading skeleton (Bootstrap placeholders) -->
         <div v-if="loading">
             <div v-for="n in 4" :key="n" class="card mb-3 p-3 rounded-3 shadow-sm placeholder-glow">
                 <span class="placeholder col-3 mb-2"></span>
@@ -60,7 +56,7 @@ const pad = (n) => String(n).padStart(2, '0')
             </TransitionGroup>
         </Transition>
 
-        <!-- Nothing saved at all -->
+        <!-- 0 data, show n tell user there is nth -->
         <div v-else-if="total === 0" class="empty card rounded-3 shadow-sm text-center p-5">
             <svg class="empty-mark mx-auto mb-3" width="56" height="56" viewBox="0 0 16 16" fill="none"
                 stroke="currentColor" stroke-width="1" stroke-linejoin="round" aria-hidden="true">
@@ -75,7 +71,6 @@ const pad = (n) => String(n).padStart(2, '0')
             </div>
         </div>
 
-        <!-- Saved projects exist, but the filters hide all of them -->
         <div v-else class="card rounded-3 shadow-sm text-center p-4 text-muted-github">
             <span>No saved projects match your search or filters.</span>
             <div class="mt-3">

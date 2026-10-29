@@ -14,13 +14,12 @@ const props = defineProps({
     categories: { type: Array, default: () => [] }
 })
 
-// Shared with stat cards and category cards through v-model:selected-lang.
 const selectedLang = defineModel('selectedLang', {
     type: String,
     default: null
 })
 
-// Languages present in the data, ordered by frequency.
+// languages present in the data, ordered by count
 const languages = computed(() => {
     const counts = {}
 
@@ -36,7 +35,7 @@ const languages = computed(() => {
         .slice(0, LANG_BUTTONS)
 })
 
-// Total projects matching the selected language.
+// total projects matching the selected language
 const matchTotal = computed(() =>
     props.categories.reduce(
         (sum, category) =>
@@ -61,7 +60,7 @@ const toggle = (lang) => {
     selectedLang.value = selectedLang.value === lang ? null : lang
 }
 
-// Info popover: opens on hover, focus or click; closes when the pointer or focus leaves it.
+// Info pop: opens on hover, focus or click
 const infoOpen = ref(false)
 
 const note = `Categories are ranked by number of builders. Projects within a category are ranked by Show HN points, not GitHub stars. Only repositories with at least ${MIN_STARS} stars are shown.`
@@ -69,7 +68,6 @@ const note = `Categories are ranked by number of builders. Projects within a cat
 
 <template>
     <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
-        <!-- position-relative: the info box is placed from here, so it starts at the content edge on phones -->
         <div class="d-flex align-items-center gap-2 position-relative">
             <h2 class="h4 fw-bold section-title mb-0">
                 Top categories
@@ -83,7 +81,6 @@ const note = `Categories are ranked by number of builders. Projects within a cat
                     i
                 </button>
 
-                <!-- Transparent top padding bridges the gap so the box stays open while the pointer moves into it. -->
                 <div v-if="infoOpen" id="discovery-info" class="info-pop position-absolute top-100 start-0 pt-2" role="note">
                     <p class="info-box small lh-base mb-0 rounded-3 shadow p-3">
                         {{ note }}
@@ -91,7 +88,6 @@ const note = `Categories are ranked by number of builders. Projects within a cat
                 </div>
             </div>
 
-            <!-- Always rendered, so the header doesn't reflow when a language is picked or cleared -->
             <span class="text-muted-github small font-monospace" :class="{ invisible: !selectedLang }"
                 :aria-hidden="!selectedLang" :title="`Top ${REPOS_PER_CATEGORY} per category shown`">
                 {{ shownTotal }}/{{ matchTotal }}
@@ -151,7 +147,6 @@ const note = `Categories are ranked by number of builders. Projects within a cat
     box-shadow: 0 0 0 3px rgba(56, 139, 253, 0.4);
 }
 
-/* Matches the language pills, neutral instead of tinted. */
 .all-pill {
     color: var(--text-muted-github);
     background: transparent;

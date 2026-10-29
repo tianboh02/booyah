@@ -5,12 +5,10 @@ const props = defineProps({
     src: { type: String, default: '' },
     initial: { type: String, default: '?' },
     size: { type: Number, default: 56 },
-    // slow spinning gradient ring around the avatar
     ring: { type: Boolean, default: false },
     ringColor: { type: String, default: '#58a6ff' }
 })
 
-// If the image fails to load, fall back to the initial
 const failed = ref(false)
 watch(() => props.src, () => (failed.value = false))
 </script>

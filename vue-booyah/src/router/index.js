@@ -97,16 +97,16 @@ function getUserExperience() {
 function clearAuth() {
   localStorage.removeItem('auth_token')
   localStorage.removeItem('user')
-  // Notify navbar.vue instantly when session/token expires
+  // notify navbar.vue instantly when session/token expires
   window.dispatchEvent(new Event('booyah:user-updated'))
 }
 
-// Global Navigation Guard
+// Global Navigation Guard, prevent unauth access
 router.beforeEach(async (to) => {
   const isAuthenticated = !!(localStorage.getItem('auth_token') && localStorage.getItem('user'))
   const isPublicRoute = to.meta.isPublic === true
 
-  // 1. Unauthenticated users restricted to public routes
+  // Unauthenticated users only can go landing page
   if (!isAuthenticated) {
     if (!isPublicRoute) {
       return { name: 'landing' }
@@ -116,7 +116,7 @@ router.beforeEach(async (to) => {
 
   const userAuthKey = localStorage.getItem('auth_token')
 
-  // 2. Validate token against GitHub API
+  // validate token against GitHub API to ensure token still validate. token expires after 8hrs
   try {
     await axios.get('https://api.github.com/user', {
       headers: {
@@ -140,7 +140,7 @@ router.beforeEach(async (to) => {
   const rawExperience = getUserExperience()
   const exp = rawExperience ? rawExperience.toLowerCase() : null
 
-  // 3. Authenticated user without experience set -> force setup page
+  // Authenticated user without experience set -> force setup page
   if (exp === null) {
     if (to.name !== 'setup') {
       return { name: 'setup' }
@@ -148,9 +148,9 @@ router.beforeEach(async (to) => {
     return true
   }
 
-  // 4. Authenticated user with experience trying to access public or setup pages
+  // Authenticated user with experience trying to access public or setup pages
   if (isPublicRoute || to.name === 'setup') {
-    if (exp === 'new') {
+    if (exp === 'newcomer') {
       return { name: 'discovery' }
     }
     if (exp === 'practitioner') {
@@ -159,7 +159,6 @@ router.beforeEach(async (to) => {
     return { name: 'discovery' }
   }
 
-  // 5. Authenticated user navigating to valid protected pages
   return true
 })
 

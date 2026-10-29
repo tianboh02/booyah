@@ -2,11 +2,8 @@
 import { computed } from 'vue'
 
 const props = defineProps({
-    // there are unsaved changes
     dirty: { type: Boolean, default: false },
-    // 'idle' | 'saving' | 'saved'
     status: { type: String, default: 'idle' },
-    // block saving (for example, invalid input)
     disabled: { type: Boolean, default: false },
     error: { type: String, default: '' }
 })
@@ -18,10 +15,9 @@ const open = computed(() => props.dirty || props.status === 'saved')
 
 <template>
     <div>
-        <!-- Save failed -->
+        <!-- Save failed... GG -->
         <div v-if="error" class="alert alert-danger py-2 small mt-3 mb-0" role="alert">{{ error }}</div>
 
-        <!-- Slides open (grid-rows trick, so the card grows smoothly) -->
         <div class="bar-wrap d-grid" :class="{ open }" :inert="!open || undefined">
             <div class="bar-inner overflow-hidden">
                 <div class="save-bar d-flex align-items-center justify-content-between gap-3 flex-wrap">

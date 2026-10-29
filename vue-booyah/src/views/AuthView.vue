@@ -5,9 +5,7 @@ import API from '@/api.js'
 import GitHubSSO from '@/components/landing/GitHubSSO.vue'
 import { createScene, sampleAvatar, SUCCESS_MS } from '@/utils/signalScene'
 
-// ==========================================================================
-// 1. USER-FACING ERROR COPY
-// ==========================================================================
+//possible user errors in auth, keep it user friendly since user cannot understand
 const ERROR_COPY = {
     denied: {
         icon: 'cancel', tint: [139, 148, 158],
@@ -78,9 +76,7 @@ const STATUS_STEPS = [
     { at: 8000, text: 'Still working, our server may be waking up' }
 ]
 
-// ==========================================================================
-// 2. AUTH FLOW
-// ==========================================================================
+
 const route = useRoute()
 const router = useRouter()
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -156,7 +152,6 @@ async function celebrate({ user, newUser }) {
         onFade: () => (fadingOut.value = true),
         onDone: go
     })
-    // Safety net: frames pause in background tabs, so don't rely on the scene alone
     later(go, SUCCESS_MS + 2000)
 }
 
@@ -183,7 +178,6 @@ async function authenticate() {
 onMounted(() => {
     const { code: authCode, error, error_description: description } = route.query
 
-    // The code is single-use: drop it from the address bar so a refresh can't replay it
     if (authCode || error) router.replace({ query: {} })
 
     try {
@@ -211,7 +205,6 @@ onBeforeUnmount(() => {
     <div class="auth-stage position-fixed top-0 start-0 w-100 h-100 overflow-hidden">
         <canvas ref="canvasEl" class="position-absolute top-0 start-0 w-100 h-100 d-block" aria-hidden="true"></canvas>
 
-        <!-- Status line under the globe -->
         <Transition name="fade">
             <div v-if="phase === 'loading'" class="hud position-absolute start-50 translate-middle-x text-center px-3 w-100">
                 <p class="hud-status font-monospace mb-2" role="status" aria-live="polite">

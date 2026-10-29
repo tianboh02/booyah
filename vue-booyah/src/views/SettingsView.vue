@@ -11,15 +11,13 @@ import SettingsLogoutCard from '@/components/settings/settingsLogoutCard.vue'
 
 const { isSignedIn, refreshUser, handle, avatarUrl, initial, experience } = useUserSettings()
 
-// Same palette as the setup page: Discovery is warm, My Projects is cool.
-// The aurora shifts color the moment you save a different experience level.
+//for the aurora in the header cards
 const headerColors = computed(() =>
     experience.value.toLowerCase() === 'newcomer'
         ? ['#41b883', '#58a6ff', '#f1e05a']
         : ['#58a6ff', '#6b8aff', '#3178c6']
 )
 
-// pick up anything that changed in localStorage since the last visit
 onMounted(refreshUser)
 </script>
 
@@ -65,7 +63,6 @@ onMounted(refreshUser)
 </template>
 
 <style scoped>
-/* Cards rise in one after another */
 .rise {
     opacity: 0;
     animation: rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;

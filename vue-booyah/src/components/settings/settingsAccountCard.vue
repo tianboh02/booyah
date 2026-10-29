@@ -5,7 +5,7 @@ import SettingsAvatar from '@/components/settings/settingsAvatar.vue'
 
 const { handle, avatarUrl, initial } = useUserSettings()
 
-// what Booyah can see through your GitHub sign-in
+// what Booyah can see through your GitHub sign-in?
 const access = ['Your profile', 'Your public and private repositories']
 </script>
 
@@ -117,7 +117,6 @@ const access = ['Your profile', 'Your public and private repositories']
     }
 }
 
-/* Checks draw in one after the other */
 .access-item {
     opacity: 0;
     transform: translateX(-8px);

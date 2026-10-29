@@ -1,19 +1,5 @@
-<!--
-  src/views/TrendingView.vue (the /trending route)
 
-  What it does:  the Trending page: the header card, the Trending nav bar, then the open section:
-                   Packages       languages/languagesSection.vue (top packages, grouped by language)
-                   Repositories   repositories/repositoriesSection.vue
-                   Developers     developers/developersSection.vue
-                 The open tab is kept in the address (?tab=repositories), so refreshing or sharing
-                 the link reopens the same tab. Sections are kept alive when you switch away, so
-                 coming back is instant and keeps your place (no reloading from the APIs).
-  Receives:      nothing (no props).
-  Gives back:    nothing (no emits).
-  Children:      shared/PageHeader.vue, trending/trendingTabs.vue and the three sections above.
--->
 <script setup>
-// ---------- Imports ----------
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import PageHeader from '@/components/shared/PageHeader.vue'
@@ -30,7 +16,6 @@ const TABS = [
   { id: 'developers', label: 'Developers', component: DevelopersSection },
 ]
 
-// ---------- State ----------
 const route = useRoute()
 const router = useRouter()
 
@@ -81,11 +66,6 @@ const status = computed(() =>
 </template>
 
 <style scoped>
-/*
-  The colours the pill toggles (languages/header/periodToggle.vue) read, with GitHub blue as the
-  accent. The Packages tab (languagesSection.vue) sets its own, with the language colour.
-  --brand-blue comes from main.css and is already darker on the light theme.
-*/
 .trending-page {
   --ink: var(--app-text);
   --ink-2: var(--text-muted-github);

@@ -22,8 +22,7 @@ const postsPerMonth = ref([])
 const rolesDetail = ref({})
 const selectedRole = ref('')
 
-// Header: the aurora takes its colours from the three technologies most often named in job posts
-// (only ones with a known language colour; the page falls back to the default blues until data arrives).
+
 const headerColors = computed(() => {
   const totals = {}
   for (const d of Object.values(rolesDetail.value)) {

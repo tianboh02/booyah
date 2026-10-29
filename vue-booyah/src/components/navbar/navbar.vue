@@ -34,7 +34,7 @@ const checkAuth = () => {
     }
 }
 
-// Check auth synchronously immediately during component setup (before DOM render)
+// checkauth immediately during component setup (before DOM render) to prevent unautorized access
 checkAuth()
 
 const userAvatar = computed(() => currentUser.value.avatar || defaultAvatar)
@@ -42,7 +42,7 @@ const userHandle = computed(() => currentUser.value.name || 'User')
 const userExperience = computed(() => currentUser.value.experience || 'Newcomer')
 const showNav = computed(() => isLogin.value && route.path !== '/setup')
 
-// Only show login button if user is NOT logged in and on landing page
+// Only show SSO button if user is not logged in and on landing page
 const showLogin = computed(() => !isLogin.value && route.path === '/')
 
 function closeMenu() {
@@ -65,7 +65,7 @@ onBeforeUnmount(() => {
     window.removeEventListener('booyah:user-updated', checkAuth)
 })
 
-watch(
+watch( //keep on listening!!! booyah :)
     () => route.path,
     () => {
         checkAuth()
@@ -88,12 +88,11 @@ function logout() {
         <nav class="navbar navbar-expand-lg px-3 px-md-5 py-3">
             <div class="container-fluid px-0 d-flex align-items-center justify-content-between">
 
-                <!-- Logo -->
+                <!-- brand logo -->
                 <RouterLink to="/" class="navbar-brand me-3 me-lg-4 p-0 d-flex align-items-center">
                     <img class="rounded-3" :src="logoSvg" width="32" height="32" alt="booyah logo" />
                 </RouterLink>
 
-                <!-- Navigation Links -->
                 <div v-if="showNav" ref="menuEl" class="collapse navbar-collapse order-3 order-lg-1 mt-2 mt-lg-0"
                     id="navbarSupportedContent">
                     <ul class="navbar-nav me-auto gap-1 align-items-lg-center p-3 p-lg-0 mobile-menu-card">
@@ -114,17 +113,18 @@ function logout() {
                                 active-class="active">Jobs</RouterLink>
                         </li>
                         <li class="nav-item">
-                            <RouterLink to="/my-projects" class="nav-link custom-nav-link text-nowrap rounded-3 px-3 py-2"
-                                active-class="active">My Projects</RouterLink>
+                            <RouterLink to="/my-projects"
+                                class="nav-link custom-nav-link text-nowrap rounded-3 px-3 py-2" active-class="active">
+                                My Projects</RouterLink>
                         </li>
                         <li class="nav-item">
-                            <RouterLink to="/saved-projects" class="nav-link custom-nav-link text-nowrap rounded-3 px-3 py-2"
-                                active-class="active">Saved</RouterLink>
+                            <RouterLink to="/saved-projects"
+                                class="nav-link custom-nav-link text-nowrap rounded-3 px-3 py-2" active-class="active">
+                                Saved</RouterLink>
                         </li>
                     </ul>
                 </div>
 
-                <!-- Right Actions Group -->
                 <div class="d-flex align-items-center gap-3 order-2 ms-auto">
                     <div v-if="showLogin" class="d-flex align-items-center py-1">
                         <ShinyButton small @click="redirectToGitHub" />
@@ -132,7 +132,7 @@ function logout() {
 
                     <ThemeToggle />
 
-                    <!-- User Profile Dropdown -->
+                    <!-- user profile + exp + settings + logout -->
                     <div v-if="showNav" class="dropdown d-flex align-items-center">
                         <button type="button"
                             class="avatar-btn d-inline-flex align-items-center gap-2 rounded-pill ps-1 pe-2 py-1 text-decoration-none border-0"
@@ -149,7 +149,6 @@ function logout() {
 
                         <ul class="dropdown-menu dropdown-menu-end shadow-lg p-2 mt-2 custom-dropdown-menu"
                             aria-labelledby="profileDropdown">
-                            <!-- Header Section -->
                             <li class="p-1 mb-1">
                                 <div class="user-profile-header p-2 rounded-3 d-flex align-items-center gap-2">
                                     <img class="rounded-circle object-fit-cover flex-shrink-0" :src="userAvatar"
@@ -157,7 +156,7 @@ function logout() {
                                     <div class="d-flex flex-column flex-grow-1 min-w-0">
                                         <div class="fw-bold header-user-name text-truncate small fs-6 mb-1"
                                             :title="userHandle">{{
-                                            userHandle }}</div>
+                                                userHandle }}</div>
                                         <div class="d-flex align-items-center gap-1">
                                             <span class="experience-badge badge rounded-pill px-2 py-1 small fw-normal">
                                                 ✨ {{ userExperience }}
@@ -171,7 +170,7 @@ function logout() {
                                 <hr class="dropdown-divider my-2 border-secondary opacity-25" />
                             </li>
 
-                            <!-- Menu Items -->
+                            <!-- drop down menu items from profile -->
                             <li>
                                 <RouterLink to="/settings"
                                     class="dropdown-item rounded-2 d-flex align-items-center gap-2 py-2 px-3 custom-dropdown-item"
@@ -204,7 +203,7 @@ function logout() {
                         </ul>
                     </div>
 
-                    <!-- Mobile Toggler -->
+                    <!-- HammBuRGEer -->
                     <button v-if="showNav" class="navbar-toggler border-0 shadow-none p-1 ms-1 d-lg-none" type="button"
                         data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
                         aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -284,6 +283,7 @@ function logout() {
 
 /* Custom Dropdown Overrides */
 /* fixed width so a long display name truncates with … instead of stretching the menu */
+/* damm... this caused me a long time to debug...*/
 .custom-dropdown-menu {
     width: 210px;
     background-color: var(--card-bg);
@@ -320,7 +320,7 @@ function logout() {
     font-weight: 600;
 }
 
-/* Red Log Out Button Style */
+/* log out gAnngNam styleee */
 .logout-item {
     color: #f85149 !important;
     transition: background-color 0.15s ease, color 0.15s ease;
@@ -332,7 +332,6 @@ function logout() {
     color: #ff6b6b !important;
 }
 
-/* Nav Link Design */
 .custom-nav-link {
     color: var(--app-text);
     opacity: 0.75;

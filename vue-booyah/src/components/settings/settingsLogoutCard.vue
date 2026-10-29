@@ -3,13 +3,12 @@ import { onBeforeUnmount, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserSettings } from '@/utils/userSettings'
 
-// Where to send people after they log out. Change this to your sign-in route.
 const LOGIN_ROUTE = '/'
 
 const router = useRouter()
 const { logout } = useUserSettings()
 
-// First click asks for confirmation, second click logs out. It resets after 3 seconds.
+// First click asks for confirmation, second click logs out. It resets after 3 seconds. cool but abit useless actually. lets keep this
 const confirming = ref(false)
 const leaving = ref(false)
 let timer = null
@@ -47,7 +46,7 @@ onBeforeUnmount(() => clearTimeout(timer))
                         <span :key="confirming ? 'confirm' : 'idle'">{{ confirming ? 'Confirm log out' : 'Log out' }}</span>
                     </Transition>
                 </span>
-                <!-- Countdown that shrinks while waiting for the second click -->
+                <!-- kim jong un nuclear button -->
                 <span v-if="confirming" class="countdown position-absolute start-0 bottom-0 w-100" aria-hidden="true"></span>
             </button>
         </div>

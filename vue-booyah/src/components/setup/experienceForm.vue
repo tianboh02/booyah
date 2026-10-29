@@ -8,8 +8,7 @@ import { vSpotlight, vTilt } from '@/utils/motion'
 const route = useRoute()
 const router = useRouter()
 
-// 'Newcomer' | 'Practitioner' — owned by SetupView (v-model:experience) so the
-// background scene can react to it. Used exactly like before: selectedExperience.value
+// 'Newcomer' | 'Practitioner'
 const props = defineProps({
     experience: {
         type: String,
@@ -17,8 +16,7 @@ const props = defineProps({
     }
 })
 const emit = defineEmits(['update:experience'])
-// The form keeps its own selection, so the cards and Continue always agree with
-// the radio buttons. It also stays in sync with the parent when one is connected.
+
 const selectedExperience = ref(props.experience)
 watch(() => props.experience, (v) => (selectedExperience.value = v))
 watch(selectedExperience, (v) => emit('update:experience', v))
@@ -53,7 +51,6 @@ const options = [
 
 const current = computed(() => options.find(o => o.value === selectedExperience.value) || options[0])
 
-// Mini previews of each destination
 const trendChips = ['Vue', 'Python', 'TypeScript', 'Go', 'Dart'].map((name, i) => ({
     name,
     color: getLangColor(name),
@@ -66,7 +63,6 @@ const previewBars = [
     { name: 'Dart', w: 42, color: getLangColor('Dart') }
 ]
 
-// Expands a colored circle from the Continue button before navigating
 async function playLaunch() {
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     const rect = submitBtn.value?.getBoundingClientRect()
@@ -85,11 +81,10 @@ const handleSubmit = async () => {
     errorMessage.value = ''
 
     try {
-        // 1. Retrieve user object from localStorage
         const userStr = localStorage.getItem('user')
         const currentUser = userStr ? JSON.parse(userStr) : {}
 
-        // 2. Axios PUT request sending currentUser.id to match backend req.body.userID
+        //user experience is null upon first sign in. update to fill in null experience
         const response = await API.put('/auth/updateExperience', {
             userID: currentUser.id,
             experience: selectedExperience.value
@@ -97,11 +92,9 @@ const handleSubmit = async () => {
 
         console.log('Update success:', response.data)
 
-        // 3. Sync local storage user object
         currentUser.experience = selectedExperience.value
         localStorage.setItem('user', JSON.stringify(currentUser))
 
-        // 4. Play the launch animation, then route based on selection
         await playLaunch()
 
         if (selectedExperience.value.toLowerCase() === 'newcomer') {
@@ -127,7 +120,6 @@ const handleSubmit = async () => {
             <span class="text-muted-github small">Required</span>
         </div>
 
-        <!-- Error Alert -->
         <div v-if="errorMessage" class="alert alert-danger py-2 small mb-4" role="alert">
             {{ errorMessage }}
         </div>
@@ -143,7 +135,6 @@ const handleSubmit = async () => {
                             dim: selectedExperience !== opt.value
                         }" :style="{ '--accent': opt.accent, '--accent2': opt.accent2, '--n': idx }">
 
-                        <!-- Spinning gradient border, visible when selected -->
                         <span class="glow-border position-absolute top-0 bottom-0 start-0 end-0 pe-none"
                             aria-hidden="true"></span>
 
@@ -169,7 +160,6 @@ const handleSubmit = async () => {
                                 </span>
                             </div>
 
-                            <!-- My Projects: language bars fill in -->
                             <div v-else class="d-flex flex-column gap-2">
                                 <div v-for="(b, bi) in previewBars" :key="b.name"
                                     class="d-flex align-items-center gap-2">
@@ -201,7 +191,6 @@ const handleSubmit = async () => {
                     </div>
                 </Transition>
 
-                <!-- Submit Button -->
                 <button ref="submitBtn" type="submit" class="continue-btn btn btn-primary position-relative overflow-hidden px-4 py-2 fw-semibold"
                     :disabled="!selectedExperience || isLoading">
                     <span v-if="isLoading" class="spinner-border spinner-border-sm me-2" role="status"></span>
@@ -257,7 +246,6 @@ const handleSubmit = async () => {
     }
 }
 
-/* --- Option cards ------------------------------------------------------------ */
 .option-card {
     --s: 1;
     cursor: pointer;
@@ -268,7 +256,6 @@ const handleSubmit = async () => {
     transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) scale(var(--s));
     transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.4s ease,
         border-color 0.3s ease, box-shadow 0.4s ease, background-color 0.4s ease;
-    /* staggered entrance */
     opacity: 0;
     animation: card-in 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
     animation-delay: calc(var(--n) * 140ms + 1.2s);
@@ -301,7 +288,6 @@ const handleSubmit = async () => {
     box-shadow: 0 20px 50px -20px color-mix(in srgb, var(--accent) 60%, transparent);
 }
 
-/* Cursor spotlight, behind content */
 .option-card::before {
     content: '';
     position: absolute;
@@ -319,7 +305,6 @@ const handleSubmit = async () => {
     opacity: 1;
 }
 
-/* Spinning gradient ring */
 .glow-border {
     border-radius: inherit;
     padding: 2px;
@@ -342,7 +327,6 @@ const handleSubmit = async () => {
     }
 }
 
-/* --- Custom radio ------------------------------------------------------------ */
 .radio-input {
     width: 1px;
     height: 1px;
@@ -402,7 +386,6 @@ const handleSubmit = async () => {
     }
 }
 
-/* --- Previews ----------------------------------------------------------------- */
 .preview {
     opacity: 0.55;
     filter: saturate(0.6);
@@ -481,7 +464,6 @@ const handleSubmit = async () => {
     }
 }
 
-/* My Projects bars grow, hold, then fade and replay */
 .bar-name {
     width: 76px;
 }
@@ -517,7 +499,6 @@ const handleSubmit = async () => {
     }
 }
 
-/* --- Footer -------------------------------------------------------------------- */
 .setup-footer {
     border-top: 1px solid var(--card-border);
     opacity: 0;
@@ -555,7 +536,6 @@ const handleSubmit = async () => {
     transform: translateY(-10px);
 }
 
-/* Continue button: shine sweep + arrow nudge */
 .continue-btn {
     border-radius: 0.85rem;
     transition: transform 0.2s ease, box-shadow 0.3s ease;

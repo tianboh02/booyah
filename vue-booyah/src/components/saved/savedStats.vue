@@ -6,14 +6,11 @@ import { vSpotlight, vTilt, useCountUp } from '@/utils/motion'
 import SavedBarPanel from '@/components/saved/savedBarPanel.vue'
 
 const props = defineProps({
-    // every saved project (the charts always show all of them)
     items: { type: Array, default: () => [] },
-    // the projects the top cards describe: everything, or just the focused category / language
     scoped: { type: Array, default: () => [] },
     loading: { type: Boolean, default: false }
 })
 
-// Shared with the toolbar and the list through SavedView
 const selectedCategory = defineModel('selectedCategory', { type: String, default: null })
 const selectedLang = defineModel('selectedLang', { type: String, default: null })
 
@@ -33,7 +30,6 @@ const categoryRows = computed(() =>
     tally(props.items, itemCategory).map(([name, count]) => ({ name, count, color: categoryColor(name) }))
 )
 
-// language comes from GitHub, so only count the projects whose details have arrived
 const langRows = computed(() =>
     tally(props.items.filter(i => i.status === 'ok'), itemLang).map(([name, count]) => ({
         name,
@@ -44,7 +40,6 @@ const langRows = computed(() =>
 
 const detailsLoading = computed(() => props.items.some(i => i.status === 'loading'))
 
-// --- Top cards --------------------------------------------------------------
 const savedCount = computed(() => props.scoped.length)
 const categoryCount = computed(() => categoryRows.value.length)
 
@@ -87,7 +82,6 @@ watch(
 <template>
     <div class="stats-body my-4">
 
-        <!-- Loading skeleton (Bootstrap placeholders) -->
         <div v-if="loading" class="row row-cols-1 row-cols-md-3 g-3 mb-4">
             <div v-for="n in 3" :key="n" class="col">
                 <div class="card p-3 h-100 rounded-3 shadow-sm placeholder-glow">
@@ -101,7 +95,7 @@ watch(
         <template v-else>
             <div class="row row-cols-1 row-cols-md-3 g-3 mb-4">
 
-                <!-- Saved count -->
+                <!-- no of saved count -->
                 <div class="col">
                     <div v-tilt="5" v-spotlight class="card stat-card overflow-hidden p-3 h-100 rounded-3 shadow-sm"
                         :class="{ 'is-in': ready, 'is-focused': focused }" :style="{ '--i': 0, '--accent': accent }">
@@ -115,7 +109,6 @@ watch(
                     </div>
                 </div>
 
-                <!-- Top / selected category -->
                 <div class="col">
                     <div v-tilt="5" v-spotlight class="card stat-card overflow-hidden p-3 h-100 rounded-3 shadow-sm"
                         :class="{ 'is-in': ready, 'is-focused': selectedCategory }"
@@ -135,7 +128,7 @@ watch(
                     </div>
                 </div>
 
-                <!-- Stars -->
+                <!-- bling bling starss -->
                 <div class="col">
                     <div v-tilt="5" v-spotlight class="card stat-card overflow-hidden p-3 h-100 rounded-3 shadow-sm"
                         :class="{ 'is-in': ready, 'is-focused': focused }"
@@ -151,7 +144,7 @@ watch(
 
             </div>
 
-            <!-- Click a bar to filter the list below -->
+            <!-- see wat u wan only... filter -->
             <div class="row g-4">
                 <div class="col-lg-6">
                     <SavedBarPanel title="By category" hint="Click a category to filter your saved projects."
@@ -214,7 +207,6 @@ watch(
     box-shadow: 0 10px 30px -12px color-mix(in srgb, var(--accent) 45%, transparent) !important;
 }
 
-/* Accent line that draws itself along the top edge */
 .stat-card::after {
     content: '';
     position: absolute;
@@ -237,7 +229,6 @@ watch(
     width: 12px;
     height: 12px;
     background-color: var(--accent);
-    /* two layers: a tight core and a wide soft halo, so the glow fades out smoothly */
     box-shadow: 0 0 6px color-mix(in srgb, var(--accent) 70%, transparent),
         0 0 18px 4px color-mix(in srgb, var(--accent) 30%, transparent);
     transition: background-color 0.4s ease, box-shadow 0.4s ease;

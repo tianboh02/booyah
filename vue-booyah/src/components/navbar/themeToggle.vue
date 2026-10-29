@@ -4,6 +4,7 @@ const { theme, toggleTheme } = useTheme()
 </script>
 
 <template>
+    <!-- so u want black or white? choose 1, no yellow or pink pls -->
     <button @click="toggleTheme" type="button" class="btn p-1 rounded-pill d-inline-flex align-items-center border"
         :class="theme === 'dark' ? 'bg-dark border-secondary' : 'bg-white border-secondary-subtle'"
         style="width: 56px; height: 32px;" :title="`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`">

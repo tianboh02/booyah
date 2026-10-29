@@ -66,7 +66,7 @@ function timeAgo(isoString) {
                 <path d="M5 11L11 5M6 5h5v5" />
             </svg>
 
-            <!-- The bookmark is checked because it is saved. Clicking it removes the save. -->
+            <!-- u want save or not? save unsave click here pls -->
             <button type="button"
                 class="bookmark-btn btn btn-sm btn-link p-0 flex-shrink-0 position-relative z-2 order-2 order-md-0"
                 :aria-label="`Remove ${item.name} from saved`" title="Saved. Click to remove"
@@ -78,7 +78,7 @@ function timeAgo(isoString) {
             </button>
         </div>
 
-        <!-- Details still loading from GitHub -->
+        <!-- loading... -->
         <div v-if="item.status === 'loading'" class="placeholder-glow">
             <span class="placeholder col-9 mb-3 d-block"></span>
             <span class="placeholder col-4"></span>
@@ -138,7 +138,6 @@ function timeAgo(isoString) {
         box-shadow 0.25s ease;
 }
 
-/* Cursor spotlight tinted by the repo's language */
 .saved-card::before {
     content: '';
     position: absolute;
@@ -152,7 +151,6 @@ function timeAgo(isoString) {
             transparent 70%);
 }
 
-/* Colored edge that grows in on hover */
 .saved-card::after {
     content: '';
     position: absolute;
@@ -180,8 +178,7 @@ function timeAgo(isoString) {
     transform: scaleY(1);
 }
 
-/* Repo name is the card's link (Bootstrap stretched-link covers the whole card).
-   Everything else clickable sits above it with position-relative z-2. */
+
 .repo-link {
     color: var(--app-text);
     text-decoration: none;
@@ -205,7 +202,6 @@ function timeAgo(isoString) {
     box-shadow: 0 0 0 3px rgba(56, 139, 253, 0.4) !important;
 }
 
-/* The repo name is the most important text on the card: it may wrap, it is never cut with "…" */
 .repo-name {
     line-height: 1.35;
     overflow-wrap: anywhere;
@@ -280,7 +276,6 @@ function timeAgo(isoString) {
     transform: translateX(0);
 }
 
-/* Filled bookmark = saved. On hover it turns into a "remove" cue. */
 .bookmark-btn {
     color: #58a6ff;
     transition: transform 0.15s ease, color 0.2s ease;

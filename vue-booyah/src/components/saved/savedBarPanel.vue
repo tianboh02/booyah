@@ -4,10 +4,8 @@ import { vSpotlight } from '@/utils/motion'
 
 const props = defineProps({
     title: { type: String, required: true },
-    // [{ name, count, color }]
     rows: { type: Array, default: () => [] },
     selected: { type: String, default: null },
-    // true while there is nothing to show yet but data is on its way
     loading: { type: Boolean, default: false },
     emptyText: { type: String, default: 'Nothing to show yet.' },
     hint: { type: String, default: '' }
@@ -22,7 +20,7 @@ const bars = computed(() =>
 
 // bars start at 0 width and grow a couple of frames after the rows arrive
 const ready = ref(false)
-watch(
+watch( //watchh meee!!
     () => props.rows.length > 0,
     (has) => {
         ready.value = false
@@ -41,7 +39,6 @@ watch(
         <p v-if="hint" class="text-muted-github small mb-3">{{ hint }}</p>
         <div v-else class="mb-3"></div>
 
-        <!-- Loading: Bootstrap placeholders -->
         <div v-if="loading && !bars.length" class="placeholder-glow d-flex flex-column gap-3">
             <span v-for="n in 4" :key="n" class="placeholder rounded-pill col-12"></span>
         </div>

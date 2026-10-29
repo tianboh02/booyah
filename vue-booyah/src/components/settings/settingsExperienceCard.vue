@@ -6,7 +6,7 @@ import SettingsSaveBar from '@/components/settings/settingsSaveBar.vue'
 
 const { experience, saveExperience } = useUserSettings()
 
-// Same options and values as the setup page ('New' | 'Practitioner')
+// Same options and values as the setup page ('Newcomer' | 'Practitioner')
 const options = [
     {
         value: 'Newcomer',
@@ -89,7 +89,6 @@ onBeforeUnmount(() => clearTimeout(savedTimer))
             </div>
         </div>
 
-        <!-- What happens next, updates as you pick -->
         <Transition name="swap" mode="out-in">
             <p :key="current.lands" class="landing-note small d-flex align-items-start gap-2 mt-3 mb-0">
                 <span class="note-dot rounded-circle flex-shrink-0" :style="{ backgroundColor: current.accent }"></span>
@@ -113,7 +112,6 @@ onBeforeUnmount(() => clearTimeout(savedTimer))
     color: var(--app-text);
 }
 
-/* --- Option cards (same look as the setup page) ----------------------------- */
 .option-card {
     cursor: pointer;
     isolation: isolate;
@@ -173,7 +171,6 @@ onBeforeUnmount(() => clearTimeout(savedTimer))
     }
 }
 
-/* --- Custom radio ------------------------------------------------------------ */
 .radio-input {
     width: 1px;
     height: 1px;
@@ -233,7 +230,6 @@ onBeforeUnmount(() => clearTimeout(savedTimer))
     }
 }
 
-/* --- Note ------------------------------------------------------------------------ */
 .landing-note {
     color: var(--app-text);
 }
@@ -241,7 +237,6 @@ onBeforeUnmount(() => clearTimeout(savedTimer))
 .note-dot {
     width: 8px;
     height: 8px;
-    /* centre the dot on the first line of text, even when the sentence wraps */
     margin-top: calc((1.5em - 8px) / 2);
     transition: background-color 0.3s ease;
 }

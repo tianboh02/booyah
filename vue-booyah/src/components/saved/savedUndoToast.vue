@@ -1,6 +1,5 @@
 <script setup>
 defineProps({
-    // the project that was just removed, or null when there is nothing to undo
     removed: { type: Object, default: null },
     duration: { type: Number, default: 6000 }
 })

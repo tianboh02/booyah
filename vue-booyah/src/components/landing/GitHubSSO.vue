@@ -2,11 +2,11 @@
 const VITE_GITHUB_CLIENT_ID = import.meta.env.VITE_GITHUB_CLIENT_ID;
 
 const redirectToGitHub = () => {
-    console.log(VITE_GITHUB_CLIENT_ID)
+    //route to github SSO login with client id first
     const rootUrl = 'https://github.com/login/oauth/authorize';
     const options = {
         client_id: VITE_GITHUB_CLIENT_ID,
-        scope: 'read:user user:email repo', // Request access permissions
+        scope: 'read:user user:email repo', // Request access permissions, especially repo to access user's private repos too
     };
 
     const q = new URLSearchParams(options).toString();
@@ -35,7 +35,6 @@ const redirectToGitHub = () => {
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Micro-interaction animation states */
 .github-sso-btn:hover {
     background-color: #32383f;
     border-color: rgba(255, 255, 255, 0.3) !important;

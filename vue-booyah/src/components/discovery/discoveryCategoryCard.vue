@@ -7,10 +7,8 @@ import { vSpotlight, useCountUp } from '@/utils/motion'
 const props = defineProps({
     category: { type: Object, required: true },
     selectedLang: { type: String, default: null },
-    // { [ghUrl]: saveId } and the set of ghUrls with a request in flight
     savedMap: { type: Object, default: () => ({}) },
     pendingLinks: { type: Object, default: () => new Set() },
-    // true inside the carousel: on phones the rows scroll within the card instead of making it tall
     inRing: { type: Boolean, default: false }
 })
 
@@ -22,7 +20,7 @@ const isPending = (project) => props.pendingLinks.has(project.ghUrl)
 const shortStars = (count) =>
     count >= 1000 ? `${Math.round(count / 100) / 10}k` : String(count)
 
-// Filter projects by language, then display the top projects for the category.
+// filter projects by language, then display the top projects for the category.
 const rows = computed(() =>
     visibleProjects(props.category, props.selectedLang)
 )
@@ -61,7 +59,6 @@ const toggleLang = (lang) => {
             <li v-for="project in rows" :key="project.id" class="project-row position-relative d-grid align-items-center"
                 :style="{ '--lang': getLangColor(langOf(project)) }">
                 <span class="cell-name d-flex align-items-center gap-2 min-w-0">
-                    <!-- The owner prefix gives way first, so the repo name stays readable; the title has the full name -->
                     <button type="button" class="project-link btn btn-link d-flex p-0 text-start font-monospace min-w-0"
                         :title="project.id" :aria-label="`Open details for ${project.id}`"
                         @click="emit('open', project)">
@@ -76,7 +73,6 @@ const toggleLang = (lang) => {
                     </svg>
                 </span>
 
-                <!-- Clicking a language filters every category by that language. -->
                 <span class="cell-lang min-w-0">
                     <button type="button" class="lang-link d-inline-flex align-items-center gap-1 rounded-2 small mw-100"
                         :class="{ 'is-selected': selectedLang === langOf(project) }"
@@ -139,7 +135,6 @@ const toggleLang = (lang) => {
 </template>
 
 <style scoped>
-/* Card spotlight and hover lift come from main.css (.spot-card), tinted blue by --accent */
 .card-head {
     border-bottom: 1px solid var(--card-border);
 }
@@ -159,7 +154,6 @@ const toggleLang = (lang) => {
     transition: background-color 0.2s ease;
 }
 
-/* Keep card height stable when filtering projects. */
 .rows {
     min-height: calc(5 * 44px);
 }
@@ -217,7 +211,6 @@ const toggleLang = (lang) => {
     background-color: var(--badge-bg);
 }
 
-/* Language-colored edge appears on hover. */
 .project-row::after {
     content: '';
     position: absolute;
@@ -306,12 +299,10 @@ const toggleLang = (lang) => {
     background-color: var(--lang);
 }
 
-/* Fixed-width, right-aligned number keeps icons lined up while staying close to them. */
 .metric span {
     min-width: 4ch;
 }
 
-/* HN triangle lights up orange, with a small lift and glow, only when hovered directly. */
 .meta-hn svg {
     transition:
         transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
@@ -332,7 +323,6 @@ const toggleLang = (lang) => {
         filter 0.2s ease;
 }
 
-/* Same rule as the HN triangle: only reacts when the icon itself is hovered. */
 .meta-star svg:hover {
     color: #e3b341;
     transform: rotate(72deg) scale(1.2);
@@ -353,7 +343,6 @@ const toggleLang = (lang) => {
     transform: scale(0.85);
 }
 
-/* Saved bookmark fills and animates. */
 .bookmark-btn svg path {
     fill: transparent;
     transition: fill 0.25s ease;
@@ -371,7 +360,6 @@ const toggleLang = (lang) => {
     fill: currentColor;
 }
 
-/* Indicate an in-flight save request. */
 .bookmark-btn.is-pending {
     opacity: 0.6;
     pointer-events: none;

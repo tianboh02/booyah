@@ -1,15 +1,10 @@
 import { ref, computed } from 'vue'
 import API from '@/api'
 
-// ---------------------------------------------------------------------------
-// Where things live in the `user` object in localStorage.
-// I could not see your user object, so these names are best guesses.
-// If yours differ, change them here and everything else follows.
-// ---------------------------------------------------------------------------
 const FIELDS = {
     id: ['id'],
-    displayName: ['name'], // the setup page greeting already reads `name` first
-    handle: ['username', 'login', 'githubUsername'], // the GitHub @handle
+    displayName: ['name'], 
+    handle: ['username', 'login', 'githubUsername'], 
     avatar: ['avatar_url', 'avatarUrl', 'avatar']
 }
 
@@ -26,10 +21,8 @@ function readUser() {
     }
 }
 
-// One shared copy, so the header, the cards and the navbar all see the same data.
 const user = ref(readUser())
 
-// Merge a change into the stored user, keep localStorage in sync, and tell the rest of the app.
 function persist(patch) {
     user.value = { ...readUser(), ...patch }
     localStorage.setItem('user', JSON.stringify(user.value))

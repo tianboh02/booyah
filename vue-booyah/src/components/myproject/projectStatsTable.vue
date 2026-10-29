@@ -3,6 +3,7 @@ import { computed, ref, watch } from 'vue'
 import { getLangColor } from '@/utils/langColors'
 import { vSpotlight, vTilt, useCountUp } from '@/utils/motion'
 
+// this page is my projects dashboard, shows the cards and KPIs ontop
 const props = defineProps({
     repoList: {
         type: Array,
@@ -193,7 +194,7 @@ const focusedCount = computed(() => scopedRepos.value.length)
 
 <template>
     <div class="mb-4">
-        <!-- Loading Skeleton -->
+        <!-- loading ... -->
         <div v-if="loading" class="row row-cols-1 row-cols-md-3 g-3 mb-4">
             <div v-for="n in 3" :key="n" class="col">
                 <div class="card p-3 h-100 rounded-3 shadow-sm placeholder-glow">
@@ -204,7 +205,7 @@ const focusedCount = computed(() => scopedRepos.value.length)
             </div>
         </div>
 
-        <!-- Top Stats Cards Grid -->
+        <!-- the top 3 card grids -->
         <div v-else-if="hasData" class="row row-cols-1 row-cols-md-3 g-3 mb-4">
             <div class="col">
                 <div v-tilt="5" v-spotlight class="card stat-card overflow-hidden p-3 h-100 rounded-3 shadow-sm"
@@ -259,9 +260,8 @@ const focusedCount = computed(() => scopedRepos.value.length)
             No repository data detected.
         </div>
 
-        <!-- Bottom Stat Row -->
+        <!-- bottom 2 language stats composition -->
         <div class="row g-4">
-            <!-- Language Share Chart Card -->
             <div class="col-lg-6">
                 <div v-spotlight class="card panel overflow-hidden p-4 h-100 rounded-3 shadow-sm">
                     <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap mb-4">
@@ -408,7 +408,6 @@ const focusedCount = computed(() => scopedRepos.value.length)
     transition: color 0.2s ease;
 }
 
-/* --- Spotlight ------------------------------------------------------------- */
 .stat-card::before,
 .panel::before {
     content: '';
@@ -432,7 +431,6 @@ const focusedCount = computed(() => scopedRepos.value.length)
     position: relative;
 }
 
-/* --- Stat cards ----------------------------------------------------------- */
 .stat-card {
     transform: perspective(700px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
     transition: transform 0.2s ease-out, border-color 0.3s ease, box-shadow 0.3s ease,
@@ -475,13 +473,11 @@ const focusedCount = computed(() => scopedRepos.value.length)
     width: 12px;
     height: 12px;
     background-color: var(--accent);
-    /* two layers: a tight core and a wide soft halo, so the glow fades out smoothly */
     box-shadow: 0 0 6px color-mix(in srgb, var(--accent) 70%, transparent),
         0 0 18px 4px color-mix(in srgb, var(--accent) 30%, transparent);
     transition: background-color 0.4s ease, box-shadow 0.4s ease;
 }
 
-/* --- Focus chip ------------------------------------------------------------ */
 .focus-chip {
     background-color: color-mix(in srgb, var(--c) 14%, var(--card-bg));
     border: 1px solid color-mix(in srgb, var(--c) 55%, var(--card-border));
@@ -559,7 +555,6 @@ const focusedCount = computed(() => scopedRepos.value.length)
     transition: background-color 0.2s ease;
 }
 
-/* --- Legend ---------------------------------------------------------------- */
 .legend-item {
     opacity: 0;
     translate: -8px 0;

@@ -13,7 +13,6 @@ const props = defineProps({
     subtitle: { type: String, default: '' },
     status: { type: String, default: '' },
     live: { type: Boolean, default: false },
-    // up to three colours for the aurora; missing ones fall back to the accent blues + Vue green
     colors: { type: Array, default: () => [] }
 })
 
